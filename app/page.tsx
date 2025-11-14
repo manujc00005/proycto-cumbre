@@ -196,102 +196,238 @@ export default function Home() {
     );
   };
 
+  // Función para generar enlaces de calendario
+  const generateCalendarLinks = (event: {
+    title: string;
+    date: string; // Formato: "2025-11-27"
+    startTime?: string; // Formato: "18:00"
+    endTime?: string; // Formato: "21:00"
+    description?: string;
+    location?: string;
+  }) => {
+    const { title, date, startTime = "09:00", endTime = "18:00", description = "", location = "" } = event;
+    
+    // Formato ISO para calendarios
+    const startDateTime = `${date.replace(/-/g, '')}T${startTime.replace(/:/g, '')}00`;
+    const endDateTime = `${date.replace(/-/g, '')}T${endTime.replace(/:/g, '')}00`;
+    
+    // Google Calendar
+    const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startDateTime}/${endDateTime}&details=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}`;
+    
+    // Apple Calendar (iCal)
+    const icsContent = `BEGIN:VCALENDAR
+  VERSION:2.0
+  BEGIN:VEVENT
+  SUMMARY:${title}
+  DTSTART:${startDateTime}
+  DTEND:${endDateTime}
+  DESCRIPTION:${description}
+  LOCATION:${location}
+  END:VEVENT
+  END:VCALENDAR`;
+    
+    const icsUrl = `data:text/calendar;charset=utf8,${encodeURIComponent(icsContent)}`;
+    
+    // Outlook
+    const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(title)}&startdt=${date}T${startTime}&enddt=${date}T${endTime}&body=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}`;
+    
+    return { googleUrl, icsUrl, outlookUrl };
+  };
+
 
   return (
     <div className="bg-zinc-950 text-white min-h-screen">
-      {/* Header / Navigation */}
-      <header className="fixed top-0 w-full bg-zinc-950/90 backdrop-blur-sm z-50 border-b border-zinc-800">
-        <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center">
-            <a href="#inicio" className="flex items-center">
-              <Image 
-                src="/aaa.png"
-                alt="Proyecto Cumbre Logo"
-                width={180}
-                height={60}
-                className="h-10 w-auto md:h-12"
-                priority
-              />
-            </a>
-          </div>
-          
-          {/* Desktop Menu */}
-          <ul className="hidden md:flex space-x-8 text-sm">
-            <li><a href="#inicio" className="hover:text-orange-400 transition">HOME</a></li>
-            <li><a href="#quienes-somos" className="hover:text-orange-400 transition">QUIÉNES SOMOS</a></li>
-            <li><a href="#aventuras" className="hover:text-orange-400 transition">NUESTRAS AVENTURAS</a></li>
-            <li><a href="#events" className="hover:text-orange-400 transition">SOCIAL CLUB EVENTS</a></li>
-            <li><a href="#merchant" className="hover:text-orange-400 transition">MERCHANT</a></li>
-          </ul>
 
-          {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden text-white"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            )}
-          </button>
+      {/* Header / Navigation */}
+      <header className="fixed top-0 w-full bg-zinc-950/95 backdrop-blur-md z-50 border-b border-zinc-800">
+        <nav className="container mx-auto px-4">
+          <div className="flex justify-between items-center h-16 lg:h-20">
+            
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <a href="#inicio" className="flex items-center">
+                <Image 
+                  src="/aaa.png"
+                  alt="Proyecto Cumbre Logo"
+                  width={140}
+                  height={45}
+                  className="h-7 w-auto sm:h-8 lg:h-10 xl:h-12"
+                  priority
+                />
+              </a>
+            </div>
+            
+            {/* Desktop Menu - Solo visible en pantallas grandes */}
+            <ul className="hidden xl:flex items-center justify-center space-x-6 2xl:space-x-8 text-xs 2xl:text-sm flex-1 mx-4">
+              <li><a href="#inicio" className="hover:text-orange-400 transition-colors font-medium whitespace-nowrap">HOME</a></li>
+              <li><a href="#quienes-somos" className="hover:text-orange-400 transition-colors font-medium whitespace-nowrap">QUIÉNES SOMOS</a></li>
+              <li><a href="#aventuras" className="hover:text-orange-400 transition-colors font-medium whitespace-nowrap">AVENTURAS</a></li>
+              <li><a href="#events" className="hover:text-orange-400 transition-colors font-medium whitespace-nowrap">EVENTS</a></li>
+              <li><a href="#merchant" className="hover:text-orange-400 transition-colors font-medium whitespace-nowrap">MERCHANT</a></li>
+            </ul>
+
+            {/* Social Media Icons - Desktop (solo en pantallas muy grandes) */}
+            <div className="hidden xl:flex items-center gap-2 2xl:gap-3">
+              {/* Instagram */}
+              <a 
+                href="https://www.instagram.com/proyectocumbre"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 2xl:w-10 2xl:h-10 bg-zinc-900 hover:bg-gradient-to-tr hover:from-yellow-400 hover:via-pink-500 hover:to-purple-600 rounded-lg flex items-center justify-center transition-all duration-300 group flex-shrink-0"
+                aria-label="Instagram"
+              >
+                <svg className="w-4 h-4 2xl:w-5 2xl:h-5 text-zinc-400 group-hover:text-white transition" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+              </a>
+
+              {/* WhatsApp */}
+              <a 
+                href="https://chat.whatsapp.com/EHmIEAcK7EBFP3UgntDdX9"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 2xl:w-10 2xl:h-10 bg-zinc-900 hover:bg-green-500 rounded-lg flex items-center justify-center transition-all duration-300 group flex-shrink-0"
+                aria-label="WhatsApp"
+              >
+                <svg className="w-4 h-4 2xl:w-5 2xl:h-5 text-zinc-400 group-hover:text-white transition" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+              </a>
+
+              {/* TikTok */}
+              <a 
+                href="https://www.tiktok.com/@proyectocumbre"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 2xl:w-10 2xl:h-10 bg-zinc-900 hover:bg-black rounded-lg flex items-center justify-center transition-all duration-300 group flex-shrink-0"
+                aria-label="TikTok"
+              >
+                <svg className="w-4 h-4 2xl:w-5 2xl:h-5 text-zinc-400 group-hover:text-white transition" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z" fill="currentColor"/>
+                </svg>
+              </a>
+            </div>
+
+            {/* Mobile/Tablet Menu Button */}
+            <button 
+              className="xl:hidden text-white p-2 hover:bg-zinc-900 rounded-lg transition flex-shrink-0"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+          </div>
         </nav>
 
-        {/* Mobile Menu */}
+        {/* Mobile/Tablet Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-zinc-950 border-b border-zinc-800">
-            <ul className="py-4">
-              <li>
-                <a 
-                  href="#inicio" 
-                  className="block px-4 py-3 hover:bg-zinc-900 hover:text-orange-400 transition"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Inicio
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="#quienes-somos" 
-                  className="block px-4 py-3 hover:bg-zinc-900 hover:text-orange-400 transition"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Quiénes somos
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="#aventuras" 
-                  className="block px-4 py-3 hover:bg-zinc-900 hover:text-orange-400 transition"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Nuestras aventuras
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="#events" 
-                  className="block px-4 py-3 hover:bg-zinc-900 hover:text-orange-400 transition"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Social Club Events
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="#merchant" 
-                  className="block px-4 py-3 hover:bg-zinc-900 hover:text-orange-400 transition"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Merchant
-                </a>
-              </li>
-            </ul>
+          <div className="xl:hidden bg-zinc-950/98 backdrop-blur-lg border-t border-zinc-800 animate-fadeIn">
+            <div className="container mx-auto px-4 py-6 max-h-[calc(100vh-4rem)] overflow-y-auto">
+              {/* Navigation Links */}
+              <ul className="space-y-1">
+                <li>
+                  <a 
+                    href="#inicio" 
+                    className="block py-3 px-4 text-center text-base font-medium hover:text-orange-400 hover:bg-zinc-900/50 rounded-lg transition-all"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    HOME
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="#quienes-somos" 
+                    className="block py-3 px-4 text-center text-base font-medium hover:text-orange-400 hover:bg-zinc-900/50 rounded-lg transition-all"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    QUIÉNES SOMOS
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="#aventuras" 
+                    className="block py-3 px-4 text-center text-base font-medium hover:text-orange-400 hover:bg-zinc-900/50 rounded-lg transition-all"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    NUESTRAS AVENTURAS
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="#events" 
+                    className="block py-3 px-4 text-center text-base font-medium hover:text-orange-400 hover:bg-zinc-900/50 rounded-lg transition-all"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    SOCIAL CLUB EVENTS
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="#merchant" 
+                    className="block py-3 px-4 text-center text-base font-medium hover:text-orange-400 hover:bg-zinc-900/50 rounded-lg transition-all"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    MERCHANT
+                  </a>
+                </li>
+              </ul>
+
+              {/* Social Media */}
+              <div className="mt-6 pt-6 border-t border-zinc-800">
+                <p className="text-zinc-500 text-xs text-center mb-4 font-semibold tracking-wider">SÍGUENOS</p>
+                <div className="flex justify-center gap-4">
+                  {/* Instagram */}
+                  <a 
+                    href="https://www.instagram.com/proyectocumbre"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-12 h-12 bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+                    aria-label="Instagram"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    </svg>
+                  </a>
+
+                  {/* WhatsApp */}
+                  <a 
+                    href="https://chat.whatsapp.com/EHmIEAcK7EBFP3UgntDdX9"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+                    aria-label="WhatsApp"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                    </svg>
+                  </a>
+
+                  {/* TikTok */}
+                  <a 
+                    href="https://www.tiktok.com/@proyectocumbre"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-12 h-12 bg-black rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+                    aria-label="TikTok"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z" fill="currentColor"/>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </header>
@@ -317,7 +453,7 @@ export default function Home() {
               PROYECTO<br />CUMBRE
             </h1> */}
             <p className="text-lg md:text-xl text-zinc-100 leading-relaxed mb-8">
-              Club de montaña, vivacs y grandes rutas diseñado para quienes buscan algo más que llegar a la cima.
+              Club de montaña para los que prefieren el barro antes que el sofá, el amanecer antes que la rutina y la adrenalina antes que lo previsible: este es tu club
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <a 
@@ -369,7 +505,6 @@ export default function Home() {
       </section>
 
       {/* Section 2 - Quiénes somos */}
-    {/* Section 2 - Quiénes somos */}
       <section id="quienes-somos" className="py-16 md:py-24 bg-zinc-900/50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Quiénes somos</h2>
@@ -955,12 +1090,10 @@ export default function Home() {
             {/* Eventos */}
             <div className="space-y-8">
               
-              {/* Evento futuro 1 */}
+              {/* Evento futuro 1 - TRAIL & TRANCA */}
               <div className="relative pl-20 group">
-                {/* Punto en la línea */}
                 <div className="absolute left-6 top-6 w-5 h-5 rounded-full bg-orange-500 border-4 border-zinc-900 group-hover:scale-125 transition-transform shadow-lg shadow-orange-500/50"></div>
                 
-                {/* Card */}
                 <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 rounded-xl border border-orange-500/30 hover:border-orange-500 transition-all shadow-lg hover:shadow-orange-500/20">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
@@ -977,45 +1110,83 @@ export default function Home() {
                       </svg>
                     </div>
                   </div>
-                  <div className="flex gap-2 mt-4 flex-wrap">
-                    <span className="px-2 py-1 bg-orange-500/20 text-orange-400 text-xs rounded">noche</span>
-                    <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">asfalto</span>
+                  
+                  {/* Tags y Botón de Calendario */}
+                  <div className="flex justify-between items-center flex-wrap gap-2 mt-4">
+                    <div className="flex gap-2 flex-wrap">
+                      <span className="px-2 py-1 bg-orange-500/20 text-orange-400 text-xs rounded">noche</span>
+                      <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">asfalto</span>
+                    </div>
+                    
+                    <div className="relative ml-auto">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const dropdown = document.getElementById('calendar-dropdown-1');
+                          if (dropdown) {
+                            dropdown.classList.toggle('hidden');
+                          }
+                        }}
+                        className="flex items-center gap-1.5 px-2 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs rounded border border-zinc-700 hover:border-zinc-600 transition-all"
+                      >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>Añadir al calendario</span>
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+
+                      <div id="calendar-dropdown-1" className="hidden absolute top-full right-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-10 min-w-[220px]">
+                        <a 
+                          href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('TRAIL & TRANCA - Proyecto Cumbre')}&dates=20251127T180000/20251127T210000&details=${encodeURIComponent('Salida/llega bar la tranca. 8Kms aprox 300+')}&location=${encodeURIComponent('Bar La Tranca')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-800 transition rounded-t-lg"
+                          onClick={() => document.getElementById('calendar-dropdown-1')?.classList.add('hidden')}
+                        >
+                          <svg className="w-5 h-5 text-blue-400" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>
+                          </svg>
+                          <span className="text-sm text-white">Google Calendar</span>
+                        </a>
+                        
+                        <a 
+                          href="data:text/calendar;charset=utf8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0ASUMMARY:TRAIL & TRANCA - Proyecto Cumbre%0ADTSTART:20251127T180000%0ADTEND:20251127T210000%0ADESCRIPTION:Salida/llega bar la tranca. 8Kms aprox 300+%0ALOCATION:Bar La Tranca%0AEND:VEVENT%0AEND:VCALENDAR"
+                          download="trail-tranca.ics"
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-800 transition"
+                          onClick={() => document.getElementById('calendar-dropdown-1')?.classList.add('hidden')}
+                        >
+                          <svg className="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span className="text-sm text-white">Apple Calendar / iCal</span>
+                        </a>
+                        
+                        <a 
+                          href={`https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent('TRAIL & TRANCA - Proyecto Cumbre')}&startdt=2025-11-27T18:00&enddt=2025-11-27T21:00&body=${encodeURIComponent('Salida/llega bar la tranca. 8Kms aprox 300+')}&location=${encodeURIComponent('Bar La Tranca')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-800 transition rounded-b-lg"
+                          onClick={() => document.getElementById('calendar-dropdown-1')?.classList.add('hidden')}
+                        >
+                          <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M24 7.387v9.226a.577.577 0 01-.577.577H7.577A.577.577 0 017 16.613V7.387a.577.577 0 01.577-.577h15.846a.577.577 0 01.577.577z"/>
+                          </svg>
+                          <span className="text-sm text-white">Outlook</span>
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Evento futuro 2 */}
-              {/* <div className="relative pl-20 group">
-                <div className="absolute left-6 top-6 w-5 h-5 rounded-full bg-orange-500 border-4 border-zinc-900 group-hover:scale-125 transition-transform shadow-lg shadow-orange-500/50"></div>
-                
-                <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 rounded-xl border border-orange-500/30 hover:border-orange-500 transition-all shadow-lg hover:shadow-orange-500/20">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2 flex-wrap">
-                        <span className="px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">PRÓXIMO</span>
-                        <span className="text-orange-400 font-semibold text-sm">22 Diciembre 2025</span>
-                      </div>
-                      <h4 className="text-xl font-bold text-white mb-2">Entrenamiento técnico</h4>
-                      <p className="text-zinc-400 text-sm">Técnicas de progresión en cresta</p>
-                    </div>
-                    <div className="flex-shrink-0 ml-4 hidden md:block">
-                      <svg className="w-12 h-12 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 mt-4 flex-wrap">
-                    <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">Técnico</span>
-                    <span className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded">Formación</span>
-                  </div>
-                </div>
-              </div> */}
-
-              {/* Evento futuro 3 */}
+              {/* Evento suspendido - CIRCULAR PICO DEL CIELO (SIN botón calendario) */}
               <div className="relative pl-20 group">
-                <div className="absolute left-6 top-6 w-5 h-5 rounded-full bg-orange-500 border-4 border-zinc-900 group-hover:scale-125 transition-transform shadow-lg shadow-orange-500/50"></div>
+                <div className="absolute left-6 top-6 w-5 h-5 rounded-full bg-red-500 border-4 border-zinc-900 group-hover:scale-125 transition-transform shadow-lg shadow-red-500/50"></div>
                 
-                <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 rounded-xl border border-red-500/30 hover:border-red-500 transition-all shadow-lg hover:shadow-orange-500/20">
+                <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 rounded-xl border border-red-500/30 hover:border-red-500 transition-all shadow-lg hover:shadow-red-500/20">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2 flex-wrap">
@@ -1023,18 +1194,18 @@ export default function Home() {
                         <span className="text-red-400 font-semibold text-sm">15 Noviembre 2025</span>
                       </div>
                       <h4 className="text-xl font-bold text-white mb-2">CIRCULAR PICO DEL CIELO</h4>
-                      <span className="text-red-400 font-semibold text-sm">Alerta Naranja por temporal</span>
+                      <p className="text-red-400 font-semibold text-sm mb-1">Alerta Naranja por temporal</p>
                       <p className="text-zinc-400 text-sm">Ruta de trail/senderismo por la Sierra de la Almijara</p>
                     </div>
                     <div className="flex-shrink-0 ml-4 hidden md:block">
                       <svg className="w-12 h-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        {/* Montañas */}
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 20l5-7 4 4 5-7 4 5v5H3z" />
-                        {/* Gotas de lluvia */}
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 4v3M12 2v4M16 4v3M6 8v2M10 6v3M14 7v2M18 8v2" />
                       </svg>
                     </div>
                   </div>
+                  
+                  {/* Solo tags, sin botón de calendario porque está suspendido */}
                   <div className="flex gap-2 mt-4 flex-wrap">
                     <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">mañana</span>
                     <span className="px-2 py-1 bg-cyan-500/20 text-cyan-400 text-xs rounded">trail</span>
@@ -1061,7 +1232,6 @@ export default function Home() {
                         <span className="text-zinc-500 font-semibold text-sm">06 Noviembre 2025</span>
                       </div>
                       <h4 className="text-lg font-bold text-zinc-300 mb-2">UP&DOWN SOCIAL RUN</h4>
-                      {/* <p className="text-zinc-500 text-sm">Anillo completado en 4 días</p> */}
                     </div>
                   </div>
                 </div>
@@ -1079,7 +1249,6 @@ export default function Home() {
                         <span className="text-zinc-500 font-semibold text-sm">20 Octubre 2025</span>
                       </div>
                       <h4 className="text-lg font-bold text-zinc-300 mb-2">La MILLA (SOCIAL) CHALLENGE</h4>
-                      {/* <p className="text-zinc-500 text-sm">Primera nevada de la temporada</p> */}
                     </div>
                   </div>
                 </div>
@@ -1097,7 +1266,6 @@ export default function Home() {
                         <span className="text-zinc-500 font-semibold text-sm">15 Octubre 2025</span>
                       </div>
                       <h4 className="text-lg font-bold text-zinc-300 mb-2">HYBRID TRAINING</h4>
-                      {/* <p className="text-zinc-500 text-sm">50km con 3000m+</p> */}
                     </div>
                   </div>
                 </div>
