@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import Carousel, { CarouselItem } from './components/Carrusel';
 import Lightbox from './components/Lightbox';
 import ProductCard from './components/ProductCard';
+import { AddToCalendar } from './components/AddToCalendar';
 
 
 
@@ -270,7 +271,7 @@ export default function Home() {
             <div className="hidden xl:flex items-center gap-2 2xl:gap-3">
               {/* Instagram */}
               <a 
-                href="https://www.instagram.com/proyectocumbre"
+                href="https://www.instagram.com/proyecto.cumbre"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 2xl:w-10 2xl:h-10 bg-zinc-900 hover:bg-gradient-to-tr hover:from-yellow-400 hover:via-pink-500 hover:to-purple-600 rounded-lg flex items-center justify-center transition-all duration-300 group flex-shrink-0"
@@ -296,7 +297,7 @@ export default function Home() {
 
               {/* TikTok */}
               <a 
-                href="https://www.tiktok.com/@proyectocumbre"
+                href="https://www.tiktok.com/@proyecto.cumbre"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 2xl:w-10 2xl:h-10 bg-zinc-900 hover:bg-black rounded-lg flex items-center justify-center transition-all duration-300 group flex-shrink-0"
@@ -540,6 +541,376 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Section - Hazte Socio */}
+<section id="hazte-socio" className="py-16 md:py-24 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 relative overflow-hidden">
+  {/* Efecto de fondo */}
+  <div className="absolute inset-0 opacity-10">
+    <div className="absolute top-0 left-1/4 w-96 h-96 bg-orange-500 rounded-full blur-3xl"></div>
+    <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-600 rounded-full blur-3xl"></div>
+  </div>
+
+  <div className="container mx-auto px-4 relative z-10">
+    {/* Header */}
+    <div className="text-center mb-12 md:mb-16">
+      <div className="inline-block mb-4">
+        <span className="px-4 py-2 bg-orange-500/20 text-orange-400 text-sm font-bold rounded-full border border-orange-500/30">
+          🎉 NUEVA TEMPORADA 2026
+        </span>
+      </div>
+      <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent">
+        Hazte Socio de Proyecto Cumbre
+      </h2>
+      <p className="text-lg md:text-xl text-zinc-300 max-w-3xl mx-auto leading-relaxed">
+        Casi un año haciendo <strong className="text-orange-400">los perlas por el monte</strong>. 
+        Para 2026 ya podéis apuntaros y federaros en montaña con el club que te entiende.
+      </p>
+      <p className="text-zinc-400 mt-4 text-sm md:text-base">
+        <strong className="text-white">Inscripciones abiertas desde diciembre.</strong> No elijas otro. Elige el bueno.
+      </p>
+    </div>
+
+    {/* Grid de opciones - CON ALTURA IGUAL */}
+    <div className="grid md:grid-cols-2 gap-8 lg:gap-12 max-w-6xl mx-auto mb-12">
+      
+      {/* Plan Socio + Federado */}
+      <div className="relative group">
+        {/* Badge recomendado */}
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
+          <span className="px-4 py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs font-bold rounded-full shadow-lg">
+            ⭐ MÁS COMPLETO
+          </span>
+        </div>
+
+        <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-2xl p-8 border-2 border-orange-500 hover:border-orange-400 transition-all shadow-2xl hover:shadow-orange-500/20 h-full flex flex-col">
+          {/* Header del plan */}
+          <div className="text-center mb-8">
+            <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
+              Socio + Federado FEDME
+            </h3>
+            <p className="text-zinc-400 text-sm mb-6">
+              Pack completo con licencia federativa
+            </p>
+            <div className="flex items-baseline justify-center gap-2">
+              <span className="text-5xl md:text-6xl font-bold text-orange-400">50€</span>
+              <span className="text-zinc-400 text-lg">/año</span>
+            </div>
+            <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+  <p className="text-sm text-blue-400 font-medium flex items-center gap-2">
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    + Licencia FEDME (precio variable según modalidad)
+  </p>
+</div>
+          </div>
+
+          {/* Beneficios - flex-1 para empujar el botón abajo */}
+          <div className="space-y-4 mb-8 flex-1">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-6 h-6 bg-orange-500/20 rounded-full flex items-center justify-center mt-0.5">
+                <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm">Licencia Federativa FEDME</p>
+                <p className="text-zinc-400 text-xs">Seguro de accidentes en montaña + cobertura rescate</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-6 h-6 bg-orange-500/20 rounded-full flex items-center justify-center mt-0.5">
+                <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm">Pack de Bienvenida Premium</p>
+                <p className="text-zinc-400 text-xs">Camiseta técnica + gorra oficial del club</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-6 h-6 bg-orange-500/20 rounded-full flex items-center justify-center mt-0.5">
+                <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm">Prioridad en Eventos</p>
+                <p className="text-zinc-400 text-xs">Inscripción preferente en todas las aventuras</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-6 h-6 bg-orange-500/20 rounded-full flex items-center justify-center mt-0.5">
+                <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm">Descuentos Exclusivos</p>
+                <p className="text-zinc-400 text-xs">10-20% en merchandise y eventos especiales</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-6 h-6 bg-orange-500/20 rounded-full flex items-center justify-center mt-0.5">
+                <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm">Comunidad Exclusiva</p>
+                <p className="text-zinc-400 text-xs">Grupo privado de WhatsApp con planificación anticipada</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-6 h-6 bg-orange-500/20 rounded-full flex items-center justify-center mt-0.5">
+                <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm">Formación Técnica</p>
+                <p className="text-zinc-400 text-xs">Talleres y entrenamientos exclusivos para socios</p>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA - Siempre al fondo con mt-auto */}
+          <button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-orange-500/50 hover:scale-105 transform mt-auto">
+            Quiero ser socio + federado
+          </button>
+        </div>
+      </div>
+
+      {/* Plan Solo Socio - CON RESTRICCIÓN Y ALTURA IGUAL */}
+      <div className="relative group">
+        <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-2xl p-8 border border-zinc-700 hover:border-zinc-600 transition-all shadow-xl h-full flex flex-col">
+          {/* Header del plan */}
+          <div className="text-center mb-8">
+            <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
+              Solo Socio
+            </h3>
+            <p className="text-zinc-400 text-sm mb-6">
+              Sin licencia federativa
+            </p>
+            <div className="flex items-baseline justify-center gap-2">
+              <span className="text-5xl md:text-6xl font-bold text-white">50€</span>
+              <span className="text-zinc-400 text-lg">/año</span>
+            </div>
+            <p className="text-xs text-zinc-500 mt-2">Cuota única anual</p>
+          </div>
+
+          {/* ⚠️ ADVERTENCIA IMPORTANTE */}
+          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-6">
+            <div className="flex items-start gap-3">
+              <svg className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div>
+                <p className="text-yellow-400 font-bold text-xs mb-1">⚠️ Restricción importante</p>
+                <p className="text-yellow-200 text-xs leading-relaxed">
+                  Algunas actividades del club requieren seguro de montaña obligatorio (alta montaña, vivacs, rutas técnicas). 
+                  Sin licencia FEDME, deberás contratar tu propio seguro para participar en estas aventuras.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Beneficios - flex-1 para empujar el botón abajo */}
+          <div className="space-y-4 mb-8 flex-1">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-6 h-6 bg-zinc-700 rounded-full flex items-center justify-center mt-0.5">
+                <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm">Pack de Bienvenida</p>
+                <p className="text-zinc-400 text-xs">Camiseta técnica + gorra oficial del club</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-6 h-6 bg-zinc-700 rounded-full flex items-center justify-center mt-0.5">
+                <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm">Prioridad en Eventos*</p>
+                <p className="text-zinc-400 text-xs">Inscripción preferente (si cumples requisitos de seguro)</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-6 h-6 bg-zinc-700 rounded-full flex items-center justify-center mt-0.5">
+                <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm">Descuentos</p>
+                <p className="text-zinc-400 text-xs">10% en merchandise del club</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-6 h-6 bg-zinc-700 rounded-full flex items-center justify-center mt-0.5">
+                <svg className="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm">Comunidad</p>
+                <p className="text-zinc-400 text-xs">Acceso al grupo privado de WhatsApp</p>
+              </div>
+            </div>
+
+            {/* NO INCLUYE */}
+            <div className="pt-4 border-t border-zinc-800">
+              <p className="text-zinc-500 text-xs font-semibold mb-3">❌ No incluye:</p>
+              
+              <div className="flex items-start gap-3 opacity-50 mb-2">
+                <div className="flex-shrink-0 w-6 h-6 bg-zinc-800 rounded-full flex items-center justify-center mt-0.5">
+                  <svg className="w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-zinc-500 font-semibold text-sm">Licencia Federativa</p>
+                  <p className="text-zinc-600 text-xs">Deberás gestionarla por tu cuenta</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 opacity-50">
+                <div className="flex-shrink-0 w-6 h-6 bg-zinc-800 rounded-full flex items-center justify-center mt-0.5">
+                  <svg className="w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-zinc-500 font-semibold text-sm">Seguro FEDME</p>
+                  <p className="text-zinc-600 text-xs">Seguro propio obligatorio para actividades técnicas</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA + Nota - Siempre al fondo con mt-auto */}
+          <div className="mt-auto">
+            <button className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all border border-zinc-700 hover:border-zinc-600 mb-3">
+              Quiero ser solo socio
+            </button>
+            <p className="text-xs text-zinc-500 text-center">
+              *Acceso limitado a algunas actividades técnicas sin seguro propio
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Info adicional */}
+    <div className="max-w-4xl mx-auto">
+      {/* Licencia FEDME explicada */}
+      <div className="bg-zinc-900/50 backdrop-blur-sm rounded-xl p-6 md:p-8 border border-zinc-800 mb-8">
+        <div className="flex items-start gap-4 mb-4">
+          <div className="flex-shrink-0 w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
+            <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <h4 className="text-xl font-bold text-white mb-2">¿Qué es la Licencia FEDME?</h4>
+            <p className="text-zinc-300 text-sm leading-relaxed mb-4">
+              La <strong className="text-blue-400">Federación Española de Deportes de Montaña y Escalada (FEDME)</strong> te proporciona 
+              un seguro de accidentes deportivos, cobertura de rescate en montaña y acceso a refugios federados con descuentos.
+            </p>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div className="flex items-center gap-2 text-xs text-zinc-400">
+                <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Seguro de accidentes en montaña</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-zinc-400">
+                <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Cobertura de rescate (helicóptero)</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-zinc-400">
+                <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Descuentos en refugios federados</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-zinc-400">
+                <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Participación en competiciones oficiales</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mt-4">
+          <p className="text-xs text-blue-300">
+            <strong>💡 Modalidades disponibles:</strong> Montañismo, Escalada, Senderismo, Trail Running, Esquí de Montaña. 
+            El precio varía según la modalidad elegida (desde 30€ hasta 60€ aproximadamente).
+          </p>
+        </div>
+      </div>
+
+      {/* CTA final grande */}
+      <div className="bg-gradient-to-r from-orange-500/10 via-orange-500/5 to-transparent rounded-xl p-8 border border-orange-500/30 text-center">
+        <h4 className="text-2xl md:text-3xl font-bold text-white mb-4">
+          ¿Listo para la temporada 2026?
+        </h4>
+        <p className="text-zinc-300 mb-6 max-w-2xl mx-auto">
+          Únete a la familia Proyecto Cumbre y vive las mejores aventuras con gente que comparte tu pasión por la montaña.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <a 
+            href="https://chat.whatsapp.com/EHmIEAcK7EBFP3UgntDdX9"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 px-8 py-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-green-500/50"
+          >
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+            </svg>
+            Únete al grupo de WhatsApp
+          </a>
+          <span className="text-zinc-500 text-sm">
+            Ahí contamos todo lo que preparamos para 2026
+          </span>
+        </div>
+      </div>
+
+      {/* Timeline de inscripción */}
+      <div className="mt-8 flex items-center justify-center gap-4 flex-wrap text-sm">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+          <span className="text-zinc-400">
+            <strong className="text-white">Inscripciones abiertas</strong> desde diciembre 2025
+          </span>
+        </div>
+        <span className="text-zinc-600">•</span>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+          <span className="text-zinc-400">
+            Temporada 2026 empieza en <strong className="text-white">enero</strong>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
 
       {/* Section 3 - Nuestras aventuras */}
@@ -1112,72 +1483,24 @@ export default function Home() {
                   </div>
                   
                   {/* Tags y Botón de Calendario */}
+                {/* Tags y Botón de Calendario */}
                   <div className="flex justify-between items-center flex-wrap gap-2 mt-4">
                     <div className="flex gap-2 flex-wrap">
                       <span className="px-2 py-1 bg-orange-500/20 text-orange-400 text-xs rounded">noche</span>
                       <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">asfalto</span>
                     </div>
                     
-                    <div className="relative ml-auto">
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const dropdown = document.getElementById('calendar-dropdown-1');
-                          if (dropdown) {
-                            dropdown.classList.toggle('hidden');
-                          }
-                        }}
-                        className="flex items-center gap-1.5 px-2 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs rounded border border-zinc-700 hover:border-zinc-600 transition-all"
-                      >
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span>Añadir al calendario</span>
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-
-                      <div id="calendar-dropdown-1" className="hidden absolute top-full right-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-10 min-w-[220px]">
-                        <a 
-                          href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('TRAIL & TRANCA - Proyecto Cumbre')}&dates=20251127T180000/20251127T210000&details=${encodeURIComponent('Salida/llega bar la tranca. 8Kms aprox 300+')}&location=${encodeURIComponent('Bar La Tranca')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-800 transition rounded-t-lg"
-                          onClick={() => document.getElementById('calendar-dropdown-1')?.classList.add('hidden')}
-                        >
-                          <svg className="w-5 h-5 text-blue-400" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>
-                          </svg>
-                          <span className="text-sm text-white">Google Calendar</span>
-                        </a>
-                        
-                        <a 
-                          href="data:text/calendar;charset=utf8,BEGIN:VCALENDAR%0AVERSION:2.0%0ABEGIN:VEVENT%0ASUMMARY:TRAIL & TRANCA - Proyecto Cumbre%0ADTSTART:20251127T180000%0ADTEND:20251127T210000%0ADESCRIPTION:Salida/llega bar la tranca. 8Kms aprox 300+%0ALOCATION:Bar La Tranca%0AEND:VEVENT%0AEND:VCALENDAR"
-                          download="trail-tranca.ics"
-                          className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-800 transition"
-                          onClick={() => document.getElementById('calendar-dropdown-1')?.classList.add('hidden')}
-                        >
-                          <svg className="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          <span className="text-sm text-white">Apple Calendar / iCal</span>
-                        </a>
-                        
-                        <a 
-                          href={`https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent('TRAIL & TRANCA - Proyecto Cumbre')}&startdt=2025-11-27T18:00&enddt=2025-11-27T21:00&body=${encodeURIComponent('Salida/llega bar la tranca. 8Kms aprox 300+')}&location=${encodeURIComponent('Bar La Tranca')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-800 transition rounded-b-lg"
-                          onClick={() => document.getElementById('calendar-dropdown-1')?.classList.add('hidden')}
-                        >
-                          <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M24 7.387v9.226a.577.577 0 01-.577.577H7.577A.577.577 0 017 16.613V7.387a.577.577 0 01.577-.577h15.846a.577.577 0 01.577.577z"/>
-                          </svg>
-                          <span className="text-sm text-white">Outlook</span>
-                        </a>
-                      </div>
-                    </div>
+                    {/* Componente reutilizable - Reemplaza todo el código del dropdown */}
+                    <AddToCalendar 
+                      event={{
+                        title: 'TRAIL & TRANCA - Proyecto Cumbre',
+                        startDate: '20251127T180000',
+                        endDate: '20251127T210000',
+                        description: 'Salida/llega bar la tranca. 8Kms aprox 300+',
+                        location: 'Bar La Tranca'
+                      }}
+                      dropdownId="calendar-dropdown-1"
+                    />
                   </div>
                 </div>
               </div>
