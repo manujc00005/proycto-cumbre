@@ -565,9 +565,20 @@ export default function Home() {
         Casi un año haciendo <strong className="text-orange-400">los perlas por el monte</strong>. 
         Para 2026 ya podéis apuntaros y federaros en montaña con el club que te entiende.
       </p>
-      <p className="text-zinc-400 mt-4 text-sm md:text-base">
-        <strong className="text-white">Inscripciones abiertas desde diciembre.</strong> No elijas otro. Elige el bueno.
-      </p>
+      <div className="mt-4 space-y-2 flex flex-col items-center text-center">
+        <p className="text-zinc-400 text-sm md:text-base">
+          <strong className="text-white">Inscripciones abiertas desde diciembre.</strong>
+        </p>
+        <div className="flex items-center gap-2">
+          <svg className="w-5 h-5 text-orange-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z"/>
+          </svg>
+          <p className="text-orange-400 font-bold text-sm md:text-base">
+            Compra Proyecto Cumbre, compra monte.
+          </p>
+        </div>
+      </div>
+
     </div>
 
     {/* Grid de opciones - CON ALTURA IGUAL */}
