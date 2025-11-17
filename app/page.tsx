@@ -387,7 +387,7 @@ export default function Home() {
                 <div className="flex justify-center gap-4">
                   {/* Instagram */}
                   <a 
-                    href="https://www.instagram.com/proyectocumbre"
+                    href="https://www.instagram.com/proyecto.cumbre"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-12 h-12 bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-transform"
@@ -415,7 +415,7 @@ export default function Home() {
 
                   {/* TikTok */}
                   <a 
-                    href="https://www.tiktok.com/@proyectocumbre"
+                    href="https://www.tiktok.com/@proyecto.cumbre"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-12 h-12 bg-black rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-transform"
@@ -1662,7 +1662,7 @@ export default function Home() {
               </p>
               <p className="text-zinc-500 text-xs">
                 📍 Andalucía, España<br/><br/>
-                ✉️ info@proyectocumbre.com
+                ✉️ web@proyecto-cumbre.es
               </p>
             </div>
             
@@ -1740,7 +1740,7 @@ export default function Home() {
                   </div>
                   <div className="flex-1">
                     <p className="text-white font-semibold text-sm">TikTok</p>
-                    <p className="text-zinc-400 text-xs">@proyectocumbre</p>
+                    <p className="text-zinc-400 text-xs">@proyecto.cumbre</p>
                   </div>
                   <svg className="w-5 h-5 text-zinc-500 group-hover:text-white transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
