@@ -1,4 +1,4 @@
-import { AddToCalendar } from '../AddToCalendar';
+import { AddToCalendar } from './AddToCalendar';
 import EventIcon from './EventIcon';
 import { Event, EventStatus } from '../types';
 import { getEventStatus, shouldShowEventDetails } from './Eventutils';
