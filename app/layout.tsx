@@ -13,8 +13,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Opcional pero recomendable: usar una variable de entorno
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.proyecto-cumbre.es";
+
 export const metadata: Metadata = {
-   title: "Proyecto Cumbre",
+  metadataBase: new URL(siteUrl),
+  title: "Proyecto Cumbre",
   description: "Aventuras de montaña, rutas y experiencias únicas.",
   openGraph: {
     title: "Proyecto Cumbre",
@@ -23,10 +28,10 @@ export const metadata: Metadata = {
     siteName: "Proyecto Cumbre",
     images: [
       {
-        url: "/quienes-bg.jpg", 
+        url: "/quienes-bg.jpg", // se resolverá como absoluta usando metadataBase
         width: 1200,
         height: 630,
-      }
+      },
     ],
     locale: "es_ES",
     type: "website",
@@ -42,12 +47,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
-         <CartDrawer />
+        <CartDrawer />
       </body>
     </html>
   );

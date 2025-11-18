@@ -2,10 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, AlertCircle, Mountain } from 'lucide-react';
+import { Check, AlertCircle, AlertTriangle, Mountain } from 'lucide-react';
 
 // Tipos de licencia
 const LICENSE_TYPES = [
+  {
+    id: 'none',
+    name: 'Sin Licencia FEDME',
+    price: 0,
+    coverage: 'Solo membresía del club',
+    description: 'Podrás participar en actividades básicas del club, pero necesitarás seguro propio para actividades técnicas.',
+    warning: true,
+  },
   {
     id: 'a1',
     name: 'A1 - Media Temporada',
@@ -38,7 +46,9 @@ const LICENSE_TYPES = [
 ];
 
 const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-const PANTS_SIZES = ['28', '30', '32', '34', '36', '38', '40', '42', '44'];
+const PANTS_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+
+const MEMBERSHIP_FEE = 50; // Cuota de socio anual
 
 export default function MembershipPage() {
   const router = useRouter();
@@ -130,9 +140,6 @@ export default function MembershipPage() {
       // Simular delay de API
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // NO añadir al carrito, solo mostrar success
-      // La membresía se procesará directamente
-
       setShowSuccess(true);
 
     } catch (error) {
@@ -145,9 +152,9 @@ export default function MembershipPage() {
 
   if (showSuccess) {
     const selectedLicense = LICENSE_TYPES.find(l => l.id === formData.licenseType);
-    const MEMBERSHIP_FEE = 50; // Cuota de socio
     const licenseFee = selectedLicense?.price || 0;
     const total = MEMBERSHIP_FEE + licenseFee;
+    const hasNoLicense = formData.licenseType === 'none';
 
     const handlePayment = async () => {
       setPaymentProcessing(true);
@@ -205,10 +212,12 @@ export default function MembershipPage() {
                     <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                     <span>Recibirás un email de confirmación</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Tu licencia federativa será procesada en 48-72h</span>
-                  </li>
+                  {!hasNoLicense && (
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>Tu licencia federativa será procesada en 48-72h</span>
+                    </li>
+                  )}
                   <li className="flex items-start gap-2">
                     <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                     <span>Te contactaremos para la entrega del merchandising</span>
@@ -259,8 +268,8 @@ export default function MembershipPage() {
                 {/* Membership Fee */}
                 <div className="flex justify-between items-center text-sm">
                   <div>
-                    <p className="text-white font-medium">Cuota de Socio</p>
-                    <p className="text-zinc-500 text-xs">Membresía anual</p>
+                    <p className="text-white font-medium">Cuota de Socio Anual</p>
+                    <p className="text-zinc-500 text-xs">Membresía del club</p>
                   </div>
                   <span className="text-white font-bold">{MEMBERSHIP_FEE}€</span>
                 </div>
@@ -271,7 +280,9 @@ export default function MembershipPage() {
                     <p className="text-white font-medium">{selectedLicense?.name}</p>
                     <p className="text-zinc-500 text-xs">{selectedLicense?.coverage}</p>
                   </div>
-                  <span className="text-white font-bold">{licenseFee}€</span>
+                  <span className="text-white font-bold">
+                    {licenseFee > 0 ? `${licenseFee}€` : 'Gratis'}
+                  </span>
                 </div>
               </div>
 
@@ -289,6 +300,22 @@ export default function MembershipPage() {
               </p>
             </div>
           </div>
+
+          {/* Warning para "Sin Licencia" */}
+          {hasNoLicense && (
+            <div className="bg-yellow-500/10 border-2 border-yellow-500/50 rounded-xl p-4 mb-6 flex gap-3">
+              <AlertTriangle className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <p className="text-yellow-300 font-bold mb-2 flex items-center gap-2">
+                  <span>⚠️</span>
+                  <span>Restricción importante</span>
+                </p>
+                <p className="text-yellow-200/90">
+                  Algunas actividades del club requieren seguro de montaña obligatorio (alta montaña, vivacs, rutas técnicas). Sin licencia FEDME, deberás contratar tu propio seguro para participar en estas aventuras.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="space-y-3">
@@ -329,7 +356,10 @@ export default function MembershipPage() {
                 <strong className="text-white">Importante:</strong> Tu membresía se activará tras confirmar el pago.
               </p>
               <p className="text-zinc-500 text-xs">
-                Recibirás un email con los detalles de tu licencia federativa.
+                {hasNoLicense 
+                  ? 'Recuerda que necesitarás seguro propio para actividades técnicas.'
+                  : 'Recibirás un email con los detalles de tu licencia federativa.'
+                }
               </p>
             </div>
           </div>
@@ -353,6 +383,12 @@ export default function MembershipPage() {
             Completa este formulario para darte de alta como socio. 
             Necesitamos estos datos para tramitar tu licencia federativa y mantenerte informado.
           </p>
+          
+          {/* Precio destacado */}
+          <div className="mt-6 inline-flex items-center gap-3 bg-orange-500/10 border border-orange-500/30 rounded-full px-6 py-3">
+            <span className="text-zinc-300 font-medium">Cuota anual de socio:</span>
+            <span className="text-orange-500 text-2xl font-bold">{MEMBERSHIP_FEE}€</span>
+          </div>
         </div>
 
         {/* Info Banner */}
@@ -477,10 +513,10 @@ export default function MembershipPage() {
           <section className="bg-zinc-900 rounded-xl p-6 md:p-8 border border-zinc-800">
             <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
               <span className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
-              Modalidad de Licencia
+              Modalidad de Licencia FEDME
             </h2>
             <p className="text-zinc-400 text-sm mb-6">
-              Selecciona la licencia que mejor se adapte a tus necesidades
+              Selecciona la licencia que mejor se adapte a tus necesidades. La cuota de socio ({MEMBERSHIP_FEE}€) se suma al precio de la licencia.
             </p>
 
             <div className="grid md:grid-cols-2 gap-4">
@@ -490,12 +526,20 @@ export default function MembershipPage() {
                   className={`relative cursor-pointer rounded-xl border-2 transition-all ${
                     formData.licenseType === license.id
                       ? 'border-orange-500 bg-orange-500/10'
+                      : license.warning
+                      ? 'border-yellow-500/50 hover:border-yellow-500 bg-yellow-500/5'
                       : 'border-zinc-700 hover:border-zinc-600 bg-zinc-800/50'
                   } ${license.recommended ? 'ring-2 ring-orange-500/50' : ''}`}
                 >
                   {license.recommended && (
                     <div className="absolute -top-3 left-4 px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">
                       MÁS COMPLETO
+                    </div>
+                  )}
+                  {license.warning && (
+                    <div className="absolute -top-3 left-4 px-3 py-1 bg-yellow-500 text-zinc-900 text-xs font-bold rounded-full flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      <span>IMPORTANTE</span>
                     </div>
                   )}
                   <input
@@ -508,8 +552,10 @@ export default function MembershipPage() {
                   />
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-3">
-                      <h3 className="font-bold text-white text-lg">{license.name}</h3>
-                      <span className="text-2xl font-bold text-orange-500">{license.price}€</span>
+                      <h3 className="font-bold text-white text-lg pr-2">{license.name}</h3>
+                      <span className={`text-2xl font-bold ${license.price > 0 ? 'text-orange-500' : 'text-green-500'}`}>
+                        {license.price > 0 ? `+${license.price}€` : ''}
+                      </span>
                     </div>
                     <p className="text-sm text-zinc-400 mb-3">{license.coverage}</p>
                     <p className="text-xs text-zinc-500">{license.description}</p>
@@ -518,6 +564,22 @@ export default function MembershipPage() {
               ))}
             </div>
             {errors.licenseType && <p className="mt-2 text-sm text-red-500">{errors.licenseType}</p>}
+
+            {/* Warning dinámico cuando selecciona "Sin Licencia" */}
+            {formData.licenseType === 'none' && (
+              <div className="mt-6 bg-yellow-500/10 border-2 border-yellow-500/50 rounded-xl p-4 flex gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                <AlertTriangle className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="text-yellow-300 font-bold mb-2 flex items-center gap-2">
+                    <span>⚠️</span>
+                    <span>Restricción importante</span>
+                  </p>
+                  <p className="text-yellow-200/90 leading-relaxed">
+                    Algunas actividades del club requieren seguro de montaña obligatorio (alta montaña, vivacs, rutas técnicas). Sin licencia FEDME, deberás contratar tu propio seguro para participar en estas aventuras.
+                  </p>
+                </div>
+              </div>
+            )}
           </section>
 
           {/* Dirección y Contacto */}
@@ -660,6 +722,38 @@ export default function MembershipPage() {
             </div>
           </section>
 
+          {/* Resumen de costos */}
+          <div className="bg-gradient-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/30 rounded-xl p-6">
+            <h3 className="text-white font-bold text-lg mb-4 flex items-center gap-2">
+              <span>💰</span>
+              Resumen de costos
+            </h3>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-zinc-300">Cuota de socio anual</span>
+                <span className="text-white font-bold">{MEMBERSHIP_FEE}€</span>
+              </div>
+              {formData.licenseType && (
+                <div className="flex justify-between items-center">
+                  <span className="text-zinc-300">
+                    {LICENSE_TYPES.find(l => l.id === formData.licenseType)?.name}
+                  </span>
+                  <span className="text-white font-bold">
+                    {LICENSE_TYPES.find(l => l.id === formData.licenseType)?.price || 0}€
+                  </span>
+                </div>
+              )}
+              <div className="border-t border-orange-500/30 pt-2 mt-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-white font-bold text-lg">Total</span>
+                  <span className="text-orange-500 font-bold text-2xl">
+                    {MEMBERSHIP_FEE + (LICENSE_TYPES.find(l => l.id === formData.licenseType)?.price || 0)}€
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Submit Button */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <button
@@ -684,7 +778,7 @@ export default function MembershipPage() {
                 </>
               ) : (
                 <>
-                  Completar y Añadir al Carrito
+                  Continuar al Pago
                   <Mountain className="w-5 h-5" />
                 </>
               )}
@@ -693,7 +787,7 @@ export default function MembershipPage() {
 
           {/* Footer Note */}
           <p className="text-center text-zinc-500 text-sm">
-            Al completar este formulario, tu membresía se añadirá al carrito para proceder con el pago.
+            Al completar este formulario, procederás al pago de tu membresía.
           </p>
         </form>
       </div>

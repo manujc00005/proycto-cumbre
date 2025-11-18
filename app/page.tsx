@@ -62,13 +62,13 @@ export default function Home() {
     'fotos-9.jpg'
   ];
 
-  // Funciones para lightbox de productos
-  const openProductLightbox = (productIndex: number, imageIndex: number) => {
-    const productImages = products[productIndex].images.map(img => img.url);
-    setCurrentProductImages(productImages);
-    setCurrentProductImageIndex(imageIndex);
-    setProductLightboxOpen(true);
-  };
+  // // Funciones para lightbox de productos
+  // const openProductLightbox = (productIndex: number, imageIndex: number) => {
+  //   const productImages = products[productIndex].images.map(img => img.url);
+  //   setCurrentProductImages(productImages);
+  //   setCurrentProductImageIndex(imageIndex);
+  //   setProductLightboxOpen(true);
+  // };
 
   const closeProductLightbox = () => {
     setProductLightboxOpen(false);
