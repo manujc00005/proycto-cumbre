@@ -2,32 +2,34 @@
 
 import { useCartStore } from './cartStore';
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { useFeatureFlag } from '../featureFlags';
 
 export const CartDrawer = () => {
   const { items, isOpen, closeCart, updateQuantity, removeItem, getTotal } = useCartStore();
   const total = getTotal();
   const DELIVERY_FEE = 15;
-  
-  const isCartEnabled = useFeatureFlag('enableCart');
-  const isCheckoutEnabled = useFeatureFlag('enableCheckout');
+  const previousOverflow = useRef<string>('');
 
-  // Prevent body scroll when cart is open
+  // Manage body scroll - save and restore previous state
   useEffect(() => {
     if (isOpen) {
+      // Save current overflow state
+      previousOverflow.current = document.body.style.overflow || 'auto';
+      // Prevent body scroll when cart is open
       document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'unset';
+      // Restore previous overflow state
+      document.body.style.overflow = previousOverflow.current || 'auto';
     }
+    
+    // Cleanup: always restore scroll on unmount
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = previousOverflow.current || 'auto';
     };
   }, [isOpen]);
 
-  // Si el carrito está desactivado, no mostrar el drawer
-  if (!isCartEnabled || !isOpen) return null;
+  if (!isOpen) return null;
 
   return (
     <>
@@ -189,20 +191,9 @@ export const CartDrawer = () => {
             </p>
 
             {/* Checkout Button */}
-            {isCheckoutEnabled ? (
-              <button className="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-bold py-4 rounded transition-colors">
-                Checkout
-              </button>
-            ) : (
-              <div className="text-center">
-                <div className="w-full bg-zinc-300 text-zinc-600 font-bold py-4 rounded cursor-not-allowed">
-                  Checkout temporalmente no disponible
-                </div>
-                <p className="text-xs text-zinc-500 mt-2">
-                 Estamos experimentando problemas técnicos. Por favor, inténtelo de nuevo más tarde.
-                </p>
-              </div>
-            )}
+            <button className="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-bold py-4 rounded transition-colors">
+              Checkout
+            </button>
           </div>
         )}
       </div>
