@@ -6,6 +6,7 @@ import Carousel, { CarouselItem } from './components/Carrusel';
 import Lightbox from './components/Lightbox';
 import ProductCard from './components/ProductCard';
 import { AddToCalendar } from './components/AddToCalendar';
+import EventsSection from './components/Events/EventsSection';
 
 
 
@@ -1458,157 +1459,7 @@ export default function Home() {
       </section>
 
       {/* Section 4 - Social Club Events */}
-      <section id="events" className="py-16 md:py-24 bg-zinc-900/50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Social Club Events</h2>
-          <div className="w-20 h-1 bg-orange-500 mb-8 md:mb-12"></div>
-          <p className="text-zinc-400 mb-12">Quedadas, entrenamientos conjuntos y viajes de fin de semana.</p>
-
-          {/* Timeline */}
-          <div className="relative max-w-4xl mx-auto">
-            {/* Línea vertical */}
-            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-orange-500 via-zinc-600 to-zinc-700"></div>
-
-            {/* Eventos */}
-            <div className="space-y-8">
-              
-              {/* Evento futuro 1 - TRAIL & TRANCA */}
-              <div className="relative pl-20 group">
-                <div className="absolute left-6 top-6 w-5 h-5 rounded-full bg-orange-500 border-4 border-zinc-900 group-hover:scale-125 transition-transform shadow-lg shadow-orange-500/50"></div>
-                
-                <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 rounded-xl border border-orange-500/30 hover:border-orange-500 transition-all shadow-lg hover:shadow-orange-500/20">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2 flex-wrap">
-                        <span className="px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">PRÓXIMO</span>
-                        <span className="text-orange-400 font-semibold text-sm">27 Noviembre 2025</span>
-                      </div>
-                      <h4 className="text-xl font-bold text-white mb-2">TRAIL & TRANCA</h4>
-                      <p className="text-zinc-400 text-sm">Salida/llega bar la tranca. 8Kms aprox 300+</p>
-                    </div>
-                    <div className="flex-shrink-0 ml-4 hidden md:block">
-                      <svg className="w-12 h-12 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z"/>
-                      </svg>
-                    </div>
-                  </div>
-                  
-                  {/* Tags y Botón de Calendario */}
-                {/* Tags y Botón de Calendario */}
-                  <div className="flex justify-between items-center flex-wrap gap-2 mt-4">
-                    <div className="flex gap-2 flex-wrap">
-                      <span className="px-2 py-1 bg-orange-500/20 text-orange-400 text-xs rounded">noche</span>
-                      <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">asfalto</span>
-                    </div>
-                    
-                    {/* Componente reutilizable - Reemplaza todo el código del dropdown */}
-                    <AddToCalendar 
-                      event={{
-                        title: 'TRAIL & TRANCA - Proyecto Cumbre',
-                        startDate: '20251127T180000',
-                        endDate: '20251127T210000',
-                        description: 'Salida/llega bar la tranca. 8Kms aprox 300+',
-                        location: 'Bar La Tranca'
-                      }}
-                      dropdownId="calendar-dropdown-1"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Evento suspendido - CIRCULAR PICO DEL CIELO (SIN botón calendario) */}
-              <div className="relative pl-20 group">
-                <div className="absolute left-6 top-6 w-5 h-5 rounded-full bg-red-500 border-4 border-zinc-900 group-hover:scale-125 transition-transform shadow-lg shadow-red-500/50"></div>
-                
-                <div className="bg-gradient-to-br from-zinc-900 to-zinc-950 p-6 rounded-xl border border-red-500/30 hover:border-red-500 transition-all shadow-lg hover:shadow-red-500/20">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2 flex-wrap">
-                        <span className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full">SUSPENDIDO</span>
-                        <span className="text-red-400 font-semibold text-sm">15 Noviembre 2025</span>
-                      </div>
-                      <h4 className="text-xl font-bold text-white mb-2">CIRCULAR PICO DEL CIELO</h4>
-                      <p className="text-red-400 font-semibold text-sm mb-1">Alerta Naranja por temporal</p>
-                      <p className="text-zinc-400 text-sm">Ruta de trail/senderismo por la Sierra de la Almijara</p>
-                    </div>
-                    <div className="flex-shrink-0 ml-4 hidden md:block">
-                      <svg className="w-12 h-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 20l5-7 4 4 5-7 4 5v5H3z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 4v3M12 2v4M16 4v3M6 8v2M10 6v3M14 7v2M18 8v2" />
-                      </svg>
-                    </div>
-                  </div>
-                  
-                  {/* Solo tags, sin botón de calendario porque está suspendido */}
-                  <div className="flex gap-2 mt-4 flex-wrap">
-                    <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">mañana</span>
-                    <span className="px-2 py-1 bg-cyan-500/20 text-cyan-400 text-xs rounded">trail</span>
-                    <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded">senderismo</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Separador */}
-              <div className="relative pl-20 py-4">
-                <div className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-zinc-600 border-4 border-zinc-900"></div>
-                <div className="text-zinc-500 text-sm font-semibold">━━━ Eventos pasados ━━━</div>
-              </div>
-
-              {/* Evento pasado 1 */}
-              <div className="relative pl-20 group opacity-60 hover:opacity-100 transition-opacity">
-                <div className="absolute left-6 top-6 w-5 h-5 rounded-full bg-zinc-600 border-4 border-zinc-900"></div>
-                
-                <div className="bg-zinc-900/50 p-6 rounded-xl border border-zinc-700">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2 flex-wrap">
-                        <span className="px-3 py-1 bg-zinc-700 text-zinc-300 text-xs font-bold rounded-full">COMPLETADO</span>
-                        <span className="text-zinc-500 font-semibold text-sm">06 Noviembre 2025</span>
-                      </div>
-                      <h4 className="text-lg font-bold text-zinc-300 mb-2">UP&DOWN SOCIAL RUN</h4>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Evento pasado 2 */}
-              <div className="relative pl-20 group opacity-60 hover:opacity-100 transition-opacity">
-                <div className="absolute left-6 top-6 w-5 h-5 rounded-full bg-zinc-600 border-4 border-zinc-900"></div>
-                
-                <div className="bg-zinc-900/50 p-6 rounded-xl border border-zinc-700">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2 flex-wrap">
-                        <span className="px-3 py-1 bg-zinc-700 text-zinc-300 text-xs font-bold rounded-full">COMPLETADO</span>
-                        <span className="text-zinc-500 font-semibold text-sm">20 Octubre 2025</span>
-                      </div>
-                      <h4 className="text-lg font-bold text-zinc-300 mb-2">La MILLA (SOCIAL) CHALLENGE</h4>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Evento pasado 3 */}
-              <div className="relative pl-20 group opacity-60 hover:opacity-100 transition-opacity">
-                <div className="absolute left-6 top-6 w-5 h-5 rounded-full bg-zinc-600 border-4 border-zinc-900"></div>
-                
-                <div className="bg-zinc-900/50 p-6 rounded-xl border border-zinc-700">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2 flex-wrap">
-                        <span className="px-3 py-1 bg-zinc-700 text-zinc-300 text-xs font-bold rounded-full">COMPLETADO</span>
-                        <span className="text-zinc-500 font-semibold text-sm">15 Octubre 2025</span>
-                      </div>
-                      <h4 className="text-lg font-bold text-zinc-300 mb-2">HYBRID TRAINING</h4>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </section>
+      <EventsSection/>
 
       {/* Section 5 - Merchant MEJORADA */}
       <section id="merchant" className="py-16 md:py-24">
@@ -1638,6 +1489,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      
        {/* ✨ NUEVO: Lightbox de productos */}
       <Lightbox 
         isOpen={productLightboxOpen}
