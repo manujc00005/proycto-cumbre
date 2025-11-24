@@ -1,0 +1,187 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum Sex {
+  M  // Masculino
+  F  // Femenino
+  O  // Otro
+}
+
+enum LicenseType {
+  none     // Sin licencia FEDME
+  a1       // A1 - Media Temporada
+  a1_plus  // A1+ - Media Temporada Plus
+  b1       // B1 - Cobertura Ampliada
+  b1_plus  // B1+ - Cobertura Ampliada Plus
+}
+
+enum FedmeStatus {
+  pending     // Pendiente de tramitar
+  processing  // En proceso con FEDME
+  active      // Licencia activa
+  rejected    // Rechazada por FEDME
+  expired     // Expirada
+  none        // Usuario eligió "Sin Licencia"
+}
+
+enum MembershipStatus {
+  pending    // Esperando pago
+  active     // Pago completado, membresía activa
+  expired    // Expiró después de 1 año
+  failed     // Pago rechazado
+  cancelled  // Cancelada por admin
+}
+
+enum PaymentStatus {
+  pending    // Pendiente
+  completed  // Completado
+  failed     // Fallido
+  refunded   // Reembolsado
+}
+
+// ============================================
+// TABLA: Headquarters (Sedes)
+// ============================================
+
+model Headquarters {
+  id        String   @id @default(uuid())
+  
+  // Información básica
+  name      String   @db.VarChar(255)
+  code      String   @unique @db.VarChar(20)  // MAD, BCN, VAL
+  city      String   @db.VarChar(100)
+  
+  // Contacto
+  phone     String?  @db.VarChar(20)
+  email     String?  @db.VarChar(255)
+  
+  // Precios de membresía (JSONB)
+  membership_prices Json  // {"basic": 50, "premium": 80, "family": 120}
+  
+  // Estado
+  status    String   @default("active") @db.VarChar(20)
+  
+  // Relaciones
+  members   Member[]
+  
+  // Timestamps
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+  
+  @@index([code])
+  @@index([status])
+  @@map("headquarters")
+}
+
+// ============================================
+// TABLA: Members (Socios)
+// ============================================
+
+model Member {
+  id                     String   @id @default(uuid())
+  
+  // Sede
+  headquarters_id        String?
+  headquarters           Headquarters? @relation(fields: [headquarters_id], references: [id])
+  member_number          String?  @unique @db.VarChar(50)  // MAD-2025-002
+  
+  // Datos personales
+  email                  String   @unique @db.VarChar(255)
+  first_name             String   @db.VarChar(100)
+  last_name              String   @db.VarChar(100)
+  birth_date             DateTime @db.Date
+  dni                    String   @unique @db.VarChar(20)
+  sex                    Sex
+  
+  // Contacto
+  phone                  String   @db.VarChar(20)
+  emergency_phone        String?  @db.VarChar(20)
+  emergency_contact_name String?  @db.VarChar(255)
+  
+  // Dirección
+  province               String   @db.VarChar(100)
+  city                   String?  @db.VarChar(100)
+  address                String   @db.Text
+  postal_code            String?  @db.VarChar(10)
+  
+  // Tallas
+  shirt_size             String?  @db.VarChar(10)
+  hoodie_size            String?  @db.VarChar(10)
+  pants_size             String?  @db.VarChar(10)
+  
+  // Licencia FEDME
+  license_type           LicenseType
+  fedme_license_number   String?  @unique @db.VarChar(50)
+  fedme_status           FedmeStatus @default(pending)
+  
+  // Estado de membresía
+  membership_status      MembershipStatus @default(pending)
+  membership_start_date  DateTime?
+  membership_end_date    DateTime?
+  
+  // Notas administrativas
+  admin_notes            String?  @db.Text
+  
+  // Relaciones
+  payments               Payment[]
+  
+  // Timestamps
+  created_at             DateTime @default(now())
+  updated_at             DateTime @default(now()) @updatedAt
+  
+  @@index([headquarters_id])
+  @@index([email])
+  @@index([dni])
+  @@index([membership_status])
+  @@index([member_number])
+  @@index([created_at(sort: Desc)])
+  @@map("members")
+}
+
+// ============================================
+// TABLA: Payments (Pagos)
+// ============================================
+
+model Payment {
+  id                String        @id @default(uuid())
+  
+  // Relación con socio
+  member_id         String
+  member            Member        @relation(fields: [member_id], references: [id], onDelete: Cascade)
+  
+  // Stripe
+  stripe_session_id String        @unique @db.VarChar(255)
+  stripe_payment_id String?       @db.VarChar(255)
+  
+  // Montos
+  amount            Int           // En centavos (5000 = 50.00€)
+  currency          String        @default("eur") @db.VarChar(3)
+  
+  // Estado
+  status            PaymentStatus @default(pending)
+  
+  // Metadata
+  description       String?       @db.Text
+  
+  // Timestamps
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @default(now()) @updatedAt
+  
+  @@index([member_id])
+  @@index([stripe_session_id])
+  @@index([status])
+  @@index([created_at(sort: Desc)])
+  @@map("payments")
+}

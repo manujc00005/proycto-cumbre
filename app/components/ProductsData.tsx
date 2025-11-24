@@ -34,7 +34,7 @@ export const productsData = [
   },
   {
     id: 'bottle-001',
-    name: 'Acid Wash Tshirt',
+    name: 'Acid Wash T-Shirt',
     desc: 'Camiseta sin mangas con efecto bleach artesanal, ligera y única',
     price: 20,
     images: [

@@ -7,6 +7,7 @@ import Lightbox from './components/Lightbox';
 import EventsSection from './components/Events/EventsSection';
 import HeaderSection from './components/Sections/HeaderSection';
 import MerchantSection from './components/Sections/MerchantSection';
+import Link from 'next/link';
 
 
 
@@ -433,9 +434,12 @@ export default function Home() {
                 </div>
 
                 {/* CTA - Siempre al fondo con mt-auto */}
-                <button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-orange-500/50 hover:scale-105 transform mt-auto">
+                <Link
+                href="/membership"
+                className="w-full block text-center bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-orange-500/50 hover:scale-105 transform mt-auto"
+                >
                   Quiero ser socio + federado
-                </button>
+                </Link>
               </div>
             </div>
 
@@ -555,9 +559,12 @@ export default function Home() {
 
                 {/* CTA + Nota - Siempre al fondo con mt-auto */}
                 <div className="mt-auto">
-                  <button className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all border border-zinc-700 hover:border-zinc-600 mb-3">
-                    Quiero ser solo socio
-                  </button>
+                   <Link
+                      href="/membership"
+                      className="block w-full text-center bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all border border-zinc-700 hover:border-zinc-600 mb-3"
+                    >
+                      Quiero ser solo socio
+                    </Link>
                   <p className="text-xs text-zinc-500 text-center">
                     *Acceso limitado a algunas actividades técnicas sin seguro propio
                   </p>
