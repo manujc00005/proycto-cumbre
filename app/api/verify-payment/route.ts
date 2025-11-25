@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { PrismaClient } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-11-17.clover',
@@ -21,12 +22,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('🔍 Verificando pago para session:', sessionId);
+    logger.log('🔍 Verificando pago para session:', sessionId);
 
     // 1. Obtener información de la sesión de Stripe
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-    console.log('📋 Sesión de Stripe:', {
+    logger.log('📋 Sesión de Stripe:', {
       id: session.id,
       status: session.status,
       payment_status: session.payment_status,
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!payment) {
-      console.warn('⚠️ No se encontró el pago en BD');
+      logger.warn('⚠️ No se encontró el pago en BD');
       return NextResponse.json({
         success: false,
         error: 'Payment not found',
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
       }, { status: 404 });
     }
 
-    console.log('💾 Pago en BD:', {
+    logger.log('💾 Pago en BD:', {
       id: payment.id,
       status: payment.status,
       member_status: payment.member.membership_status,
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Error verificando pago:', error);
+    logger.error('❌ Error verificando pago:', error);
     
     if (error.type === 'StripeInvalidRequestError') {
       return NextResponse.json({

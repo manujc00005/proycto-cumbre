@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { XCircle, Mountain, ArrowLeft } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 function PagoCanceladoContent() {
   const router = useRouter();
@@ -15,14 +16,14 @@ function PagoCanceladoContent() {
       const sessionId = searchParams.get('session_id');
       
       if (!sessionId) {
-        console.log('⚠️ No se encontró session_id en la URL');
+        logger.log('⚠️ No se encontró session_id en la URL');
         setIsProcessing(false);
         return;
       }
 
       try {
-        console.log('🚫 Procesando cancelación del pago...');
-        console.log('Session ID:', sessionId);
+        logger.log('🚫 Procesando cancelación del pago...');
+        logger.log('Session ID:', sessionId);
         
         // Llamar a la API para marcar el pago como cancelado
         const response = await fetch('/api/payment-cancelled', {
@@ -39,10 +40,10 @@ function PagoCanceladoContent() {
           throw new Error(data.error || 'Error al procesar la cancelación');
         }
 
-        console.log('✅ Pago marcado como cancelado');
+        logger.log('✅ Pago marcado como cancelado');
         
       } catch (error: any) {
-        console.error('❌ Error al procesar cancelación:', error);
+        logger.error('❌ Error al procesar cancelación:', error);
         setError(error.message);
       } finally {
         setIsProcessing(false);

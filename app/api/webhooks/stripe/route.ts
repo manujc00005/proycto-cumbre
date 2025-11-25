@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { PrismaClient, MembershipStatus, PaymentStatus } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-11-17.clover',
@@ -23,24 +24,27 @@ export async function POST(request: NextRequest) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: any) {
-    console.error('❌ Webhook signature verification failed:', err.message);
+    logger.apiError('Webhook signature verification failed', err.message);
     return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 });
   }
 
-  console.log('✅ Webhook recibido:', event.type);
+  logger.stripe(`Webhook recibido: ${event.type}`);
 
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         
-        console.log('💳 Pago completado:', session.id);
-        console.log('🆔 Member ID:', session.metadata?.memberId);
+       logger.stripe('Pago completado', {
+          sessionId: session.id,
+          memberId: session.metadata?.memberId,
+          amount: session.amount_total
+        });
 
         const memberId = session.metadata?.memberId;
 
         if (!memberId) {
-          console.error('❌ No se encontró memberId en los metadatos');
+          logger.apiError('No se encontró memberId en metadatos');
           return NextResponse.json({ error: 'No memberId found' }, { status: 400 });
         }
 
@@ -52,7 +56,7 @@ export async function POST(request: NextRequest) {
       
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        console.log('✅ PaymentIntent succeeded:', paymentIntent.id);
+        logger.stripe('PaymentIntent succeeded', paymentIntent.id);
         
         if (paymentIntent.id) {
           await prisma.payment.updateMany({
@@ -69,7 +73,7 @@ export async function POST(request: NextRequest) {
       
       case 'payment_intent.payment_failed': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        console.error('❌ Payment failed:', paymentIntent.id);
+        logger.apiError('PaymentIntent failed', paymentIntent.id);
         
         if (paymentIntent.id) {
           await prisma.payment.updateMany({
@@ -98,17 +102,17 @@ export async function POST(request: NextRequest) {
 
       case 'charge.succeeded':
       case 'charge.updated':
-        console.log(`ℹ️ Evento informativo: ${event.type}`);
+        logger.log(`ℹ️ Evento informativo: ${event.type}`);
         break;
 
       default:
-        console.log(`⚠️ Unhandled event type: ${event.type}`);
+        logger.log(`⚠️ Unhandled event type: ${event.type}`);
     }
 
     return NextResponse.json({ received: true }, { status: 200 });
     
   } catch (error: any) {
-    console.error('❌ Error processing webhook:', error);
+    logger.apiError('Error processing webhook', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -121,7 +125,7 @@ async function processCompletedPayment(
 ) {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`🔄 Procesando pago - Intento ${attempt} de ${maxRetries}`);
+      logger.log(`🔄 Procesando pago - Intento ${attempt} de ${maxRetries}`);
 
       // 1. Buscar el payment existente
       const payment = await prisma.payment.findUnique({
@@ -129,11 +133,14 @@ async function processCompletedPayment(
       });
 
       if (!payment) {
-        console.error('❌ Payment no encontrado para session:', session.id);
+        logger.apiError('Payment no encontrado', session.id);
         throw new Error('Payment not found');
       }
 
-      console.log('📦 Payment encontrado:', payment.id, '- Status:', payment.status);
+      logger.db('Payment encontrado', {
+        id: payment.id,
+        status: payment.status
+      });
 
       // 2. Actualizar member a ACTIVE
       await updateMemberToActive(memberId, session);
@@ -148,14 +155,14 @@ async function processCompletedPayment(
         }
       });
 
-      console.log('✅ Pago procesado exitosamente');
+      logger.apiSuccess('Pago procesado exitosamente');
       return; // ✅ Éxito
       
     } catch (error: any) {
-      console.error(`❌ Error en intento ${attempt}:`, error.message);
+      logger.apiError(`Error en intento ${attempt}`, error.message);
       
       if (attempt === maxRetries) {
-        console.error('❌ Máximo de reintentos alcanzado');
+        logger.error('❌ Máximo de reintentos alcanzado');
         throw error;
       }
       
@@ -167,7 +174,7 @@ async function processCompletedPayment(
 
 // Actualizar member a ACTIVE
 async function updateMemberToActive(memberId: string, session: Stripe.Checkout.Session) {
-  console.log('🔄 Actualizando socio a ACTIVE:', memberId);
+  logger.db('Actualizando member a ACTIVE', memberId);
 
   const now = new Date();
   const oneYearFromNow = new Date();
@@ -195,16 +202,17 @@ async function updateMemberToActive(memberId: string, session: Stripe.Checkout.S
       },
     });
 
-    console.log('✅ Socio actualizado a ACTIVE');
-    console.log('   - Member:', updatedMember.id);
-    console.log('   - Status:', updatedMember.membership_status);
-    console.log('   - Start:', updatedMember.membership_start_date?.toISOString());
-    console.log('   - End:', updatedMember.membership_end_date?.toISOString());
+    logger.apiSuccess('Member actualizado a ACTIVE', {
+      id: updatedMember.id,
+      status: updatedMember.membership_status,
+      start: updatedMember.membership_start_date?.toISOString()
+    });
+
     
     return updatedMember;
     
   } catch (error: any) {
-    console.error('❌ Error actualizando socio:', error);
+    logger.apiError('Error actualizando member', error);
     throw error;
   }
 }

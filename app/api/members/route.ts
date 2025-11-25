@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient, LicenseType, FedmeStatus, Sex, MembershipStatus } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 const prisma = new PrismaClient();
 
@@ -13,11 +14,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { overwrite, ...formData } = body;
 
-    console.log('📥 Datos recibidos:', { 
-      email: formData.email, 
+    logger.apiStart('POST', '/api/members', {
+      email: formData.email,
       dni: formData.dni,
-      licenseType: formData.licenseType,
-    });
+      licenseType: formData.licenseType
+    })
 
     // Validaciones
     const errors: Record<string, string> = {};
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
       errors.licenseType = 'Debes seleccionar una modalidad de licencia';
     } else if (!VALID_LICENSE_TYPES.includes(formData.licenseType as LicenseType)) {
       errors.licenseType = 'Tipo de licencia inválido';
-      console.error(`❌ Licencia inválida recibida: "${formData.licenseType}"`);
+      logger.error(`❌ Licencia inválida recibida: "${formData.licenseType}"`);
     }
 
     if (Object.keys(errors).length > 0) {
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
     const fedmeStatus: FedmeStatus = licenseType === 'none' ? 'none' : 'pending';
     const membershipStatus: MembershipStatus = 'pending';
 
-    console.log('✅ Tipo de licencia:', licenseType);
+    logger.log('✅ Tipo de licencia:', licenseType);
 
     // Preparar datos
     const memberData = {
@@ -126,7 +127,7 @@ export async function POST(request: NextRequest) {
       membership_end_date: null,
     };
 
-    console.log('📦 Guardando:', {
+    logger.log('📦 Guardando:', {
       license_type: memberData.license_type,
       fedme_status: memberData.fedme_status,
     });
@@ -138,15 +139,19 @@ export async function POST(request: NextRequest) {
         where: { id: existingMember.id },
         data: { ...memberData, updated_at: new Date() }
       });
-      console.log('✅ Socio actualizado');
+      logger.log('✅ Socio actualizado');
     } else {
       member = await prisma.member.create({
         data: memberData
       });
-      console.log('✅ Socio creado');
+      logger.apiSuccess('Socio creado', {
+        id: member.id,
+        license_type: member.license_type,
+        fedme_status: member.fedme_status
+      });
     }
 
-    console.log('✅ Guardado en BD:', {
+    logger.log('✅ Guardado en BD:', {
       id: member.id,
       license_type: member.license_type,
       fedme_status: member.fedme_status,
@@ -168,7 +173,7 @@ export async function POST(request: NextRequest) {
     }, { status: existingMember ? 200 : 201 });
 
   } catch (error: any) {
-    console.error('❌ Error:', error);
+    logger.error('❌ Error:', error);
     
     if (error.code === 'P2007') {
       return NextResponse.json(
@@ -236,7 +241,7 @@ export async function GET(request: NextRequest) {
       members,
     });
   } catch (error: any) {
-    console.error('❌ Error:', error);
+    logger.error('❌ Error:', error);
     return NextResponse.json(
       { error: 'Error al obtener miembros', details: error.message },
       { status: 500 }

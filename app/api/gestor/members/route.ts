@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    console.log('📥 GET /api/gestor/members - Obteniendo socios...');
+    logger.log('📥 GET /api/gestor/members - Obteniendo socios...');
     
     const members = await prisma.member.findMany({
       orderBy: [
@@ -24,14 +25,14 @@ export async function GET() {
       }
     });
 
-    console.log(`✅ Se encontraron ${members.length} socios`);
+    logger.log(`✅ Se encontraron ${members.length} socios`);
 
     return NextResponse.json({
       success: true,
       members,
     });
   } catch (error: any) {
-    console.error('❌ Error obteniendo socios:', error);
+    logger.error('❌ Error obteniendo socios:', error);
     return NextResponse.json(
       { error: 'Error al obtener socios', details: error.message },
       { status: 500 }

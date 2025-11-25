@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { PrismaClient, PaymentStatus } from '@prisma/client';
 import { getLicensePrice, LICENSE_TYPES, MEMBERSHIP_FEE } from '@/lib/constants';
+import { logger } from '@/lib/logger';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-11-17.clover',
@@ -16,7 +17,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { memberId, total, memberData } = body;
 
-    console.log('💳 Procesando checkout:', { memberId, total, memberData });
+    logger.log('💳 Procesando checkout:', { memberId, total, memberData });
 
     if (!memberId || !total || !memberData) {
       return NextResponse.json(
@@ -97,7 +98,7 @@ export async function POST(req: NextRequest) {
       customer_email: memberData.email,
     });
 
-    console.log('✅ Sesión de Stripe creada:', session.id);
+    logger.log('✅ Sesión de Stripe creada:', session.id);
 
     // ✅ CREAR PAYMENT EN BD INMEDIATAMENTE (estado: pending)
     try {
@@ -113,19 +114,19 @@ export async function POST(req: NextRequest) {
         }
       });
 
-      console.log('✅ Payment creado en BD:', payment.id);
-      console.log('📊 Estado actual:');
-      console.log('   - Payment ID:', payment.id);
-      console.log('   - Status:', payment.status);
-      console.log('   - Amount:', payment.amount / 100, '€');
-      console.log('   - Stripe Session:', session.id);
+      logger.log('✅ Payment creado en BD:', payment.id);
+      logger.log('📊 Estado actual:');
+      logger.log('   - Payment ID:', payment.id);
+      logger.log('   - Status:', payment.status);
+      logger.log('   - Amount:', payment.amount / 100, '€');
+      logger.log('   - Stripe Session:', session.id);
 
     } catch (paymentError: any) {
       // Si el payment ya existe (por alguna razón), continuar
       if (paymentError.code === 'P2002') {
-        console.log('⚠️ Payment ya existe para esta sesión, continuando...');
+        logger.log('⚠️ Payment ya existe para esta sesión, continuando...');
       } else {
-        console.error('❌ Error creando payment:', paymentError);
+        logger.error('❌ Error creando payment:', paymentError);
         // No fallar el checkout por esto
       }
     }
@@ -136,7 +137,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Error en checkout:', error);
+    logger.error('❌ Error en checkout:', error);
     
     return NextResponse.json(
       { error: error.message || 'Error al crear sesión de pago' },

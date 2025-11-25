@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 const prisma = new PrismaClient();
 
@@ -14,7 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('🚫 Buscando pago con session_id:', sessionId);
+    logger.log('🚫 Buscando pago con session_id:', sessionId);
 
     // Buscar el pago por session_id
     const payment = await prisma.payment.findUnique({
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     // Solo actualizar si el pago está en estado "pending"
     if (payment.status !== 'pending') {
-      console.log('⚠️ El pago ya tiene estado:', payment.status);
+      logger.log('⚠️ El pago ya tiene estado:', payment.status);
       return NextResponse.json({
         success: true,
         message: 'El pago ya fue procesado previamente',
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    console.log('📝 Actualizando estado del pago a "failed"...');
+    logger.log('📝 Actualizando estado del pago a "failed"...');
 
     // Actualizar el estado del pago a "failed" (cancelado)
     await prisma.payment.update({
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    console.log('✅ Pago marcado como cancelado');
+    logger.log('✅ Pago marcado como cancelado');
 
     return NextResponse.json({
       success: true,
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Error al procesar cancelación:', error);
+    logger.error('❌ Error al procesar cancelación:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor', details: error.message },
       { status: 500 }

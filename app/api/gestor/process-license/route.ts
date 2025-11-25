@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 const prisma = new PrismaClient();
 
@@ -14,7 +15,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('📝 Procesando licencia para:', memberId);
+    logger.log('📝 Procesando licencia para:', memberId);
 
     // Extraer el año del member_number (MAL-2025-0001 -> 2025)
     const year = memberNumber ? parseInt(memberNumber.split('-')[1]) : new Date().getFullYear();
@@ -23,8 +24,8 @@ export async function POST(request: NextRequest) {
     const membershipStartDate = new Date();
     const membershipEndDate = new Date(year, 11, 31); // 31 de diciembre del año
 
-    console.log('📅 Inicio:', membershipStartDate);
-    console.log('📅 Fin:', membershipEndDate);
+    logger.log('📅 Inicio:', membershipStartDate);
+    logger.log('📅 Fin:', membershipEndDate);
 
     // Actualizar el socio
     const updatedMember = await prisma.member.update({
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    console.log('✅ Licencia procesada exitosamente');
+    logger.log('✅ Licencia procesada exitosamente');
 
     return NextResponse.json({
       success: true,
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Error procesando licencia:', error);
+    logger.error('❌ Error procesando licencia:', error);
     return NextResponse.json(
       { error: 'Error al procesar licencia', details: error.message },
       { status: 500 }

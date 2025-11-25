@@ -4,6 +4,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Check, Mountain, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 function SuccessContent() {
   const router = useRouter();
@@ -26,7 +27,7 @@ function SuccessContent() {
 
   const verifyPayment = async (sessionId: string) => {
     try {
-      console.log('🔍 Verificando pago con sesión:', sessionId);
+      logger.log('🔍 Verificando pago con sesión:', sessionId);
 
       const response = await fetch('/api/verify-payment', {
         method: 'POST',
@@ -42,11 +43,11 @@ function SuccessContent() {
         throw new Error(data.error || 'Error al verificar el pago');
       }
 
-      console.log('✅ Pago verificado:', data);
+      logger.log('✅ Pago verificado:', data);
       setMemberData(data);
 
     } catch (error: any) {
-      console.error('❌ Error verificando pago:', error);
+      logger.error('❌ Error verificando pago:', error);
       setError(error.message);
     } finally {
       setLoading(false);

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Check, AlertCircle, AlertTriangle, Mountain, X } from 'lucide-react';
 import LicenseConfigurator from './LicenseConfigurator';
 import { AgeCategory, calculateAge, calculateAgeCategory, getCategoryLabel, getLicensePrice, LICENSE_TYPES, MEMBERSHIP_FEE } from '@/lib/constants';
+import { logger } from '@/lib/logger';
 
 
 const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -265,7 +266,7 @@ export default function MembershipPage() {
     setShowErrorBanner(false);
 
     try {
-      console.log('📤 Enviando datos a la API...');
+      logger.log('📤 Enviando datos a la API...');
       
       const response = await fetch('/api/members', { 
         method: 'POST', 
@@ -291,7 +292,7 @@ export default function MembershipPage() {
         throw new Error(data.error || 'Error al guardar los datos');
       }
 
-      console.log('✅ Socio guardado exitosamente:', data);
+      logger.log('✅ Socio guardado exitosamente:', data);
       
       if (data.member?.id) {
         setMemberId(data.member.id);
@@ -301,7 +302,7 @@ export default function MembershipPage() {
       setShowErrorBanner(false);
 
     } catch (error: any) {
-      console.error('❌ Error submitting form:', error);
+      logger.error('❌ Error submitting form:', error);
       
       setErrors({ submit: error.message || 'Error al procesar el formulario' });
       setShowErrorBanner(true);
@@ -322,7 +323,7 @@ export default function MembershipPage() {
       setPaymentProcessing(true);
       
       try {
-        console.log('💳 Iniciando proceso de pago...');
+        logger.log('💳 Iniciando proceso de pago...');
 
         const response = await fetch('/api/checkout', {
           method: 'POST',
@@ -348,7 +349,7 @@ export default function MembershipPage() {
           throw new Error(data.error || 'Error al crear sesión de pago');
         }
 
-        console.log('✅ Sesión creada:', data.sessionId);
+        logger.log('✅ Sesión creada:', data.sessionId);
 
         if (data.url) {
           window.location.href = data.url;
@@ -357,7 +358,7 @@ export default function MembershipPage() {
         }
 
       } catch (error: any) {
-        console.error('❌ Error al procesar pago:', error);
+        logger.error('❌ Error al procesar pago:', error);
         alert('Error al procesar el pago. Por favor, inténtalo de nuevo.');
         setPaymentProcessing(false);
       }
