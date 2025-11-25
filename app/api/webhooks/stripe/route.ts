@@ -4,10 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { PrismaClient, MembershipStatus, PaymentStatus } from '@prisma/client';
 import { logger } from '@/lib/logger';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-11-17.clover',
-});
+import { getStripe } from '@/lib/stripe';
 
 const prisma = new PrismaClient({
   log: ['error', 'warn'],
@@ -16,6 +13,7 @@ const prisma = new PrismaClient({
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(request: NextRequest) {
+  const stripe = getStripe();
   const body = await request.text();
   const signature = request.headers.get('stripe-signature')!;
 

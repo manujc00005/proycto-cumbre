@@ -5,15 +5,13 @@ import Stripe from 'stripe';
 import { PrismaClient, PaymentStatus } from '@prisma/client';
 import { getLicensePrice, LICENSE_TYPES, MEMBERSHIP_FEE } from '@/lib/constants';
 import { logger } from '@/lib/logger';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-11-17.clover',
-});
+import { getStripe } from '@/lib/stripe';
 
 const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
   try {
+    const stripe = getStripe();
     const body = await req.json();
     const { memberId, total, memberData } = body;
 
