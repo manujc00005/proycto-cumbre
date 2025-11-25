@@ -1,10 +1,14 @@
-// /api/verify-payment/route.ts
+// app/api/verify-payment/route.ts - VERSIÓN CORREGIDA
+
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { PrismaClient } from '@prisma/client';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-11-20.acacia',
+  apiVersion: '2025-11-17.clover',
 });
+
+const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,55 +16,95 @@ export async function POST(request: NextRequest) {
 
     if (!sessionId) {
       return NextResponse.json(
-        { error: 'Session ID es requerido' },
+        { error: 'Session ID is required' },
         { status: 400 }
       );
     }
 
-    console.log('🔍 Verificando sesión de Stripe:', sessionId);
+    console.log('🔍 Verificando pago para session:', sessionId);
 
-    // Obtener la sesión de Stripe
+    // 1. Obtener información de la sesión de Stripe
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-    console.log('✅ Sesión encontrada:', {
+    console.log('📋 Sesión de Stripe:', {
       id: session.id,
+      status: session.status,
       payment_status: session.payment_status,
       customer_email: session.customer_email,
     });
 
-    // Verificar que el pago fue exitoso
-    if (session.payment_status !== 'paid') {
-      return NextResponse.json(
-        { error: 'El pago no ha sido completado' },
-        { status: 400 }
-      );
+    // 2. Buscar payment en base de datos
+    const payment = await prisma.payment.findUnique({
+      where: { stripe_session_id: sessionId },
+      include: {
+        member: {
+          select: {
+            id: true,
+            member_number: true,
+            email: true,
+            first_name: true,
+            last_name: true,
+            membership_status: true,
+            fedme_status: true,
+            license_type: true,
+          }
+        }
+      }
+    });
+
+    if (!payment) {
+      console.warn('⚠️ No se encontró el pago en BD');
+      return NextResponse.json({
+        success: false,
+        error: 'Payment not found',
+        stripeStatus: session.payment_status,
+      }, { status: 404 });
     }
 
-    // Obtener datos del miembro desde metadata
-    const memberId = session.metadata?.memberId;
-    const licenseType = session.metadata?.licenseType;
+    console.log('💾 Pago en BD:', {
+      id: payment.id,
+      status: payment.status,
+      member_status: payment.member.membership_status,
+    });
 
-    // Opcional: Obtener los datos del socio de la BD
-    // const member = await prisma.member.findUnique({ where: { id: memberId } });
-
+    // 3. ✅ Devolver datos en el formato que espera el componente
     return NextResponse.json({
       success: true,
+      // Datos del payment
+      amount: payment.amount, // Ya está en centavos
+      currency: payment.currency,
+      paymentStatus: payment.status,
+      
+      // Datos del member (formato que espera el componente)
+      firstName: payment.member.first_name,
+      lastName: payment.member.last_name,
+      email: payment.member.email,
+      memberNumber: payment.member.member_number,
+      membershipStatus: payment.member.membership_status,
+      fedmeStatus: payment.member.fedme_status,
+      licenseType: payment.member.license_type,
+      
+      // Datos de Stripe
       sessionId: session.id,
-      amount: session.amount_total,
-      currency: session.currency,
-      email: session.customer_email,
-      firstName: session.metadata?.firstName,
-      lastName: session.metadata?.lastName,
-      licenseType: licenseType,
-      memberId: memberId,
-      paymentStatus: session.payment_status,
-    }, { status: 200 });
+      stripeStatus: session.status,
+      stripePaymentStatus: session.payment_status,
+    });
 
   } catch (error: any) {
     console.error('❌ Error verificando pago:', error);
-    return NextResponse.json(
-      { error: 'Error al verificar el pago', details: error.message },
-      { status: 500 }
-    );
+    
+    if (error.type === 'StripeInvalidRequestError') {
+      return NextResponse.json({
+        error: 'Invalid Stripe session ID',
+        details: error.message
+      }, { status: 400 });
+    }
+
+    return NextResponse.json({
+      error: 'Error verifying payment',
+      details: error.message
+    }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }

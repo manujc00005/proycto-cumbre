@@ -55,11 +55,16 @@ CREATE TYPE "Sex" AS ENUM (
 
 -- Tipos de Licencia FEDME
 CREATE TYPE "LicenseType" AS ENUM (
-  'none',      -- Sin licencia
-  'a1',        -- A1 - Media Temporada
-  'a1_plus',   -- A1+ - Media Temporada Plus
-  'b1',        -- B1 - Cobertura Ampliada
-  'b1_plus'    -- B1+ - Cobertura Ampliada Plus
+  'none',
+  'a1',
+  'a1_plus',
+  'a1_familiar',
+  'b1',
+  'b1_plus',
+  'b1_familiar',
+  'c1',
+  'c1_plus',
+  'c1_familiar'
 );
 
 -- Estado de Licencia FEDME

@@ -1,11 +1,15 @@
 // ============================================================
 // CONSTANTES PARA PROYECTO CUMBRE - LICENCIAS FEDME 2025
+// ÚNICA FUENTE DE VERDAD - NO MODIFICAR SIN ACTUALIZAR PRISMA
 // ============================================================
 
-// Cuota anual de socio del club
+// Cuota anual de socio del club (independiente de FEDME)
 export const MEMBERSHIP_FEE = 50;
 
-// Categorías por edad
+// ============================================================
+// CATEGORÍAS POR EDAD (FEDME 2025)
+// ============================================================
+
 export const AGE_CATEGORIES = {
   INFANTIL: 'infantil', // 0-14 años
   JUVENIL: 'juvenil',   // 15-18 años
@@ -23,7 +27,6 @@ export function calculateAgeCategory(birthDate: string): AgeCategory {
   const monthDiff = today.getMonth() - birth.getMonth();
   const dayDiff = today.getDate() - birth.getDate();
   
-  // Ajustar edad si no ha cumplido años este año
   if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
     age--;
   }
@@ -33,7 +36,6 @@ export function calculateAgeCategory(birthDate: string): AgeCategory {
   return AGE_CATEGORIES.MAYOR;
 }
 
-// Obtener edad actual desde fecha de nacimiento
 export function calculateAge(birthDate: string): number {
   const today = new Date();
   const birth = new Date(birthDate);
@@ -49,7 +51,6 @@ export function calculateAge(birthDate: string): number {
   return age;
 }
 
-// Obtener nombre legible de la categoría
 export function getCategoryLabel(category: AgeCategory): string {
   switch (category) {
     case AGE_CATEGORIES.INFANTIL:
@@ -63,7 +64,10 @@ export function getCategoryLabel(category: AgeCategory): string {
   }
 }
 
-// Ámbitos geográficos
+// ============================================================
+// ÁMBITOS TERRITORIALES (FEDME 2025)
+// ============================================================
+
 export type TerritoryScope = 'regional' | 'national' | 'european' | 'none';
 
 export interface LicenseTerritory {
@@ -89,7 +93,7 @@ export const TERRITORIES: LicenseTerritory[] = [
     name: 'Nacional',
     shortName: 'España',
     description: 'Para quienes viajan por toda España y países cercanos',
-    coverage: 'España, Andorra, Pirineos Franceses, Portugal y Marruecos',
+    coverage: 'España, Andorra, Pirineo Francés, Portugal y Marruecos',
     icon: '🇪🇸'
   },
   {
@@ -97,7 +101,7 @@ export const TERRITORIES: LicenseTerritory[] = [
     name: 'Europeo',
     shortName: 'Europa',
     description: 'Para montañeros que viajan por Europa',
-    coverage: 'Toda Europa y Marruecos',
+    coverage: 'Europa y Marruecos',
     icon: '🌍'
   },
   {
@@ -110,32 +114,48 @@ export const TERRITORIES: LicenseTerritory[] = [
   }
 ];
 
-// Tipos de licencia simplificados
+// ============================================================
+// LICENCIAS FEDME 2025 - OFICIAL
+// ============================================================
+
 export interface LicenseType {
-  id: string;
-  name: string;
-  shortName: string;
+  id: string;              // ID para BD (debe coincidir con enum de Prisma)
+  name: string;            // Nombre completo
+  shortName: string;       // Nombre corto
   territory: TerritoryScope;
   includesExtras: boolean; // BTT, Espeleología, Esquí Nórdico
   prices: {
-    infantil: number;
-    juvenil: number;
-    mayor: number;
+    infantil: number;      // Precio para infantiles (clubes)
+    juvenil: number;       // Precio para juveniles (clubes)
+    mayor: number;         // Precio para mayores (clubes)
   };
-  coverage: string;
-  popular?: boolean;
-  familyLicense?: boolean; // Solo para menores
+  coverage: string;        // Descripción de cobertura
+  popular?: boolean;       // Marcar como recomendada
 }
 
-// Función helper para obtener precio según categoría
-export function getLicensePrice(license: LicenseType, category: AgeCategory): number {
-  return license.prices[category];
-}
-
-// LICENCIAS SIMPLIFICADAS - Sin modalidades de inclusión social
+// 🎯 LICENCIAS OFICIALES FEDME 2025
+// Basadas en las tablas oficiales: licencia1.jpeg y licencia2.jpeg
 export const LICENSE_TYPES: LicenseType[] = [
   // ============================================================
-  // ÁMBITO REGIONAL (Andalucía, Ceuta y Melilla)
+  // SIN LICENCIA (Usuario no quiere FEDME)
+  // ============================================================
+  {
+    id: 'none',
+    name: 'Sin Licencia FEDME',
+    shortName: 'Sin Licencia',
+    territory: 'none',
+    includesExtras: false,
+    prices: {
+      infantil: 0,
+      juvenil: 0,
+      mayor: 0
+    },
+    coverage: 'Solo membresía del club (sin seguro federativo)',
+    popular: false
+  },
+
+  // ============================================================
+  // ÁMBITO A - REGIONAL (Andalucía, Ceuta y Melilla)
   // ============================================================
   {
     id: 'a',
@@ -152,7 +172,7 @@ export const LICENSE_TYPES: LicenseType[] = [
     popular: false
   },
   {
-    id: 'a-plus',
+    id: 'a_plus',
     name: 'A+ - Autonómica Plus',
     shortName: 'A+',
     territory: 'regional',
@@ -163,26 +183,11 @@ export const LICENSE_TYPES: LicenseType[] = [
       mayor: 57.00
     },
     coverage: 'Todo lo de A + BTT, Espeleología y Esquí Nórdico (no competitivos)',
-    popular: true
-  },
-  {
-    id: 'a-familiar',
-    name: 'A Familiar',
-    shortName: 'A Fam',
-    territory: 'regional',
-    includesExtras: false,
-    prices: {
-      infantil: 8.50,
-      juvenil: 8.50,
-      mayor: 0 // No disponible para mayores
-    },
-    coverage: 'Modalidad familiar para menores (cobertura básica de montaña)',
-    popular: false,
-    familyLicense: true
+    popular: true  // ⭐ Recomendada para regional
   },
 
   // ============================================================
-  // ÁMBITO NACIONAL (España, Andorra, Pirineos, Portugal, Marruecos)
+  // ÁMBITO B - NACIONAL (España, Andorra, Pirineo, Portugal, Marruecos)
   // ============================================================
   {
     id: 'b',
@@ -199,7 +204,7 @@ export const LICENSE_TYPES: LicenseType[] = [
     popular: false
   },
   {
-    id: 'b-plus',
+    id: 'b_plus',
     name: 'B+ - Nacional Plus',
     shortName: 'B+',
     territory: 'national',
@@ -210,62 +215,38 @@ export const LICENSE_TYPES: LicenseType[] = [
       mayor: 81.00
     },
     coverage: 'Todo lo de B + BTT, Espeleología y Esquí Nórdico (no competitivos)',
-    popular: true
-  },
-  {
-    id: 'b-familiar',
-    name: 'B Familiar',
-    shortName: 'B Fam',
-    territory: 'national',
-    includesExtras: false,
-    prices: {
-      infantil: 21.00,
-      juvenil: 21.00,
-      mayor: 0
-    },
-    coverage: 'Modalidad familiar para menores',
-    popular: false,
-    familyLicense: true
+    popular: true  // ⭐ Recomendada para nacional
   },
 
   // ============================================================
-  // ÁMBITO EUROPEO
+  // ÁMBITO C - EUROPEO (Europa y Marruecos)
   // ============================================================
   {
     id: 'c',
     name: 'C - Europea',
     shortName: 'C',
     territory: 'european',
-    includesExtras: true, // Siempre incluye extras
+    includesExtras: true,  // Siempre incluye extras según FEDME
     prices: {
       infantil: 85.00,
       juvenil: 85.00,
       mayor: 125.00
     },
-    coverage: 'Cobertura completa en Europa incluyendo BTT, Espeleología y Esquí Nórdico',
+    coverage: 'Cobertura completa en Europa incluyendo BTT, Espeleología y Esquí Nórdico (no competitivos)',
     popular: false
   },
-
-  // ============================================================
-  // SIN LICENCIA
-  // ============================================================
-  {
-    id: 'none',
-    name: 'Sin Licencia FEDME',
-    shortName: 'Sin Licencia',
-    territory: 'none',
-    includesExtras: false,
-    prices: {
-      infantil: 0,
-      juvenil: 0,
-      mayor: 0
-    },
-    coverage: 'Solo membresía del club (sin seguro federativo)',
-    popular: false
-  }
 ];
 
-// Función para filtrar licencias por territorio y preferencias
+// ============================================================
+// FUNCIONES HELPER
+// ============================================================
+
+// Obtener precio según categoría
+export function getLicensePrice(license: LicenseType, category: AgeCategory): number {
+  return license.prices[category];
+}
+
+// Filtrar licencias por territorio y preferencias
 export function filterLicenses(
   territory: TerritoryScope,
   wantsExtras: boolean,
@@ -275,10 +256,7 @@ export function filterLicenses(
     // Filtrar por territorio
     if (license.territory !== territory) return false;
     
-    // Filtrar licencias familiares si es mayor
-    if (license.familyLicense && ageCategory === 'mayor') return false;
-    
-    // Si no quiere extras, solo mostrar sin extras o la europea (que siempre los tiene)
+    // Si no quiere extras, solo mostrar sin extras
     if (!wantsExtras && license.includesExtras && territory !== 'european') return false;
     
     // Si quiere extras, solo mostrar con extras
@@ -288,7 +266,7 @@ export function filterLicenses(
   });
 }
 
-// Función para obtener licencia recomendada
+// Obtener licencia recomendada
 export function getRecommendedLicense(
   territory: TerritoryScope,
   wantsExtras: boolean,
@@ -304,10 +282,20 @@ export function getRecommendedLicense(
   return filtered[0] || null;
 }
 
-// Obtener el territorio por ID de licencia
+// Obtener territorio por ID de licencia
 export function getTerritoryByLicenseId(licenseId: string): LicenseTerritory | null {
   const license = LICENSE_TYPES.find(l => l.id === licenseId);
   if (!license) return null;
   
   return TERRITORIES.find(t => t.id === license.territory) || null;
+}
+
+// Validar que un ID de licencia es válido
+export function isValidLicenseId(licenseId: string): boolean {
+  return LICENSE_TYPES.some(l => l.id === licenseId);
+}
+
+// Obtener licencia por ID
+export function getLicenseById(licenseId: string): LicenseType | null {
+  return LICENSE_TYPES.find(l => l.id === licenseId) || null;
 }

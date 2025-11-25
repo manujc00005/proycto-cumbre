@@ -1,10 +1,12 @@
+// app/api/checkout/route.ts - VERSIÓN CORREGIDA
+
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { PrismaClient } from '@prisma/client';
-import { getLicensePrice, MEMBERSHIP_FEE, LICENSE_TYPES } from '@/lib/constants';
+import { PrismaClient, PaymentStatus } from '@prisma/client';
+import { getLicensePrice, LICENSE_TYPES, MEMBERSHIP_FEE } from '@/lib/constants';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-11-20.acacia',
+  apiVersion: '2025-11-17.clover',
 });
 
 const prisma = new PrismaClient();
@@ -20,6 +22,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'Faltan datos requeridos' },
         { status: 400 }
+      );
+    }
+
+    // Verificar que el member existe
+    const member = await prisma.member.findUnique({
+      where: { id: memberId }
+    });
+
+    if (!member) {
+      return NextResponse.json(
+        { error: 'Miembro no encontrado' },
+        { status: 404 }
       );
     }
 
@@ -40,7 +54,6 @@ export async function POST(req: NextRequest) {
 
     // Crear line items para Stripe
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
-      // Cuota de socio
       {
         price_data: {
           currency: 'eur',
@@ -48,13 +61,12 @@ export async function POST(req: NextRequest) {
             name: 'Cuota de Socio Anual - Proyecto Cumbre',
             description: 'Membresía anual del club de montaña',
           },
-          unit_amount: MEMBERSHIP_FEE * 100, // Stripe usa centavos
+          unit_amount: MEMBERSHIP_FEE * 100,
         },
         quantity: 1,
       },
     ];
 
-    // Solo agregar licencia si tiene costo
     if (licensePrice > 0) {
       lineItems.push({
         price_data: {
@@ -63,19 +75,19 @@ export async function POST(req: NextRequest) {
             name: `Licencia FEDME - ${selectedLicense.name}`,
             description: selectedLicense.coverage,
           },
-          unit_amount: Math.round(licensePrice * 100), // Stripe usa centavos
+          unit_amount: Math.round(licensePrice * 100),
         },
         quantity: 1,
       });
     }
 
-    // Crear sesión de Stripe Checkout
+    // ✅ CREAR SESIÓN DE STRIPE
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
       success_url: `${process.env.NEXT_PUBLIC_URL}/pago-exito?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_URL}/pago-cancelado?canceled=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_URL}/pago-cancelado?session_id={CHECKOUT_SESSION_ID}`,
       metadata: {
         memberId: memberId,
         email: memberData.email,
@@ -86,6 +98,37 @@ export async function POST(req: NextRequest) {
     });
 
     console.log('✅ Sesión de Stripe creada:', session.id);
+
+    // ✅ CREAR PAYMENT EN BD INMEDIATAMENTE (estado: pending)
+    try {
+      const payment = await prisma.payment.create({
+        data: {
+          member_id: memberId,
+          stripe_session_id: session.id,
+          stripe_payment_id: session.payment_intent as string || null,
+          amount: total * 100, // Convertir a centavos
+          currency: 'eur',
+          status: 'pending' as PaymentStatus,
+          description: `Membresía - Licencia ${memberData.licenseType}`,
+        }
+      });
+
+      console.log('✅ Payment creado en BD:', payment.id);
+      console.log('📊 Estado actual:');
+      console.log('   - Payment ID:', payment.id);
+      console.log('   - Status:', payment.status);
+      console.log('   - Amount:', payment.amount / 100, '€');
+      console.log('   - Stripe Session:', session.id);
+
+    } catch (paymentError: any) {
+      // Si el payment ya existe (por alguna razón), continuar
+      if (paymentError.code === 'P2002') {
+        console.log('⚠️ Payment ya existe para esta sesión, continuando...');
+      } else {
+        console.error('❌ Error creando payment:', paymentError);
+        // No fallar el checkout por esto
+      }
+    }
 
     return NextResponse.json({
       sessionId: session.id,
@@ -99,5 +142,7 @@ export async function POST(req: NextRequest) {
       { error: error.message || 'Error al crear sesión de pago' },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }

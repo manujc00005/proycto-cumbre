@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, AlertCircle, AlertTriangle, Mountain, X } from 'lucide-react';
+import LicenseConfigurator from './LicenseConfigurator';
 import { AgeCategory, calculateAge, calculateAgeCategory, getCategoryLabel, getLicensePrice, LICENSE_TYPES, MEMBERSHIP_FEE } from '@/lib/constants';
-import LicenseConfigurator from './LicenseSelector';
 
 
 const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -74,7 +74,7 @@ export default function MembershipPage() {
         // Si hay una licencia seleccionada que ya no está disponible, limpiarla
         if (formData.licenseType) {
           const selectedLicense = LICENSE_TYPES.find(l => l.id === formData.licenseType);
-          if (selectedLicense && selectedLicense.familyLicense && category === 'mayor') {
+          if (selectedLicense && category === 'mayor') {
             // Si es licencia familiar y el usuario es mayor, limpiar selección
             setFormData(prev => ({ ...prev, licenseType: '' }));
           }

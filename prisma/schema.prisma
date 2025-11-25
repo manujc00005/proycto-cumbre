@@ -1,4 +1,4 @@
-// prisma/schema.prisma
+// prisma/schema.prisma - DEFINITIVO
 
 generator client {
   provider = "prisma-client-js"
@@ -10,7 +10,7 @@ datasource db {
 }
 
 // ============================================
-// ENUMS
+// ENUMS - DEBEN COINCIDIR CON constants.ts
 // ============================================
 
 enum Sex {
@@ -19,21 +19,23 @@ enum Sex {
   O  // Otro
 }
 
+// 🎯 LICENCIAS FEDME 2025 - SOLO 6 TIPOS
 enum LicenseType {
-  none     // Sin licencia FEDME
-  a1       // A1 - Media Temporada
-  a1_plus  // A1+ - Media Temporada Plus
-  b1       // B1 - Cobertura Ampliada
-  b1_plus  // B1+ - Cobertura Ampliada Plus
+  none      // Sin licencia
+  a         // A - Autonómica
+  a_plus    // A+ - Autonómica Plus
+  b         // B - Nacional
+  b_plus    // B+ - Nacional Plus
+  c         // C - Europea (siempre con extras)
 }
 
 enum FedmeStatus {
+  none        // Usuario eligió "Sin Licencia"
   pending     // Pendiente de tramitar
   processing  // En proceso con FEDME
   active      // Licencia activa
   rejected    // Rechazada por FEDME
   expired     // Expirada
-  none        // Usuario eligió "Sin Licencia"
 }
 
 enum MembershipStatus {
@@ -60,7 +62,7 @@ model Headquarters {
   
   // Información básica
   name      String   @db.VarChar(255)
-  code      String   @unique @db.VarChar(20)  // MAD, BCN, VAL
+  code      String   @unique @db.VarChar(20)
   city      String   @db.VarChar(100)
   
   // Contacto
@@ -68,7 +70,7 @@ model Headquarters {
   email     String?  @db.VarChar(255)
   
   // Precios de membresía (JSONB)
-  membership_prices Json  // {"basic": 50, "premium": 80, "family": 120}
+  membership_prices Json
   
   // Estado
   status    String   @default("active") @db.VarChar(20)
@@ -95,7 +97,7 @@ model Member {
   // Sede
   headquarters_id        String?
   headquarters           Headquarters? @relation(fields: [headquarters_id], references: [id])
-  member_number          String?  @unique @db.VarChar(50)  // MAD-2025-002
+  member_number          String?  @unique @db.VarChar(50)
   
   // Datos personales
   email                  String   @unique @db.VarChar(255)
@@ -166,7 +168,7 @@ model Payment {
   stripe_payment_id String?       @db.VarChar(255)
   
   // Montos
-  amount            Int           // En centavos (5000 = 50.00€)
+  amount            Int
   currency          String        @default("eur") @db.VarChar(3)
   
   // Estado
