@@ -10,7 +10,6 @@ import MerchantSection from './components/Sections/MerchantSection';
 import Link from 'next/link';
 
 
-
 export default function Home() {
 
   // Estados para el lightbox
