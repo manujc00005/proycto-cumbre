@@ -7,7 +7,7 @@ import { logger } from '@/lib/logger';
 const prisma = new PrismaClient();
 
 // ✅ NO HAY MAPPING - Los IDs ya coinciden entre frontend y BD
-const VALID_LICENSE_TYPES: LicenseType[] = ['none', 'a', 'a_plus', 'b', 'b_plus', 'c'];
+const VALID_LICENSE_TYPES: LicenseType[] = ['none', 'a', 'a_plus', 'a_nac', 'a_nac_plus', 'b', 'b_plus', 'c'];
 
 export async function POST(request: NextRequest) {
   try {

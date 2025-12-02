@@ -20,14 +20,16 @@ enum Sex {
   O  // Otro
 }
 
-// 🎯 LICENCIAS FEDME 2025 - SOLO 6 TIPOS
+// 🎯 LICENCIAS FEDME 2026 - SOLO 6 TIPOS
 enum LicenseType {
-  none      // Sin licencia
-  a         // A - Autonómica
-  a_plus    // A+ - Autonómica Plus
-  b         // B - Nacional
-  b_plus    // B+ - Nacional Plus
-  c         // C - Europea (siempre con extras)
+  none        // Sin licencia
+  a           // A - Autonómica
+  a_plus      // A+ - Autonómica Plus
+  a_nac       // A NAC - Autonómica Nacional (NUEVO)
+  a_nac_plus  // A NAC+ - Autonómica Nacional Plus (NUEVO)
+  b           // B - Nacional
+  b_plus      // B+ - Nacional Plus
+  c           // C - Europea
 }
 
 enum FedmeStatus {

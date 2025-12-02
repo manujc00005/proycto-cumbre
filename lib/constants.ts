@@ -1,5 +1,5 @@
 // ============================================================
-// CONSTANTES PARA PROYECTO CUMBRE - LICENCIAS FEDME 2025
+// CONSTANTES PARA PROYECTO CUMBRE - LICENCIAS FEDME 2026
 // ÚNICA FUENTE DE VERDAD - NO MODIFICAR SIN ACTUALIZAR PRISMA
 // ============================================================
 
@@ -7,7 +7,7 @@
 export const MEMBERSHIP_FEE = 50;
 
 // ============================================================
-// CATEGORÍAS POR EDAD (FEDME 2025)
+// CATEGORÍAS POR EDAD (FEDME 2026)
 // ============================================================
 
 export const AGE_CATEGORIES = {
@@ -65,10 +65,10 @@ export function getCategoryLabel(category: AgeCategory): string {
 }
 
 // ============================================================
-// ÁMBITOS TERRITORIALES (FEDME 2025)
+// ÁMBITOS TERRITORIALES (FEDME 2026)
 // ============================================================
 
-export type TerritoryScope = 'regional' | 'national' | 'european' | 'none';
+export type TerritoryScope = 'regional' | 'regional_national' | 'national' | 'european' | 'none';
 
 export interface LicenseTerritory {
   id: TerritoryScope;
@@ -87,6 +87,14 @@ export const TERRITORIES: LicenseTerritory[] = [
     description: 'Para montañeros que practican principalmente en Andalucía, Ceuta y Melilla',
     coverage: 'Andalucía, Ceuta y Melilla',
     icon: '🏔️'
+  },
+  {
+    id: 'regional_national',
+    name: 'Autonómico + Nacional',
+    shortName: 'Andalucía + España',
+    description: 'Licencia autonómica con cobertura ampliada a toda España',
+    coverage: 'Andalucía con extensión nacional (España completa)',
+    icon: '🏔️🇪🇸'
   },
   {
     id: 'national',
@@ -115,7 +123,7 @@ export const TERRITORIES: LicenseTerritory[] = [
 ];
 
 // ============================================================
-// LICENCIAS FEDME 2025 - OFICIAL
+// LICENCIAS FEDME 2026 - OFICIAL
 // ============================================================
 
 export interface LicenseType {
@@ -133,8 +141,8 @@ export interface LicenseType {
   popular?: boolean;       // Marcar como recomendada
 }
 
-// 🎯 LICENCIAS OFICIALES FEDME 2025
-// Basadas en las tablas oficiales: licencia1.jpeg y licencia2.jpeg
+// 🎯 LICENCIAS OFICIALES FEDME 2026
+// Basadas en las tablas oficiales actualizadas
 export const LICENSE_TYPES: LicenseType[] = [
   // ============================================================
   // SIN LICENCIA (Usuario no quiere FEDME)
@@ -164,9 +172,9 @@ export const LICENSE_TYPES: LicenseType[] = [
     territory: 'regional',
     includesExtras: false,
     prices: {
-      infantil: 10.50,
-      juvenil: 10.50,
-      mayor: 44.00
+      infantil: 11.00,
+      juvenil: 11.00,
+      mayor: 45.00
     },
     coverage: 'Excursiones, Senderismo, Escalada, Vías Ferratas, Alpinismo, Esquí de Montaña, Descenso de Barrancos, Acampadas Alpinísticas, Raquetas de Nieve, Marcha Nórdica, Travesías y Carreras por Montaña',
     popular: false
@@ -178,12 +186,45 @@ export const LICENSE_TYPES: LicenseType[] = [
     territory: 'regional',
     includesExtras: true,
     prices: {
-      infantil: 25.00,
-      juvenil: 25.00,
-      mayor: 57.00
+      infantil: 26.00,
+      juvenil: 26.00,
+      mayor: 58.00
     },
     coverage: 'Todo lo de A + BTT, Espeleología y Esquí Nórdico (no competitivos)',
     popular: true  // ⭐ Recomendada para regional
+  },
+
+  // ============================================================
+  // ÁMBITO A NAC - AUTONÓMICO NACIONAL (NOVEDAD 2026)
+  // Licencia autonómica con cobertura extendida a toda España
+  // ============================================================
+  {
+    id: 'a_nac',
+    name: 'A NAC - Autonómica Nacional',
+    shortName: 'A NAC',
+    territory: 'regional_national',
+    includesExtras: false,
+    prices: {
+      infantil: 27.00,
+      juvenil: 27.00,
+      mayor: 55.00
+    },
+    coverage: 'Cobertura autonómica ampliada a toda España: Excursiones, Senderismo, Escalada, Vías Ferratas, Alpinismo, Esquí de Montaña, Descenso de Barrancos, Acampadas Alpinísticas, Raquetas de Nieve, Marcha Nórdica, Travesías y Carreras por Montaña',
+    popular: false
+  },
+  {
+    id: 'a_nac_plus',
+    name: 'A NAC+ - Autonómica Nacional Plus',
+    shortName: 'A NAC+',
+    territory: 'regional_national',
+    includesExtras: true,
+    prices: {
+      infantil: 41.00,
+      juvenil: 41.00,
+      mayor: 70.00
+    },
+    coverage: 'Todo lo de A NAC + BTT, Espeleología y Esquí Nórdico (no competitivos) con cobertura en toda España',
+    popular: true  // ⭐ Recomendada para quienes quieren cobertura nacional desde autonómica
   },
 
   // ============================================================

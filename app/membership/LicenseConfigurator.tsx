@@ -1,4 +1,4 @@
-// components/LicenseConfigurator.tsx - VERSIÓN SIMPLIFICADA
+// components/LicenseConfigurator.tsx - ACTUALIZADO CON A NAC Y A NAC+ (2026)
 
 import { useState, useEffect } from 'react';
 import { Check, ChevronRight, Mountain, Shield, Bike, Info, AlertTriangle, Sparkles } from 'lucide-react';
@@ -67,7 +67,7 @@ export default function LicenseConfigurator({
       setWantsExtras(true);
       setCurrentStep('result');
     } else {
-      // Para regional y nacional, preguntar por extras
+      // Para regional, regional_national y national, preguntar por extras
       setCurrentStep('extras');
     }
   };
@@ -118,9 +118,21 @@ export default function LicenseConfigurator({
           <div className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
             1
           </div>
-          <div>
-            <h3 className="text-white font-bold text-lg">¿Dónde practicas montaña habitualmente?</h3>
-            <p className="text-zinc-400 text-sm">Selecciona el ámbito de cobertura que necesitas</p>
+          <div className="flex-1">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h3 className="text-white font-bold text-lg">¿Dónde practicas montaña habitualmente?</h3>
+              <a
+                href="https://fadmes.es/wp-content/uploads/2025/11/Licencias-Anuales-deportistas-2026.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative flex items-center gap-1.5 text-xs text-zinc-400 hover:text-orange-400 transition-colors border border-zinc-700 hover:border-orange-500 rounded-full px-3 py-1"
+                title="Ver tarifas oficiales FADMES 2026"
+              >
+                <Info className="w-3.5 h-3.5" />
+                <span className="font-medium">Tarifas oficiales FADMES</span>
+              </a>
+            </div>
+            <p className="text-zinc-400 text-sm mt-1">Selecciona el ámbito de cobertura que necesitas</p>
           </div>
         </div>
 
@@ -297,11 +309,23 @@ export default function LicenseConfigurator({
           <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center">
             <Check className="w-5 h-5" strokeWidth={3} />
           </div>
-          <div>
-            <h3 className="text-white font-bold text-lg">
-              {isNone ? 'Sin Licencia Federativa' : 'Licencias disponibles para ti'}
-            </h3>
-            <p className="text-zinc-400 text-sm">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h3 className="text-white font-bold text-lg">
+                {isNone ? 'Sin Licencia Federativa' : 'Licencias disponibles para ti'}
+              </h3>
+              <a
+                href="https://fadmes.es/wp-content/uploads/2025/11/Licencias-Anuales-deportistas-2026.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative flex items-center gap-1.5 text-xs text-zinc-400 hover:text-orange-400 transition-colors border border-zinc-700 hover:border-orange-500 rounded-full px-3 py-1"
+                title="Ver tarifas oficiales FADMES 2026"
+              >
+                <Info className="w-3.5 h-3.5" />
+                <span className="font-medium">Tarifas oficiales FADMES</span>
+              </a>
+            </div>
+            <p className="text-zinc-400 text-sm mt-1">
               {isNone 
                 ? 'Solo membresía del club'
                 : `${territory?.name} ${wantsExtras ? '+ Actividades extras' : ''}`
@@ -344,7 +368,7 @@ export default function LicenseConfigurator({
                 <div className="flex items-start justify-between gap-4">
                   {/* Content */}
                   <div className="flex-1 space-y-3">
-                    {/* Header con badge */}
+                    {/* Header con badges */}
                     <div className="flex items-center gap-2 flex-wrap">
                       <h4 className={`font-bold text-lg ${
                         isSelected 
@@ -444,7 +468,7 @@ export default function LicenseConfigurator({
               <p className="font-semibold text-zinc-300 mb-1">Sobre las licencias FEDME:</p>
               <ul className="space-y-1 text-xs">
                 <li>• Seguro de accidentes y responsabilidad civil incluido</li>
-                <li>• Válidas para la temporada completa (01/01/2025 - 31/12/2025)</li>
+                <li>• Válidas para la temporada completa (01/01/2026 - 31/12/2026)</li>
                 <li>• Procesamiento en 48-72h laborables</li>
               </ul>
             </div>
