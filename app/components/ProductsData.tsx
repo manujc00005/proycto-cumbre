@@ -5,7 +5,8 @@ export const productsData = [
     desc: "Algodón orgánico, tallaje oversize",
     price: 25,
     images: [
-     "/shop/s.nevada.jpeg"
+     "/shop/sierra_back.jpg",
+     "/shop/Sierra_front.jpg"
     ],
     sizes: ['S', 'M', 'L', 'XL'],
     tags: ['NEW', 'LIMITED'],
@@ -13,10 +14,11 @@ export const productsData = [
   {
     id: 'tshirt-001',
     name: "Sudadera El diablo me atrapó",  
-    desc: "Algodón orgánico, tallaje oversize",
+    desc: "Edición limitada en algodón orgánico premium",
     price: 50,
     images: [
-      "/shop/diablo.jpeg"
+      "/shop/diabli_back.jpg",
+      "/shop/diablo_front.jpg"
     ],
     sizes: ['S', 'M', 'L', 'XL'],
     tags: ['BESTSELLER'],
@@ -24,10 +26,11 @@ export const productsData = [
   {
     id: 'cap-001',
     name: 'Tee Basic T-Shirt',
-    desc: 'Lightweight cap with UV protection',
-    price: 30,
+    desc: 'El clásico que nunca falla. Comodidad y estilo para cada aventura',
+    price: 20,
     images: [
-     "/shop/basic.jpeg"
+     "/shop/classic_back.jpg",
+     "/shop/classic_front.jpg"
     ],
     sizes: ['S', 'M', 'L', 'XL'],
     tags: [],
@@ -35,36 +38,92 @@ export const productsData = [
   {
     id: 'bottle-001',
     name: 'Acid Wash T-Shirt',
-    desc: 'Camiseta sin mangas con efecto bleach artesanal, ligera y única',
+    desc: 'Única. Efecto bleach artesanal, no hay dos iguales',
     price: 20,
     images: [
-     "/shop/sin.jpeg"
+     "/shop/custom_front.jpg"
     ],
     sizes: ['500ml'],
     tags: ['ECO'],
   },
   {
-    id: 'shorts-001',
+    id: 'shorts-002',
     name: 'Classic PC CAP',
-    desc: 'Ligera y resistente para tu día a día',
+    desc: 'Tu compañera de ruta. Protección y estilo en cada paso',
     price: 20,
     images: [
-      "/shop/cap.jpeg"
+      "/shop/gorra26.jpg"
     ],
     sizes: ['UNISIZE'],
     tags: [],
   },
   {
-    id: 'socks-001',
+    id: 'socks-003',
     name: 'T-Shit Performance Trail',
-    desc: 'Material transpirable de secado rápido, perfecta para trail running',
+    desc: 'Diseñada para competir. Secado rápido y máximo rendimiento en trail',
     price: 40,
     images: [
-       "/shop/tecnica.jpeg", "/shop/tecnica1.jpeg", 
-       "Camiseta Proyecto Cumbre - Vista trasera"
+       "/shop/competición_back.jpg", 
+       "/shop/competición_front.jpg"
     ],
     sizes: ['S', 'M', 'L', 'XL'],
-    tags: ['NEW'],
+    tags: ['PERFORMANCE'],
+  },
+  {
+    id: 'socks-004',
+    name: 'T-Shit Peaks Training',
+    desc: 'Entrenamiento con tecnología transpirable para tus sesiones más intensas',
+    price: 25,
+    images: [
+       "/shop/entrenamiento_back.jpg", 
+       "/shop/entrenamiento_front.jpg"
+    ],
+    sizes: ['S', 'M', 'L', 'XL'],
+    tags: ['TRAINING'],
+  },
+  {
+    id: 'socks-004',
+    name: 'T-Shit Fantasy Goat',
+    desc: 'Goat style. Diseño exclusivo para auténticos montañeros',
+    price: 25,
+    images: [
+       "/shop/fantasy_front.jpg"
+    ],
+    sizes: ['S', 'M', 'L', 'XL'],
+    tags: [],
+  },
+  {
+    id: 'socks-005',
+    name: 'T-Shit Goat 90s',
+    desc: 'Retro con alma montañera. Estilo noventero que nunca pasa de moda',
+    price: 25,
+    images: [
+       "/shop/camiseta_goat_front.jpg"
+    ],
+    sizes: ['S', 'M', 'L', 'XL'],
+    tags: [],
+  },
+   {
+    id: 'socks-006',
+    name: 'Sweather Cowboy',
+    desc: 'Perfecta para tu día a día. Compra y vive la montaña.',
+    price: 50,
+    images: [
+       "/shop/cowboy_front.jpg"
+    ],
+    sizes: ['S', 'M', 'L', 'XL'],
+    tags: [],
+  },
+   {
+    id: 'socks-006',
+    name: 'Sweather DateCampo',
+    desc: 'Abraza la naturaleza. Calidez y estilo campestre',
+    price: 50,
+    images: [
+       "/shop/datecampo_front.jpg"
+    ],
+    sizes: ['S', 'M', 'L', 'XL'],
+    tags: [],
   },
 ];
 

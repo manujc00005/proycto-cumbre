@@ -59,7 +59,7 @@ export const AddToCartButton = ({
         `}
       >
         <ShoppingBag className="w-5 h-5" strokeWidth={1.5} />
-        <span>Temporarily Unavailable</span>
+        <span>Pre-order • Contactar</span>
       </button>
     );
   }
