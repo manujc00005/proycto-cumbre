@@ -46,6 +46,44 @@ export const eventsData: { events: Event[] } = {
       date: '20 Octubre 2025',
       title: 'La MILLA (SOCIAL) CHALLENGE'
     },
+    {
+      id: 5,
+      date: '23 Diciembre 2025',
+      title: 'TRAIL & TRANCA v2',
+      description: 'Salida/llegada bar la tranca. 10Kms aprox 300+',
+      icon: 'runner',
+      iconColor: 'orange',
+      tags: [
+        { label: 'noche', color: 'orange' },
+        { label: 'asfalto', color: 'blue' }
+      ],
+      calendar: {
+        title: 'TRAIL & TRANCA - Proyecto Cumbre',
+        startDate: '20251223T180000',
+        endDate: '20251223T210000',
+        description: 'Salida/llegada bar la tranca. 8Kms aprox 300+',
+        location: 'Bar La Tranca'
+      }
+    },
+    {
+      id: 6,
+      date: '11 Diciembre 2025',
+      title: 'UP&DOWN SOCIAL RUN',
+      description: 'Salida/llegada Monte tortuga. 45min aprox 300+',
+      icon: 'mountain',
+      iconColor: 'orange',
+      tags: [
+        { label: 'noche', color: 'orange' },
+        { label: 'trail', color: 'yellow' }
+      ],
+      calendar: {
+        title: 'UP&DOWN SOCIAL RUN - Proyecto Cumbre',
+        startDate: '20251211T180000',
+        endDate: '20251211T210000',
+        description: 'Salida/llegada Monte tortuga. 45min aprox 300+',
+        location: 'Monte tortuga'
+      }
+    },
   ]
 };
 
