@@ -1,4 +1,6 @@
 // lib/stripe.ts
+// stripe listen --forward-to localhost:3000/api/webhooks/stripe
+
 import Stripe from 'stripe';
 
 let stripeInstance: Stripe | null = null;

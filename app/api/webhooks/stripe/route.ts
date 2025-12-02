@@ -5,6 +5,8 @@ import Stripe from 'stripe';
 import { PrismaClient, MembershipStatus, PaymentStatus } from '@prisma/client';
 import { logger } from '@/lib/logger';
 import { getStripe } from '@/lib/stripe';
+import { EmailService } from '@/lib/email-service';
+
 
 const prisma = new PrismaClient({
   log: ['error', 'warn'],
@@ -141,7 +143,7 @@ async function processCompletedPayment(
       });
 
       // 2. Actualizar member a ACTIVE
-      await updateMemberToActive(memberId, session);
+      const updatedMember = await updateMemberToActive(memberId, session);
       
       // 3. Actualizar payment a COMPLETED
       await prisma.payment.update({
@@ -154,6 +156,10 @@ async function processCompletedPayment(
       });
 
       logger.apiSuccess('Pago procesado exitosamente');
+
+      // 🎯 4. ENVIAR EMAIL UNIFICADO (después de todo lo demás)
+      await sendMemberEmail(updatedMember, session);
+      
       return; // ✅ Éxito
       
     } catch (error: any) {
@@ -206,11 +212,47 @@ async function updateMemberToActive(memberId: string, session: Stripe.Checkout.S
       start: updatedMember.membership_start_date?.toISOString()
     });
 
-    
     return updatedMember;
     
   } catch (error: any) {
     logger.apiError('Error actualizando member', error);
     throw error;
+  }
+}
+
+// 🎯 Enviar email unificado al miembro
+async function sendMemberEmail(
+  member: any,
+  session: Stripe.Checkout.Session
+) {
+  try {
+    logger.log('📧 Iniciando envío de email unificado...');
+
+    // Email unificado de bienvenida + confirmación de pago
+    await EmailService.sendWelcomeWithPaymentStatus({
+      email: member.email,
+      firstName: member.first_name,
+      lastName: member.last_name,
+      memberNumber: member.member_number,
+      licenseType: member.license_type || 'none',
+      paymentStatus: 'success',
+      amount: session.amount_total || 0,
+      currency: session.currency || 'eur',
+    });
+
+    logger.apiSuccess('✅ Email de bienvenida con confirmación de pago enviado');
+
+  } catch (emailError: any) {
+    // ⚠️ NO fallar el webhook si falla el email
+    logger.apiError('❌ Error enviando email (no crítico)', emailError.message);
+    
+    // Registrar en admin_notes que faltó enviar el email
+    await prisma.member.update({
+      where: { id: member.id },
+      data: {
+        admin_notes: `${member.admin_notes}\n[ERROR] Email no enviado: ${emailError.message}`,
+        updated_at: new Date()
+      }
+    }).catch(err => logger.error('Error actualizando admin_notes', err));
   }
 }

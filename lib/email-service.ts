@@ -1,7 +1,11 @@
 // lib/email/email-service.ts
 import { Resend } from 'resend';
+import { logger } from '@/lib/logger';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Detectar entorno
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 interface EmailOptions {
   to: string | string[];
@@ -19,80 +23,308 @@ export class EmailService {
    * Enviar email genérico
    */
   static async send(options: EmailOptions) {
+    const recipients = Array.isArray(options.to) ? options.to : [options.to];
+    const fromAddress = options.from || this.from;
+
     try {
-      const { data, error } = await resend.emails.send({
-        from: options.from || this.from,
-        to: Array.isArray(options.to) ? options.to : [options.to],
+      logger.log('📧 [Email] Intentando enviar:', {
+        from: fromAddress,
+        to: recipients,
         subject: options.subject,
+        env: process.env.NODE_ENV,
+      });
+
+      const { data, error } = await resend.emails.send({
+        from: fromAddress,
+        to: recipients,
+        subject: isDevelopment ? `[DEV] ${options.subject}` : options.subject,
         html: options.html,
         text: options.text,
       });
 
       if (error) {
-        console.error('❌ Error enviando email:', error);
+        logger.error('❌ [Email] Error de Resend:', {
+          error: error.message,
+          name: error.name,
+          to: recipients,
+          subject: options.subject,
+        });
         throw new Error(error.message);
       }
 
-      console.log('✅ Email enviado:', data?.id);
+      logger.apiSuccess('Email enviado', {
+        id: data?.id,
+        to: recipients,
+        subject: options.subject,
+      });
+
       return { success: true, id: data?.id };
     } catch (error: any) {
-      console.error('❌ Error en EmailService:', error);
+      logger.apiError('Error crítico enviando email', {
+        message: error.message,
+        to: recipients,
+        subject: options.subject,
+      });
       throw error;
     }
   }
 
   /**
-   * Email de bienvenida al nuevo socio
+   * Email unificado de bienvenida + confirmación de pago
    */
-  static async sendWelcomeEmail(memberData: {
+  static async sendWelcomeWithPaymentStatus(memberData: {
     email: string;
     firstName: string;
     lastName: string;
     memberNumber: string;
     licenseType: string;
+    paymentStatus: 'success' | 'failed';
+    amount?: number;
+    currency?: string;
   }) {
+    logger.log('📧 [Email] Preparando email de bienvenida con estado de pago:', {
+      email: memberData.email,
+      memberNumber: memberData.memberNumber,
+      paymentStatus: memberData.paymentStatus,
+    });
+
+    const hasLicense = memberData.licenseType && memberData.licenseType !== 'none';
+    const isSuccess = memberData.paymentStatus === 'success';
+
     const html = `
       <!DOCTYPE html>
       <html>
         <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
-            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
-            .button { display: inline-block; background: #f97316; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
-            .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+              line-height: 1.6; 
+              color: #e4e4e7;
+              background-color: #09090b;
+              padding: 20px;
+            }
+            .container { 
+              max-width: 600px; 
+              margin: 0 auto; 
+              background-color: #18181b;
+              border: 1px solid #27272a;
+              border-radius: 12px;
+              overflow: hidden;
+            }
+            .header { 
+              background: linear-gradient(135deg, ${isSuccess ? '#10b981 0%, #059669 100%' : '#ef4444 0%, #dc2626 100%'});
+              padding: 40px 30px;
+              text-align: center;
+            }
+            .header h1 {
+              color: white;
+              font-size: 28px;
+              font-weight: 700;
+              margin: 0;
+            }
+            .content { 
+              padding: 40px 30px;
+              background-color: #18181b;
+            }
+            .content h2 {
+              color: #fafafa;
+              font-size: 24px;
+              margin-bottom: 20px;
+              font-weight: 600;
+            }
+            .content p {
+              color: #a1a1aa;
+              margin-bottom: 16px;
+              font-size: 15px;
+            }
+            .status-box {
+              background-color: ${isSuccess ? '#022c22' : '#450a0a'};
+              border: 1px solid ${isSuccess ? '#065f46' : '#7f1d1d'};
+              border-radius: 12px;
+              padding: 25px;
+              text-align: center;
+              margin: 30px 0;
+            }
+            .status-icon {
+              font-size: 48px;
+              margin-bottom: 10px;
+            }
+            .status-title {
+              font-size: 20px;
+              font-weight: 700;
+              color: ${isSuccess ? '#10b981' : '#ef4444'};
+              margin-bottom: 8px;
+            }
+            .status-subtitle {
+              color: ${isSuccess ? '#6ee7b7' : '#fca5a5'};
+              font-size: 14px;
+            }
+            .amount {
+              font-size: 36px;
+              font-weight: 700;
+              color: ${isSuccess ? '#10b981' : '#ef4444'};
+              margin-top: 15px;
+            }
+            .info-box {
+              background-color: #27272a;
+              border: 1px solid #3f3f46;
+              border-radius: 8px;
+              padding: 20px;
+              margin: 20px 0;
+            }
+            .info-box h3 {
+              color: #fafafa;
+              font-size: 16px;
+              margin-bottom: 15px;
+              font-weight: 600;
+            }
+            .info-box ul {
+              list-style: none;
+              margin: 0;
+              padding: 0;
+            }
+            .info-box li {
+              color: #a1a1aa;
+              padding: 8px 0;
+              border-bottom: 1px solid #3f3f46;
+              font-size: 15px;
+            }
+            .info-box li:last-child {
+              border-bottom: none;
+            }
+            .info-box strong {
+              color: #fafafa;
+              font-weight: 600;
+            }
+            .badge {
+              display: inline-block;
+              background-color: #422006;
+              color: #fb923c;
+              padding: 6px 14px;
+              border-radius: 6px;
+              font-size: 13px;
+              font-weight: 600;
+              border: 1px solid #7c2d12;
+            }
+            .alert-box {
+              background-color: #422006;
+              border: 1px solid #7c2d12;
+              border-left: 4px solid #f59e0b;
+              border-radius: 8px;
+              padding: 20px;
+              margin: 20px 0;
+            }
+            .alert-box p {
+              color: #fcd34d;
+              margin: 8px 0;
+              font-size: 14px;
+            }
+            .alert-box strong {
+              color: #fbbf24;
+            }
+            .error-box {
+              background-color: #450a0a;
+              border: 1px solid #7f1d1d;
+              border-left: 4px solid #ef4444;
+              border-radius: 8px;
+              padding: 20px;
+              margin: 20px 0;
+            }
+            .error-box p {
+              color: #fca5a5;
+              margin: 8px 0;
+              font-size: 14px;
+            }
+            .error-box strong {
+              color: #ef4444;
+              display: block;
+              margin-bottom: 8px;
+            }
+            .footer { 
+              text-align: center; 
+              padding: 30px;
+              background-color: #09090b;
+              border-top: 1px solid #27272a;
+            }
+            .footer p {
+              color: #71717a;
+              font-size: 13px;
+              margin: 5px 0;
+            }
           </style>
         </head>
         <body>
           <div class="container">
             <div class="header">
-              <h1>¡Bienvenido a Proyecto Cumbre! 🏔️</h1>
+              <h1>${isSuccess ? '¡Bienvenido a Proyecto Cumbre!' : 'Problema con tu Pago'} 🏔️</h1>
             </div>
             <div class="content">
               <h2>Hola ${memberData.firstName},</h2>
-              <p>¡Gracias por unirte a nuestro club de montaña! Estamos encantados de tenerte como socio.</p>
               
-              <h3>Detalles de tu membresía:</h3>
-              <ul>
-                <li><strong>Número de Socio:</strong> ${memberData.memberNumber}</li>
-                <li><strong>Nombre:</strong> ${memberData.firstName} ${memberData.lastName}</li>
-                <li><strong>Licencia FEDME:</strong> ${memberData.licenseType.toUpperCase()}</li>
-              </ul>
+              ${isSuccess ? `
+                <p>¡Gracias por unirte a nuestro club de montaña! Estamos encantados de tenerte como socio y de acompañarte en esta nueva aventura.</p>
+                
+                <div class="status-box">
+                  <div class="status-icon">✅</div>
+                  <div class="status-title">Pago Completado</div>
+                  <div class="status-subtitle">Tu membresía está activa</div>
+                  ${memberData.amount ? `<div class="amount">${(memberData.amount / 100).toFixed(2)}€</div>` : ''}
+                </div>
 
-              <p>Tu licencia está siendo procesada. Recibirás un email cuando esté activa.</p>
+                <div class="info-box">
+                  <h3>Detalles de tu membresía</h3>
+                  <ul>
+                    <li><strong>Número de Socio:</strong> ${memberData.memberNumber}</li>
+                    <li><strong>Nombre:</strong> ${memberData.firstName} ${memberData.lastName}</li>
+                    <li><strong>Estado:</strong> <span style="color: #10b981; font-weight: 600;">ACTIVO</span></li>
+                    ${hasLicense ? `<li><strong>Licencia FEDME:</strong> <span class="badge">${memberData.licenseType.toUpperCase()}</span></li>` : '<li><strong>Licencia FEDME:</strong> Sin licencia</li>'}
+                  </ul>
+                </div>
 
-              <div style="text-align: center;">
-                <a href="${process.env.NEXT_PUBLIC_URL}" class="button">Acceder al Portal</a>
-              </div>
+                ${hasLicense ? `
+                  <div class="alert-box">
+                    <p><strong>Sobre tu licencia federativa</strong></p>
+                    <p>Tu licencia FEDME está siendo procesada. Te enviaremos un email de confirmación cuando esté activa y disponible para descargar (normalmente 48-72 horas).</p>
+                  </div>
+                ` : ''}
 
-              <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
+                <p>Ya puedes participar en todas nuestras actividades. ¡Nos vemos en la montaña!</p>
+              ` : `
+                <p>Hemos recibido tu solicitud de membresía, pero <strong>tu pago no pudo ser procesado correctamente</strong>.</p>
+                
+                <div class="status-box">
+                  <div class="status-icon">❌</div>
+                  <div class="status-title">Pago Fallido</div>
+                  <div class="status-subtitle">No se pudo completar el pago</div>
+                </div>
+
+                <div class="error-box">
+                  <strong>¿Qué ha pasado?</strong>
+                  <p>• El pago fue rechazado o cancelado</p>
+                  <p>• Tu membresía no ha sido activada</p>
+                  <p>• No se te ha realizado ningún cargo</p>
+                </div>
+
+                <div class="info-box">
+                  <h3>¿Qué puedes hacer?</h3>
+                  <ul>
+                    <li><strong>Reintentar el pago</strong> desde nuestra web con otra tarjeta</li>
+                    <li><strong>Contactarnos</strong> si crees que es un error</li>
+                    <li><strong>Verificar</strong> con tu banco que la tarjeta permite pagos online</li>
+                  </ul>
+                </div>
+
+                <p style="margin-top: 30px;">Si necesitas ayuda o tienes dudas, contacta con nosotros:</p>
+                <p style="color: #fafafa; font-weight: 600;">📧 info@proyecto-cumbre.es</p>
+              `}
               
-              <p>¡Nos vemos en la montaña!</p>
-              <p><strong>Equipo Proyecto Cumbre</strong></p>
+              <p style="margin-top: 30px; color: #f97316; font-weight: 600;">Equipo Proyecto Cumbre</p>
             </div>
             <div class="footer">
-              <p>Este es un email automático, por favor no respondas.</p>
+              <p>Este es un email automático, por favor no respondas a este mensaje.</p>
               <p>© ${new Date().getFullYear()} Proyecto Cumbre - Club de Montaña</p>
             </div>
           </div>
@@ -100,125 +332,24 @@ export class EmailService {
       </html>
     `;
 
-    return this.send({
-      to: memberData.email,
-      subject: '¡Bienvenido a Proyecto Cumbre! 🏔️',
-      html,
-      text: `Hola ${memberData.firstName}, bienvenido a Proyecto Cumbre. Tu número de socio es ${memberData.memberNumber}.`,
-    });
-  }
+    try {
+      const result = await this.send({
+        to: memberData.email,
+        subject: isSuccess 
+          ? '¡Bienvenido a Proyecto Cumbre! 🏔️' 
+          : '⚠️ Problema con tu pago - Proyecto Cumbre',
+        html,
+        text: isSuccess
+          ? `Hola ${memberData.firstName}, bienvenido a Proyecto Cumbre. Tu número de socio es ${memberData.memberNumber} y tu membresía está activa.`
+          : `Hola ${memberData.firstName}, tu pago no pudo procesarse. Por favor, contacta con nosotros en info@proyecto-cumbre.es`,
+      });
 
-  /**
-   * Email de confirmación de pago
-   */
-  static async sendPaymentConfirmation(data: {
-    email: string;
-    firstName: string;
-    memberNumber: string;
-    amount: number;
-    currency: string;
-    description: string;
-  }) {
-    const html = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
-            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
-            .amount { font-size: 36px; font-weight: bold; color: #10b981; text-align: center; margin: 20px 0; }
-            .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>✅ Pago Confirmado</h1>
-            </div>
-            <div class="content">
-              <h2>Hola ${data.firstName},</h2>
-              <p>Hemos recibido tu pago correctamente.</p>
-              
-              <div class="amount">${(data.amount / 100).toFixed(2)} ${data.currency.toUpperCase()}</div>
-
-              <h3>Detalles del pago:</h3>
-              <ul>
-                <li><strong>Número de Socio:</strong> ${data.memberNumber}</li>
-                <li><strong>Concepto:</strong> ${data.description}</li>
-                <li><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-ES')}</li>
-              </ul>
-
-              <p>Gracias por tu pago. Tu membresía está ahora activa.</p>
-              
-              <p><strong>Equipo Proyecto Cumbre</strong></p>
-            </div>
-            <div class="footer">
-              <p>© ${new Date().getFullYear()} Proyecto Cumbre - Club de Montaña</p>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
-
-    return this.send({
-      to: data.email,
-      subject: '✅ Pago confirmado - Proyecto Cumbre',
-      html,
-    });
-  }
-
-  /**
-   * Email a administradores - Nueva licencia pendiente
-   */
-  static async notifyAdminNewLicense(memberData: {
-    firstName: string;
-    lastName: string;
-    memberNumber: string;
-    licenseType: string;
-    email: string;
-    phone: string;
-  }) {
-    const html = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; background: #f9fafb; }
-            .alert { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; }
-            h2 { color: #f97316; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <h2>🔔 Nueva Licencia Pendiente de Procesar</h2>
-            
-            <div class="alert">
-              <strong>Acción requerida:</strong> Hay una nueva licencia FEDME pendiente de tramitación.
-            </div>
-
-            <h3>Datos del Socio:</h3>
-            <ul>
-              <li><strong>Nombre:</strong> ${memberData.firstName} ${memberData.lastName}</li>
-              <li><strong>N° Socio:</strong> ${memberData.memberNumber}</li>
-              <li><strong>Email:</strong> ${memberData.email}</li>
-              <li><strong>Teléfono:</strong> ${memberData.phone}</li>
-              <li><strong>Licencia:</strong> ${memberData.licenseType.toUpperCase()}</li>
-            </ul>
-
-            <p><a href="${process.env.NEXT_PUBLIC_URL}/gestor" style="background: #f97316; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; display: inline-block;">Ir al Gestor</a></p>
-          </div>
-        </body>
-      </html>
-    `;
-
-    return this.send({
-      to: this.adminEmail,
-      subject: `🔔 Nueva licencia pendiente - ${memberData.memberNumber}`,
-      html,
-    });
+      logger.apiSuccess(isSuccess ? 'Email de bienvenida enviado' : 'Email de pago fallido enviado');
+      return result;
+    } catch (error) {
+      logger.apiError('Fallo enviando email unificado', error);
+      throw error;
+    }
   }
 
   /**
@@ -231,16 +362,115 @@ export class EmailService {
     licenseType: string;
     validUntil: Date;
   }) {
+    logger.log('📧 [Email] Preparando licencia activada:', {
+      email: data.email,
+      memberNumber: data.memberNumber,
+      licenseType: data.licenseType,
+    });
+
     const html = `
       <!DOCTYPE html>
       <html>
         <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
-            .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
-            .success-badge { background: #d1fae5; color: #065f46; padding: 10px 20px; border-radius: 20px; display: inline-block; font-weight: bold; }
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+              line-height: 1.6; 
+              color: #e4e4e7;
+              background-color: #09090b;
+              padding: 20px;
+            }
+            .container { 
+              max-width: 600px; 
+              margin: 0 auto; 
+              background-color: #18181b;
+              border: 1px solid #27272a;
+              border-radius: 12px;
+              overflow: hidden;
+            }
+            .header { 
+              background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+              padding: 40px 30px;
+              text-align: center;
+            }
+            .header h1 {
+              color: white;
+              font-size: 28px;
+              font-weight: 700;
+              margin: 0;
+            }
+            .content { 
+              padding: 40px 30px;
+              background-color: #18181b;
+            }
+            .content h2 {
+              color: #fafafa;
+              font-size: 24px;
+              margin-bottom: 20px;
+              font-weight: 600;
+            }
+            .content p {
+              color: #a1a1aa;
+              margin-bottom: 16px;
+              font-size: 15px;
+            }
+            .badge-box {
+              background-color: #022c22;
+              border: 1px solid #065f46;
+              border-radius: 12px;
+              padding: 30px;
+              text-align: center;
+              margin: 30px 0;
+            }
+            .success-badge {
+              display: inline-block;
+              background-color: #064e3b;
+              color: #6ee7b7;
+              padding: 12px 24px;
+              border-radius: 8px;
+              font-weight: 700;
+              font-size: 16px;
+              border: 1px solid #065f46;
+            }
+            .info-box {
+              background-color: #27272a;
+              border: 1px solid #3f3f46;
+              border-radius: 8px;
+              padding: 20px;
+              margin: 20px 0;
+            }
+            .info-box ul {
+              list-style: none;
+              margin: 0;
+              padding: 0;
+            }
+            .info-box li {
+              color: #a1a1aa;
+              padding: 8px 0;
+              border-bottom: 1px solid #3f3f46;
+              font-size: 15px;
+            }
+            .info-box li:last-child {
+              border-bottom: none;
+            }
+            .info-box strong {
+              color: #fafafa;
+              font-weight: 600;
+            }
+            .footer { 
+              text-align: center; 
+              padding: 30px;
+              background-color: #09090b;
+              border-top: 1px solid #27272a;
+            }
+            .footer p {
+              color: #71717a;
+              font-size: 13px;
+              margin: 5px 0;
+            }
           </style>
         </head>
         <body>
@@ -250,33 +480,45 @@ export class EmailService {
             </div>
             <div class="content">
               <h2>Hola ${data.firstName},</h2>
-              <p>¡Buenas noticias! Tu licencia FEDME ya ha sido procesada y está activa.</p>
+              <p>¡Buenas noticias! Tu licencia FEDME ya ha sido procesada y está completamente activa.</p>
               
-              <div style="text-align: center; margin: 30px 0;">
+              <div class="badge-box">
                 <div class="success-badge">LICENCIA ${data.licenseType.toUpperCase()} ACTIVA</div>
               </div>
 
-              <h3>Detalles:</h3>
-              <ul>
-                <li><strong>Número de Socio:</strong> ${data.memberNumber}</li>
-                <li><strong>Tipo de Licencia:</strong> ${data.licenseType.toUpperCase()}</li>
-                <li><strong>Válida hasta:</strong> ${data.validUntil.toLocaleDateString('es-ES')}</li>
-              </ul>
+              <div class="info-box">
+                <ul>
+                  <li><strong>Número de Socio:</strong> ${data.memberNumber}</li>
+                  <li><strong>Tipo de Licencia:</strong> ${data.licenseType.toUpperCase()}</li>
+                  <li><strong>Válida hasta:</strong> ${data.validUntil.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</li>
+                </ul>
+              </div>
 
-              <p>Ya puedes disfrutar de todas las coberturas y beneficios de tu licencia FEDME.</p>
+              <p>Ya puedes disfrutar de todas las coberturas y beneficios de tu licencia FEDME en todas nuestras actividades.</p>
               
-              <p>¡Nos vemos en la montaña!</p>
-              <p><strong>Equipo Proyecto Cumbre</strong></p>
+              <p style="margin-top: 30px; color: #fafafa;">¡Nos vemos en la montaña!</p>
+              <p style="color: #f97316; font-weight: 600;">Equipo Proyecto Cumbre</p>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} Proyecto Cumbre - Club de Montaña</p>
             </div>
           </div>
         </body>
       </html>
     `;
 
-    return this.send({
-      to: data.email,
-      subject: '✅ Tu licencia FEDME está activa',
-      html,
-    });
+    try {
+      const result = await this.send({
+        to: data.email,
+        subject: '✅ Tu licencia FEDME está activa',
+        html,
+      });
+
+      logger.apiSuccess('Email de licencia activada enviado');
+      return result;
+    } catch (error) {
+      logger.apiError('Fallo enviando email de licencia activada', error);
+      throw error;
+    }
   }
 }
