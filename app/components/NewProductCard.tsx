@@ -79,8 +79,8 @@ export const ProductCard = ({
               <ChevronRight className="w-4 h-4 text-zinc-900" strokeWidth={2} />
             </button>
 
-            {/* Image Indicators */}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+            {/* 🔥 Image Indicators – versión “dedo friendly” */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
               {images.map((_, index) => (
                 <button
                   key={index}
@@ -88,13 +88,17 @@ export const ProductCard = ({
                     e.stopPropagation();
                     setCurrentImageIndex(index);
                   }}
-                  className={`h-1.5 rounded-full transition-all ${
-                    index === currentImageIndex
-                      ? 'w-6 bg-white'
-                      : 'w-1.5 bg-white/50 hover:bg-white/75'
-                  }`}
-                  aria-label={`Go to image ${index + 1}`}
-                />
+                  className="h-6 w-6 flex items-center justify-center rounded-full bg-black/20 active:scale-95 transition-transform"
+                  aria-label={`Ir a imagen ${index + 1}`}
+                >
+                  <span
+                    className={`block rounded-full transition-all ${
+                      index === currentImageIndex
+                        ? 'w-8 h-2 bg-white'
+                        : 'w-2 h-2 bg-white/60'
+                    }`}
+                  />
+                </button>
               ))}
             </div>
           </>

@@ -82,7 +82,7 @@ export const productsData = [
     tags: ['TRAINING'],
   },
   {
-    id: 'socks-004',
+    id: 'socks-011',
     name: 'T-Shit Fantasy Goat',
     desc: 'Goat style. Diseño exclusivo para auténticos montañeros',
     price: 25,
@@ -115,7 +115,7 @@ export const productsData = [
     tags: [],
   },
    {
-    id: 'socks-006',
+    id: 'socks-012',
     name: 'Sweather DateCampo',
     desc: 'Abraza la naturaleza. Calidez y estilo campestre',
     price: 50,
