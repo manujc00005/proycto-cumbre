@@ -1,13 +1,11 @@
 // app/api/verify-payment/route.ts - VERSIÓN CORREGIDA
 
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
-import { PrismaClient } from '@prisma/client';
 import { logger } from '@/lib/logger';
 import { getStripe } from '@/lib/stripe';
+import { prisma } from '@/lib/prisma';
 
 
-const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
