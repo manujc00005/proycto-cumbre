@@ -12,14 +12,7 @@ export const eventsData: { events: Event[] } = {
       tags: [
         { label: 'noche', color: 'orange' },
         { label: 'asfalto', color: 'blue' }
-      ],
-      calendar: {
-        title: 'TRAIL & TRANCA - Proyecto Cumbre',
-        startDate: '20251127T180000',
-        endDate: '20251127T210000',
-        description: 'Salida/llega bar la tranca. 8Kms aprox 300+',
-        location: 'Bar La Tranca'
-      }
+      ]
     },
     {
       id: 2,
@@ -56,14 +49,7 @@ export const eventsData: { events: Event[] } = {
       tags: [
         { label: 'noche', color: 'orange' },
         { label: 'asfalto', color: 'blue' }
-      ],
-      calendar: {
-        title: 'TRAIL & TRANCA - Proyecto Cumbre',
-        startDate: '20251223T180000',
-        endDate: '20251223T210000',
-        description: 'Salida/llegada bar la tranca. 8Kms aprox 300+',
-        location: 'Bar La Tranca'
-      }
+      ]
     },
     {
       id: 6,
@@ -75,14 +61,7 @@ export const eventsData: { events: Event[] } = {
       tags: [
         { label: 'noche', color: 'orange' },
         { label: 'trail', color: 'yellow' }
-      ],
-      calendar: {
-        title: 'UP&DOWN SOCIAL RUN - Proyecto Cumbre',
-        startDate: '20251211T180000',
-        endDate: '20251211T210000',
-        description: 'Salida/llegada Monte tortuga. 45min aprox 300+',
-        location: 'Monte tortuga'
-      }
+      ]
     },
   ]
 };

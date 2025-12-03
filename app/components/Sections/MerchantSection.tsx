@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { ProductCard } from '../NewProductCard';
-import { productsData } from '../ProductsData';
+import { ProductCard } from '../Productos/NewProductCard';
+import { productsData } from '../Productos/ProductsData';
 
 
 

@@ -1,8 +1,11 @@
+// app/components/events/EventCard.tsx
+
 import { AddToCalendar } from './AddToCalendar';
 import EventIcon from './EventIcon';
 import { Event, EventStatus } from '../types';
 import { getEventStatus, shouldShowEventDetails } from './Eventutils';
 import EventTag from './EventTag';
+import { generateCalendarData } from '@/lib/calendar-utils';
 
 interface EventCardProps {
   event: Event;
@@ -12,6 +15,7 @@ interface EventCardProps {
 const EventCard: React.FC<EventCardProps> = ({ event, dropdownId }) => {
   const status = getEventStatus(event);
   const showDetails = shouldShowEventDetails(event);
+  const calendarData = generateCalendarData(event);
 
   const getStatusConfig = (status: EventStatus) => {
     switch (status) {
@@ -71,7 +75,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, dropdownId }) => {
             <h4 className={`${isCompleted ? 'text-lg' : 'text-xl'} font-bold ${config.titleColor} mb-2`}>
               {event.title}
             </h4>
-            { showDetails &&event.cancelReason && (
+            {showDetails && event.cancelReason && (
               <p className="text-red-400 font-semibold text-sm mb-1">{event.cancelReason}</p>
             )}
             {event.description && (
@@ -83,9 +87,8 @@ const EventCard: React.FC<EventCardProps> = ({ event, dropdownId }) => {
           )}
         </div>
         
-        {/* Tags y/o Botón de Calendario - Solo para eventos futuros */}
-        {showDetails && (event.tags || event.calendar) && (
-          <div className={`flex ${event.calendar ? 'justify-between' : 'gap-2'} items-center flex-wrap gap-2 mt-4`}>
+        {showDetails && (event.tags || status === 'upcoming') && (
+          <div className={`flex ${status === 'upcoming' ? 'justify-between' : 'gap-2'} items-center flex-wrap gap-2 mt-4`}>
             {event.tags && (
               <div className="flex gap-2 flex-wrap">
                 {event.tags.map((tag, index) => (
@@ -94,9 +97,9 @@ const EventCard: React.FC<EventCardProps> = ({ event, dropdownId }) => {
               </div>
             )}
             
-            {event.calendar && dropdownId && (
+            {status === 'upcoming' && dropdownId && (
               <AddToCalendar 
-                event={event.calendar}
+                event={calendarData}
                 dropdownId={dropdownId}
               />
             )}

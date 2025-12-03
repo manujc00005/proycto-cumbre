@@ -1,6 +1,10 @@
+// app/components/types.ts
+
+import { EventColor, IconType, EventStatus } from '@/lib/events-constants';
+
 export interface EventTag {
   label: string;
-  color: 'orange' | 'blue' | 'cyan' | 'yellow' | 'red' | 'green' | 'purple' | 'pink';
+  color: EventColor;
 }
 
 export interface CalendarEvent {
@@ -13,15 +17,17 @@ export interface CalendarEvent {
 
 export interface Event {
   id: number;
-  date: string; // Formato: "DD Mes YYYY" ejemplo: "27 Noviembre 2025"
+  date: string;
   title: string;
   description?: string;
-  cancelled?: boolean; // Si está cancelado
-  cancelReason?: string;
-  icon?: 'runner' | 'mountain';
-  iconColor?: 'orange' | 'blue' | 'cyan' | 'yellow' | 'red' | 'green' | 'purple' | 'pink';
+  location?: string;
+  icon?: IconType;
+  iconColor?: EventColor;
   tags?: EventTag[];
+  cancelled?: boolean;
+  cancelReason?: string;
   calendar?: CalendarEvent;
 }
 
-export type EventStatus = 'upcoming' | 'cancelled' | 'completed';
+// Re-exportar tipos para conveniencia
+export type { EventColor, IconType, EventStatus };

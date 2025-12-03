@@ -50,7 +50,7 @@ const EventsSection = () => {
               <EventCard 
                 key={event.id} 
                 event={event} 
-                dropdownId={event.calendar ? `calendar-dropdown-${event.id}` : undefined}
+                dropdownId={`calendar-dropdown-${event.id}`}
               />
             ))}
 
