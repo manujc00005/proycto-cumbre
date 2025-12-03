@@ -16,8 +16,8 @@ interface EmailOptions {
 }
 
 export class EmailService {
-  private static from = process.env.EMAIL_FROM || 'noreply@proyecto-cumbre.com';
-  private static adminEmail = process.env.EMAIL_ADMIN || 'admin@proyecto-cumbre.com';
+  private static from = process.env.EMAIL_FROM || 'info@proyecto-cumbre.es';
+  private static adminEmail = process.env.EMAIL_ADMIN || 'info@proyecto-cumbre.es';
 
   /**
    * Enviar email genérico
