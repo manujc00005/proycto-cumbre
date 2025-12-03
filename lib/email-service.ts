@@ -93,245 +93,245 @@ export class EmailService {
 
 
         const html = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { 
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-              line-height: 1.6; 
-              color: #e4e4e7;
-              background-color: #09090b;
-              padding: 20px;
-            }
-            .container { 
-              max-width: 600px; 
-              margin: 0 auto; 
-              background-color: #18181b;
-              border: 1px solid #27272a;
-              border-radius: 12px;
-              overflow: hidden;
-            }
-            .header { 
-              background: linear-gradient(135deg, ${isSuccess ? '#10b981 0%, #059669 100%' : '#ef4444 0%, #dc2626 100%'});
-              padding: 40px 30px;
-              text-align: center;
-            }
-            .header h1 {
-              color: white;
-              font-size: 28px;
-              font-weight: 700;
-              margin: 0;
-            }
-            .content { 
-              padding: 40px 30px;
-              background-color: #18181b;
-            }
-            .content h2 {
-              color: #fafafa;
-              font-size: 24px;
-              margin-bottom: 20px;
-              font-weight: 600;
-            }
-            .content p {
-              color: #a1a1aa;
-              margin-bottom: 16px;
-              font-size: 15px;
-            }
-            .status-box {
-              background-color: ${isSuccess ? '#022c22' : '#450a0a'};
-              border: 1px solid ${isSuccess ? '#065f46' : '#7f1d1d'};
-              border-radius: 12px;
-              padding: 25px;
-              text-align: center;
-              margin: 30px 0;
-            }
-            .status-icon {
-              font-size: 48px;
-              margin-bottom: 10px;
-            }
-            .status-title {
-              font-size: 20px;
-              font-weight: 700;
-              color: ${isSuccess ? '#10b981' : '#ef4444'};
-              margin-bottom: 8px;
-            }
-            .status-subtitle {
-              color: ${isSuccess ? '#6ee7b7' : '#fca5a5'};
-              font-size: 14px;
-            }
-            .amount {
-              font-size: 36px;
-              font-weight: 700;
-              color: ${isSuccess ? '#10b981' : '#ef4444'};
-              margin-top: 15px;
-            }
-            .info-box {
-              background-color: #27272a;
-              border: 1px solid #3f3f46;
-              border-radius: 8px;
-              padding: 20px;
-              margin: 20px 0;
-            }
-            .info-box h3 {
-              color: #fafafa;
-              font-size: 16px;
-              margin-bottom: 15px;
-              font-weight: 600;
-            }
-            .info-box ul {
-              list-style: none;
-              margin: 0;
-              padding: 0;
-            }
-            .info-box li {
-              color: #a1a1aa;
-              padding: 8px 0;
-              border-bottom: 1px solid #3f3f46;
-              font-size: 15px;
-            }
-            .info-box li:last-child {
-              border-bottom: none;
-            }
-            .info-box strong {
-              color: #fafafa;
-              font-weight: 600;
-            }
-            .badge {
-              display: inline-block;
-              background-color: #422006;
-              color: #fb923c;
-              padding: 6px 14px;
-              border-radius: 6px;
-              font-size: 13px;
-              font-weight: 600;
-              border: 1px solid #7c2d12;
-            }
-            .alert-box {
-              background-color: #422006;
-              border: 1px solid #7c2d12;
-              border-left: 4px solid #f59e0b;
-              border-radius: 8px;
-              padding: 20px;
-              margin: 20px 0;
-            }
-            .alert-box p {
-              color: #fcd34d;
-              margin: 8px 0;
-              font-size: 14px;
-            }
-            .alert-box strong {
-              color: #fbbf24;
-            }
-            .error-box {
-              background-color: #450a0a;
-              border: 1px solid #7f1d1d;
-              border-left: 4px solid #ef4444;
-              border-radius: 8px;
-              padding: 20px;
-              margin: 20px 0;
-            }
-            .error-box p {
-              color: #fca5a5;
-              margin: 8px 0;
-              font-size: 14px;
-            }
-            .error-box strong {
-              color: #ef4444;
-              display: block;
-              margin-bottom: 8px;
-            }
-            .footer { 
-              text-align: center; 
-              padding: 30px;
-              background-color: #09090b;
-              border-top: 1px solid #27272a;
-            }
-            .footer p {
-              color: #71717a;
-              font-size: 13px;
-              margin: 5px 0;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>${isSuccess ? '¡Bienvenido a Proyecto Cumbre!' : 'Problema con tu Pago'} 🏔️</h1>
-            </div>
-            <div class="content">
-              <h2>Hola ${memberData.firstName},</h2>
-              
-              ${isSuccess ? `
-                <p>¡Gracias por unirte a nuestro club de montaña! Estamos encantados de tenerte como socio y de acompañarte en esta nueva aventura.</p>
-                
-                <div class="status-box">
-                  <div class="status-icon">✅</div>
-                  <div class="status-title">Pago Completado</div>
-                  <div class="status-subtitle">Tu membresía está activa</div>
-                  ${memberData.amount ? `<div class="amount">${(memberData.amount / 100).toFixed(2)}€</div>` : ''}
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body { 
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                  line-height: 1.6; 
+                  color: #e4e4e7;
+                  background-color: #09090b;
+                  padding: 20px;
+                }
+                .container { 
+                  max-width: 600px; 
+                  margin: 0 auto; 
+                  background-color: #18181b;
+                  border: 1px solid #27272a;
+                  border-radius: 12px;
+                  overflow: hidden;
+                }
+                .header { 
+                  background: linear-gradient(135deg, ${isSuccess ? '#10b981 0%, #059669 100%' : '#ef4444 0%, #dc2626 100%'});
+                  padding: 40px 30px;
+                  text-align: center;
+                }
+                .header h1 {
+                  color: white;
+                  font-size: 28px;
+                  font-weight: 700;
+                  margin: 0;
+                }
+                .content { 
+                  padding: 40px 30px;
+                  background-color: #18181b;
+                }
+                .content h2 {
+                  color: #fafafa;
+                  font-size: 24px;
+                  margin-bottom: 20px;
+                  font-weight: 600;
+                }
+                .content p {
+                  color: #a1a1aa;
+                  margin-bottom: 16px;
+                  font-size: 15px;
+                }
+                .status-box {
+                  background-color: ${isSuccess ? '#022c22' : '#450a0a'};
+                  border: 1px solid ${isSuccess ? '#065f46' : '#7f1d1d'};
+                  border-radius: 12px;
+                  padding: 25px;
+                  text-align: center;
+                  margin: 30px 0;
+                }
+                .status-icon {
+                  font-size: 48px;
+                  margin-bottom: 10px;
+                }
+                .status-title {
+                  font-size: 20px;
+                  font-weight: 700;
+                  color: ${isSuccess ? '#10b981' : '#ef4444'};
+                  margin-bottom: 8px;
+                }
+                .status-subtitle {
+                  color: ${isSuccess ? '#6ee7b7' : '#fca5a5'};
+                  font-size: 14px;
+                }
+                .amount {
+                  font-size: 36px;
+                  font-weight: 700;
+                  color: ${isSuccess ? '#10b981' : '#ef4444'};
+                  margin-top: 15px;
+                }
+                .info-box {
+                  background-color: #27272a;
+                  border: 1px solid #3f3f46;
+                  border-radius: 8px;
+                  padding: 20px;
+                  margin: 20px 0;
+                }
+                .info-box h3 {
+                  color: #fafafa;
+                  font-size: 16px;
+                  margin-bottom: 15px;
+                  font-weight: 600;
+                }
+                .info-box ul {
+                  list-style: none;
+                  margin: 0;
+                  padding: 0;
+                }
+                .info-box li {
+                  color: #a1a1aa;
+                  padding: 8px 0;
+                  border-bottom: 1px solid #3f3f46;
+                  font-size: 15px;
+                }
+                .info-box li:last-child {
+                  border-bottom: none;
+                }
+                .info-box strong {
+                  color: #fafafa;
+                  font-weight: 600;
+                }
+                .badge {
+                  display: inline-block;
+                  background-color: #422006;
+                  color: #fb923c;
+                  padding: 6px 14px;
+                  border-radius: 6px;
+                  font-size: 13px;
+                  font-weight: 600;
+                  border: 1px solid #7c2d12;
+                }
+                .alert-box {
+                  background-color: #422006;
+                  border: 1px solid #7c2d12;
+                  border-left: 4px solid #f59e0b;
+                  border-radius: 8px;
+                  padding: 20px;
+                  margin: 20px 0;
+                }
+                .alert-box p {
+                  color: #fcd34d;
+                  margin: 8px 0;
+                  font-size: 14px;
+                }
+                .alert-box strong {
+                  color: #fbbf24;
+                }
+                .error-box {
+                  background-color: #450a0a;
+                  border: 1px solid #7f1d1d;
+                  border-left: 4px solid #ef4444;
+                  border-radius: 8px;
+                  padding: 20px;
+                  margin: 20px 0;
+                }
+                .error-box p {
+                  color: #fca5a5;
+                  margin: 8px 0;
+                  font-size: 14px;
+                }
+                .error-box strong {
+                  color: #ef4444;
+                  display: block;
+                  margin-bottom: 8px;
+                }
+                .footer { 
+                  text-align: center; 
+                  padding: 30px;
+                  background-color: #09090b;
+                  border-top: 1px solid #27272a;
+                }
+                .footer p {
+                  color: #71717a;
+                  font-size: 13px;
+                  margin: 5px 0;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h1>${isSuccess ? '¡Bienvenido a Proyecto Cumbre!' : 'Problema con tu Pago'} 🏔️</h1>
                 </div>
+                <div class="content">
+                  <h2>Hola ${memberData.firstName},</h2>
+                  
+                  ${isSuccess ? `
+                    <p>¡Gracias por unirte a nuestro club de montaña! Estamos encantados de tenerte como socio y de acompañarte en esta nueva aventura.</p>
+                    
+                    <div class="status-box">
+                      <div class="status-icon">✅</div>
+                      <div class="status-title">Pago Completado</div>
+                      <div class="status-subtitle">Tu membresía está activa</div>
+                      ${memberData.amount ? `<div class="amount">${(memberData.amount / 100).toFixed(2)}€</div>` : ''}
+                    </div>
 
-                <div class="info-box">
-                  <h3>Detalles de tu membresía</h3>
-                  <ul>
-                    <li><strong>Número de Socio:</strong> ${memberData.memberNumber}</li>
-                    <li><strong>Nombre:</strong> ${memberData.firstName} ${memberData.lastName}</li>
-                    <li><strong>Estado:</strong> <span style="color: #10b981; font-weight: 600;">ACTIVO</span></li>
-                    ${hasLicense ? `<li><strong>Licencia FEDME:</strong> <span class="badge">${memberData.licenseType.toUpperCase()}</span></li>` : '<li><strong>Licencia FEDME:</strong> Sin licencia</li>'}
-                  </ul>
+                    <div class="info-box">
+                      <h3>Detalles de tu membresía</h3>
+                      <ul>
+                        <li><strong>Número de Socio:</strong> ${memberData.memberNumber}</li>
+                        <li><strong>Nombre:</strong> ${memberData.firstName} ${memberData.lastName}</li>
+                        <li><strong>Estado:</strong> <span style="color: #10b981; font-weight: 600;">ACTIVO</span></li>
+                        ${hasLicense ? `<li><strong>Licencia FEDME:</strong> <span class="badge">${memberData.licenseType.toUpperCase()}</span></li>` : '<li><strong>Licencia FEDME:</strong> Sin licencia</li>'}
+                      </ul>
+                    </div>
+
+                    ${hasLicense ? `
+                      <div class="alert-box">
+                        <p><strong>Sobre tu licencia federativa</strong></p>
+                        <p>Tu licencia FEDME está siendo procesada. Te enviaremos un email de confirmación cuando esté activa y disponible para descargar (normalmente 48-72 horas).</p>
+                      </div>
+                    ` : ''}
+
+                    <p>Ya puedes participar en todas nuestras actividades. ¡Nos vemos en la montaña!</p>
+                  ` : `
+                    <p>Hemos recibido tu solicitud de membresía, pero <strong>tu pago no pudo ser procesado correctamente</strong>.</p>
+                    
+                    <div class="status-box">
+                      <div class="status-icon">❌</div>
+                      <div class="status-title">Pago Fallido</div>
+                      <div class="status-subtitle">No se pudo completar el pago</div>
+                    </div>
+
+                    <div class="error-box">
+                      <strong>¿Qué ha pasado?</strong>
+                      <p>• El pago fue rechazado o cancelado</p>
+                      <p>• Tu membresía no ha sido activada</p>
+                      <p>• No se te ha realizado ningún cargo</p>
+                    </div>
+
+                    <div class="info-box">
+                      <h3>¿Qué puedes hacer?</h3>
+                      <ul>
+                        <li><strong>Reintentar el pago</strong> desde nuestra web con otra tarjeta</li>
+                        <li><strong>Contactarnos</strong> si crees que es un error</li>
+                        <li><strong>Verificar</strong> con tu banco que la tarjeta permite pagos online</li>
+                      </ul>
+                    </div>
+
+                    <p style="margin-top: 30px;">Si necesitas ayuda o tienes dudas, contacta con nosotros:</p>
+                    <p style="color: #fafafa; font-weight: 600;">📧 info@proyecto-cumbre.es</p>
+                  `}
+                  
+                  <p style="margin-top: 30px; color: #f97316; font-weight: 600;">Equipo Proyecto Cumbre</p>
                 </div>
-
-                ${hasLicense ? `
-                  <div class="alert-box">
-                    <p><strong>Sobre tu licencia federativa</strong></p>
-                    <p>Tu licencia FEDME está siendo procesada. Te enviaremos un email de confirmación cuando esté activa y disponible para descargar (normalmente 48-72 horas).</p>
-                  </div>
-                ` : ''}
-
-                <p>Ya puedes participar en todas nuestras actividades. ¡Nos vemos en la montaña!</p>
-              ` : `
-                <p>Hemos recibido tu solicitud de membresía, pero <strong>tu pago no pudo ser procesado correctamente</strong>.</p>
-                
-                <div class="status-box">
-                  <div class="status-icon">❌</div>
-                  <div class="status-title">Pago Fallido</div>
-                  <div class="status-subtitle">No se pudo completar el pago</div>
+                <div class="footer">
+                  <p>Este es un email automático, por favor no respondas a este mensaje.</p>
+                  <p>© ${new Date().getFullYear()} Proyecto Cumbre - Club de Montaña</p>
                 </div>
-
-                <div class="error-box">
-                  <strong>¿Qué ha pasado?</strong>
-                  <p>• El pago fue rechazado o cancelado</p>
-                  <p>• Tu membresía no ha sido activada</p>
-                  <p>• No se te ha realizado ningún cargo</p>
-                </div>
-
-                <div class="info-box">
-                  <h3>¿Qué puedes hacer?</h3>
-                  <ul>
-                    <li><strong>Reintentar el pago</strong> desde nuestra web con otra tarjeta</li>
-                    <li><strong>Contactarnos</strong> si crees que es un error</li>
-                    <li><strong>Verificar</strong> con tu banco que la tarjeta permite pagos online</li>
-                  </ul>
-                </div>
-
-                <p style="margin-top: 30px;">Si necesitas ayuda o tienes dudas, contacta con nosotros:</p>
-                <p style="color: #fafafa; font-weight: 600;">📧 info@proyecto-cumbre.es</p>
-              `}
-              
-              <p style="margin-top: 30px; color: #f97316; font-weight: 600;">Equipo Proyecto Cumbre</p>
-            </div>
-            <div class="footer">
-              <p>Este es un email automático, por favor no respondas a este mensaje.</p>
-              <p>© ${new Date().getFullYear()} Proyecto Cumbre - Club de Montaña</p>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
+              </div>
+            </body>
+          </html>
+        `;
 
     try {
       const result = await this.send({
