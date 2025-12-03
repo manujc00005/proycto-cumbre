@@ -205,9 +205,9 @@ export const LICENSE_TYPES: LicenseType[] = [
     territory: 'regional_national',
     includesExtras: false,
     prices: {
-      infantil: 27.00,
-      juvenil: 27.00,
-      mayor: 55.00
+      infantil: 22.00,
+      juvenil: 22.00,
+      mayor: 52.00
     },
     coverage: 'Cobertura autonómica ampliada a toda España: Excursiones, Senderismo, Escalada, Vías Ferratas, Alpinismo, Esquí de Montaña, Descenso de Barrancos, Acampadas Alpinísticas, Raquetas de Nieve, Marcha Nórdica, Travesías y Carreras por Montaña',
     popular: false
@@ -219,9 +219,9 @@ export const LICENSE_TYPES: LicenseType[] = [
     territory: 'regional_national',
     includesExtras: true,
     prices: {
-      infantil: 41.00,
-      juvenil: 41.00,
-      mayor: 70.00
+      infantil: 36.00,
+      juvenil: 36.00,
+      mayor: 69.00
     },
     coverage: 'Todo lo de A NAC + BTT, Espeleología y Esquí Nórdico (no competitivos) con cobertura en toda España',
     popular: true  // ⭐ Recomendada para quienes quieren cobertura nacional desde autonómica
@@ -237,9 +237,9 @@ export const LICENSE_TYPES: LicenseType[] = [
     territory: 'national',
     includesExtras: false,
     prices: {
-      infantil: 27.00,
-      juvenil: 27.00,
-      mayor: 64.00
+      infantil: 29.00,
+      juvenil: 29.00,
+      mayor: 66.00
     },
     coverage: 'Excursiones, Senderismo, Escalada, Vías Ferratas, Alpinismo, Esquí de Montaña, Descenso de Barrancos, Acampadas Alpinísticas, Raquetas de Nieve, Marcha Nórdica, Travesías y Carreras por Montaña',
     popular: false
@@ -251,9 +251,9 @@ export const LICENSE_TYPES: LicenseType[] = [
     territory: 'national',
     includesExtras: true,
     prices: {
-      infantil: 41.00,
-      juvenil: 41.00,
-      mayor: 81.00
+      infantil: 43.00,
+      juvenil: 43.00,
+      mayor: 83.00
     },
     coverage: 'Todo lo de B + BTT, Espeleología y Esquí Nórdico (no competitivos)',
     popular: true  // ⭐ Recomendada para nacional
@@ -269,9 +269,9 @@ export const LICENSE_TYPES: LicenseType[] = [
     territory: 'european',
     includesExtras: true,  // Siempre incluye extras según FEDME
     prices: {
-      infantil: 85.00,
-      juvenil: 85.00,
-      mayor: 125.00
+      infantil: 87.00,
+      juvenil: 87.00,
+      mayor: 127.00
     },
     coverage: 'Cobertura completa en Europa incluyendo BTT, Espeleología y Esquí Nórdico (no competitivos)',
     popular: false
