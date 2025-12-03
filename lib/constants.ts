@@ -340,3 +340,33 @@ export function isValidLicenseId(licenseId: string): boolean {
 export function getLicenseById(licenseId: string): LicenseType | null {
   return LICENSE_TYPES.find(l => l.id === licenseId) || null;
 }
+
+export function formatLicenseType(licenseType: string): string {
+  const licenseMap: Record<string, string> = {
+    'none': 'Sin Licencia',
+    'a': 'A (Autonómica)',
+    'a_plus': 'A+ (Autonómica Plus)',
+    'a_nac': 'A NAC (Autonómica Nacional)',
+    'a_nac_plus': 'A NAC+ (Autonómica Nacional Plus)',
+    'b': 'B (Nacional)',
+    'b_plus': 'B+ (Nacional Plus)',
+    'c': 'C (Europea)',
+  };
+
+  return licenseMap[licenseType] || licenseType.toUpperCase();
+}
+
+export function formatShortLicenseType(licenseType: string): string {
+  const licenseMap: Record<string, string> = {
+    'none': 'Sin Licencia',
+    'a': 'A',
+    'a_plus': 'A+',
+    'a_nac': 'A NAC',
+    'a_nac_plus': 'A NAC+',
+    'b': 'B',
+    'b_plus': 'B+',
+    'c': 'C',
+  };
+
+  return licenseMap[licenseType] || licenseType.toUpperCase();
+}

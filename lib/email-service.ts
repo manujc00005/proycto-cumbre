@@ -1,6 +1,7 @@
 // lib/email/email-service.ts
 import { Resend } from 'resend';
 import { logger } from '@/lib/logger';
+import { formatLicenseType, formatShortLicenseType } from './constants';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -379,6 +380,9 @@ export class EmailService {
       licenseType: data.licenseType,
     });
 
+   const formattedLicense = formatLicenseType(data.licenseType);
+   const shortFormattedLicense = formatShortLicenseType(data.licenseType);
+
    const html = `
       <!DOCTYPE html>
       <html>
@@ -522,14 +526,14 @@ export class EmailService {
               <p>Tenemos excelentes noticias. Tu licencia FEDME ya ha sido procesada y está completamente activa.</p>
               
               <div class="badge-box">
-                <div class="success-badge">LICENCIA ${data.licenseType.toUpperCase()} ACTIVA ✓</div>
+                <div class="success-badge">LICENCIA: ${shortFormattedLicense} ACTIVA ✓</div>
               </div>
 
               <div class="info-box">
                 <h3>Detalles de tu licencia</h3>
                 <ul>
                   <li><strong>Número de Socio:</strong> ${data.memberNumber}</li>
-                  <li><strong>Tipo de Licencia:</strong> ${data.licenseType.toUpperCase()}</li>
+                  <li><strong>Tipo de Licencia:</strong>  ${formattedLicense}</li>
                   <li><strong>Válida hasta:</strong> ${data.validUntil.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</li>
                 </ul>
               </div>
