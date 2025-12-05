@@ -572,4 +572,161 @@ export class EmailService {
       throw error;
     }
   }
+
+    /**
+   * Email de contacto desde formulario web
+   */
+  static async sendContactForm(data: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  }) {
+    logger.log('📧 [Email] Preparando email de contacto:', {
+      from: data.email,
+      subject: data.subject,
+    });
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              line-height: 1.6; 
+              color: #e4e4e7;
+              background-color: #09090b;
+              padding: 20px;
+            }
+            .container { 
+              max-width: 600px; 
+              margin: 0 auto; 
+              background-color: #18181b;
+              border: 1px solid #27272a;
+              border-radius: 12px;
+              overflow: hidden;
+            }
+            .header { 
+              background: #000000;
+              padding: 40px 30px;
+              text-align: center;
+            }
+            .header h1 {
+              color: #f97316;
+              font-size: 32px;
+              font-weight: 700;
+              margin: 0;
+              letter-spacing: -0.5px;
+            }
+            .content { 
+              padding: 40px 30px;
+              background-color: #18181b;
+            }
+            .content h2 {
+              color: #fafafa;
+              font-size: 24px;
+              margin-bottom: 20px;
+              font-weight: 600;
+            }
+            .info-box {
+              background-color: #27272a;
+              border: 1px solid #3f3f46;
+              border-radius: 8px;
+              padding: 20px;
+              margin: 20px 0;
+            }
+            .info-box h3 {
+              color: #fafafa;
+              font-size: 14px;
+              margin-bottom: 15px;
+              font-weight: 600;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+            .info-box p {
+              color: #a1a1aa;
+              margin: 8px 0;
+              font-size: 15px;
+            }
+            .info-box strong {
+              color: #fafafa;
+              font-weight: 600;
+            }
+            .message-box {
+              background-color: #09090b;
+              border-left: 4px solid #f97316;
+              border-radius: 8px;
+              padding: 20px;
+              margin: 20px 0;
+            }
+            .message-box p {
+              color: #e4e4e7;
+              white-space: pre-wrap;
+              line-height: 1.8;
+            }
+            .footer { 
+              text-align: center; 
+              padding: 30px;
+              background-color: #09090b;
+              border-top: 1px solid #27272a;
+            }
+            .footer p {
+              color: #71717a;
+              font-size: 13px;
+              margin: 5px 0;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>PROYECTO CUMBRE</h1>
+            </div>
+            
+            <div class="content">
+              <h2>Nuevo mensaje de contacto</h2>
+              
+              <div class="info-box">
+                <h3>Información del remitente</h3>
+                <p><strong>Nombre:</strong> ${data.name}</p>
+                <p><strong>Email:</strong> ${data.email}</p>
+                <p><strong>Asunto:</strong> ${data.subject}</p>
+              </div>
+
+              <div class="message-box">
+                <p>${data.message}</p>
+              </div>
+
+              <p style="margin-top: 30px; color: #a1a1aa; font-size: 14px;">
+                Responde directamente a este email para contactar con ${data.name}.
+              </p>
+            </div>
+            
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} Proyecto Cumbre - Club de Montaña</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    try {
+      const result = await this.send({
+        to: this.adminEmail, // Envía a tu email de admin
+        subject: `[Contacto Web] ${data.subject}`,
+        html,
+        from: this.from,
+      });
+
+      logger.apiSuccess('Email de contacto enviado');
+      return result;
+    } catch (error) {
+      logger.apiError('Fallo enviando email de contacto', error);
+      throw error;
+    }
+  }
 }

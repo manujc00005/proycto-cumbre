@@ -33,6 +33,8 @@ export default function HeaderSection() {
             <li><a href="#aventuras" className="hover:text-orange-400 transition-colors font-medium whitespace-nowrap">AVENTURAS</a></li>
             <li><a href="#events" className="hover:text-orange-400 transition-colors font-medium whitespace-nowrap">EVENTS</a></li>
             <li><a href="#merchant" className="hover:text-orange-400 transition-colors font-medium whitespace-nowrap">MERCHANT</a></li>
+             <li><a href="#contact" className="hover:text-orange-400 transition-colors font-medium whitespace-nowrap">CONTACTO</a></li>
+
           </ul>
 
           {/* Social Media Icons & Cart - Desktop */}
