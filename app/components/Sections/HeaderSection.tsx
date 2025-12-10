@@ -158,6 +158,15 @@ export default function HeaderSection() {
                   MERCH
                 </a>
               </li>
+              <li>
+                <a 
+                  href="#contact" 
+                  className="block py-3 px-4 text-center text-base font-medium hover:text-orange-400 hover:bg-zinc-900/50 rounded-lg transition-all"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  CONTACTO
+                </a>
+              </li>
             </ul>
 
             {/* Social Media */}
