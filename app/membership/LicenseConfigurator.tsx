@@ -157,7 +157,9 @@ export default function LicenseConfigurator({
                   <div className="flex-1 space-y-2">
                     {/* Icon + Name */}
                     <div className="flex items-center gap-3">
-                      <span className="text-3xl">{territory.icon}</span>
+                      <span className="text-white text-3xl inline-flex items-center whitespace-nowrap leading-none">
+                        {territory.icon}
+                      </span>
                       <div>
                         <h4 className={`font-bold text-lg ${isNone ? 'text-yellow-300' : 'text-white'}`}>
                           {territory.name}

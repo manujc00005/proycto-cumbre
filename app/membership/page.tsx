@@ -6,7 +6,7 @@ import { Check, AlertCircle, AlertTriangle, Mountain, X } from 'lucide-react';
 import LicenseConfigurator from './LicenseConfigurator';
 import { AgeCategory, calculateAge, calculateAgeCategory, getCategoryLabel, getLicensePrice, LICENSE_TYPES, MEMBERSHIP_FEE } from '@/lib/constants';
 import { logger } from '@/lib/logger';
-
+import styles from './page.module.css';
 
 const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const PANTS_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -713,7 +713,7 @@ export default function MembershipPage() {
                     const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
                     return minDate.toISOString().split('T')[0];
                   })()}
-                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${
+                  className={`${styles.dateInput}  w-full px-4 py-3 bg-zinc-800 border-2 ${
                     errors.birthDate ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
                   } rounded-lg text-white focus:outline-none transition-all`}
                 />
