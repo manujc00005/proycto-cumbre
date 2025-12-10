@@ -965,11 +965,12 @@ export default function MembershipPage() {
               <span className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">4</span>
               Tallas de Ropa
             </h2>
+
             <p className="text-zinc-400 text-sm mb-6">
               Para que puedas ir fronteando con estilo CUMBRE
             </p>
 
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6">
               {/* Camiseta */}
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-2">
@@ -987,44 +988,9 @@ export default function MembershipPage() {
                   ))}
                 </select>
               </div>
-
-              {/* Sudadera */}
-              <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-2">
-                  Sudadera
-                </label>
-                <select
-                  name="hoodieSize"
-                  value={formData.hoodieSize}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 bg-zinc-800 border-2 border-zinc-700 focus:border-orange-500 rounded-lg text-white focus:outline-none transition-all"
-                >
-                  <option value="">Selecciona...</option>
-                  {SHIRT_SIZES.map(size => (
-                    <option key={size} value={size}>{size}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Pantalón */}
-              <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-2">
-                  Pantalón
-                </label>
-                <select
-                  name="pantsSize"
-                  value={formData.pantsSize}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 bg-zinc-800 border-2 border-zinc-700 focus:border-orange-500 rounded-lg text-white focus:outline-none transition-all"
-                >
-                  <option value="">Selecciona...</option>
-                  {PANTS_SIZES.map(size => (
-                    <option key={size} value={size}>{size}</option>
-                  ))}
-                </select>
-              </div>
             </div>
           </section>
+
 
           {/* Resumen de costos */}
           {ageCategory && formData.licenseType && (

@@ -28,7 +28,6 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
-, "app/membership/LicenseSelector.tsx.backup", "lib/constants.ts.backup"  ],
+    "**/*.mts"],
   "exclude": ["node_modules"]
 }

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CartDrawer } from "./components/Cart/CartDrawer";
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { validateEnv } from "@/lib/env";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,6 +18,7 @@ const geistMono = Geist_Mono({
 // Opcional pero recomendable: usar una variable de entorno
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.proyecto-cumbre.es";
+validateEnv();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

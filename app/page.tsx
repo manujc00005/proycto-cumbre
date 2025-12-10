@@ -259,38 +259,38 @@ export default function Home() {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Quiénes somos</h2>
           <div className="w-20 h-1 bg-orange-500 mb-8 md:mb-12"></div>
 
-          <div className="grid md:grid-cols-2 gap-12 md:gap-16">
+          <div className="grid md:grid-cols-2 gap-12 md:gap-16 md:items-start">
             {/* Texto */}
-            <div className="space-y-6">
+            <div className="space-y-6 ">
                <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                Proyecto Cumbre empezó como empiezan las mejores (y peores) ideas: agotados, oliendo a cabra y sentados en un bar cutre después de una ruta demasiado larga. Entre sudor, barro y promesas que no deberíamos haber hecho, decidimos montar un club de montaña. No porque el mundo lo necesitara, sino porque nosotros sí.
+                Proyecto Cumbre nació como nacen las mejores (y peores) ideas: reventados, oliendo a cabra y sentados en un bar cutre después de una ruta demasiado larga. Entre sudor, barro y promesas que no deberíamos haber hecho, decidimos montar un club de montaña. No porque el mundo lo pidiera, sino porque nosotros sí.              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+              Somos un grupo que no comparte cordura, pero sí un lugar común: el campo. Y desde aquel día se ha sumado más gente como nosotros: amantes del desnivel y ciudadanos medianamente funcionales de lunes a viernes.              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+              No vendemos un estilo de vida perfecto. Aquí hay postureo, fotos mal hechas, rutas que se nos van de las manos, grupos de WhatsApp imposibles de controlar, y una disciplina bastante cuestionable.              </p>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+                Pero también hay algo serio: la comunidad.
+                Una comunidad que sale al monte para respirar, desconectar, buscar terreno nuevo y pasar más horas afuera que frente a una pantalla. Gente que sabe que explorar es mejor que competir y que la montaña enseña más que cualquier documental de la 2.
               </p>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                 Esto nace de un grupo que no comparte cordura, pero sí un lugar común: El campo. Y desde aquel día, el club ha ido creciendo con más gente como nosotros: exploradores, corredores, gravelers, escaladores, flipados del desnivel y ciudadanos funcionales solo de lunes a viernes.
-              </p>
-              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                No vendemos un estilo de vida perfecto. Aquí hay postureo, hay fotos mal hechas, hay rutas que se nos van de las manos, grupos de WhatsApp que nadie controla, abandonos dignos de documental y una disciplina que… bueno, digamos que existe cuando conviene.
-              </p>
-              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                Pero también hay algo serio: <strong>la comunidad</strong>.<br />
-                Una comunidad que sale al monte para respirar, para desconectar, para buscar terreno nuevo y para pasar más horas al aire libre que frente a una pantalla. Gente que entiende que explorar es mejor que competir y que la montaña sabe más que cualquier entrenador.
-              </p>
-              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-                No te vamos a prometer éxito, medallas ni transformaciones mágicas.<br />
-                Lo que sí te prometemos es esto:
+               No prometemos medallas ni transformaciones mágicas. Prometemos esto:
               </p>
               <ul className="text-base md:text-lg text-zinc-300 leading-relaxed list-disc list-inside mt-2">
                 <li>Aventuras reales</li>
                 <li>Terreno de verdad</li>
                 <li>Gente auténtica</li>
                 <li>Muchas decisiones dudosas</li>
+                <li>Y una comunidad que, pese a todo… funciona.</li>
               </ul>
+              <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
+Proyecto Cumbre: el club que no debería existir, pero existe. Y cada día somos más.              </p>
             </div>
 
             {/* Carrusel reutilizable */}
             <Carousel 
               items={teamMembers}
               autoPlayInterval={3000}
+              height="h-[400px] md:h-[650px]"
               showControls={true}
               showDots={true}
               showCounter={true}

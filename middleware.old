@@ -1,0 +1,78 @@
+// middleware.ts
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { isStripeIP } from '@/lib/stripe-ips';
+import { getClientIP } from './lib/rate-limit';
+
+// Almacenamiento simple en memoria
+const requestLog = new Map<string, number[]>();
+
+interface NextRequestWithIP extends NextRequest {
+  ip?: string;
+}
+
+function simpleRateLimit(ip: string, maxRequests: number, windowMs: number): boolean {
+  // Limpieza de seguridad: si el mapa es muy grande, lo vaciamos
+  if (requestLog.size > 5000) {
+    requestLog.clear();
+  }
+
+  const now = Date.now();
+  const requests = requestLog.get(ip) || [];
+  
+  const recentRequests = requests.filter(time => now - time < windowMs);
+  
+  if (recentRequests.length >= maxRequests) {
+    return false;
+  }
+  
+  recentRequests.push(now);
+  requestLog.set(ip, recentRequests);
+  
+  return true;
+}
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  
+  // Obtener IP de forma segura
+  let ip = getClientIP(request);
+  const forwarded = request.headers.get('x-forwarded-for');
+  if (forwarded) {
+    ip = forwarded.split(',')[0].trim();
+  }
+
+  const isDev = process.env.NODE_ENV === 'development';
+
+  // 1. Webhook de Stripe (Siempre protegido)
+  if (pathname === '/api/webhooks/stripe') {
+    if (!isStripeIP(ip)) {
+      // Permitir en dev si quieres probar webhooks locales, si no, descomenta abajo
+      // return new NextResponse(JSON.stringify({ error: 'Forbidden' }), { status: 403 });
+    }
+    return NextResponse.next();
+  }
+  
+  // 2. MODO DESARROLLO: PASE LIBRE (Happy Flow)
+  // Esto evitará que te bloquees a ti mismo mientras programas
+  if (isDev) {
+    return NextResponse.next();
+  }
+
+  // 3. MODO PRODUCCIÓN: Rate Limits
+  // Si NO es desarrollo, aplicamos lógica
+  if (pathname === '/api/members') {
+    if (!simpleRateLimit(ip, 10, 60000)) {
+      return new NextResponse(
+        JSON.stringify({ error: 'Demasiadas solicitudes. Espera un minuto.' }),
+        { status: 429, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: '/api/:path*',
+};
