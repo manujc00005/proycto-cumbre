@@ -23,7 +23,7 @@ export default function MerchantSection() {
         {/* Header */}
         <div className="mb-12 md:mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-zinc-900 mb-4">
-            Merchant
+            Merch
           </h2>
           <div className="w-20 h-1 bg-orange-500 mb-6"></div>
           <p className="text-zinc-600 max-w-2xl text-lg">

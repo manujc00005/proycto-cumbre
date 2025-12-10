@@ -32,7 +32,7 @@ export default function HeaderSection() {
             <li><a href="#quienes-somos" className="hover:text-orange-400 transition-colors font-medium whitespace-nowrap">QUIÉNES SOMOS</a></li>
             <li><a href="#aventuras" className="hover:text-orange-400 transition-colors font-medium whitespace-nowrap">AVENTURAS</a></li>
             <li><a href="#events" className="hover:text-orange-400 transition-colors font-medium whitespace-nowrap">EVENTS</a></li>
-            <li><a href="#merchant" className="hover:text-orange-400 transition-colors font-medium whitespace-nowrap">MERCHANT</a></li>
+            <li><a href="#merchant" className="hover:text-orange-400 transition-colors font-medium whitespace-nowrap">MERCH</a></li>
              <li><a href="#contact" className="hover:text-orange-400 transition-colors font-medium whitespace-nowrap">CONTACTO</a></li>
 
           </ul>
@@ -155,7 +155,7 @@ export default function HeaderSection() {
                   className="block py-3 px-4 text-center text-base font-medium hover:text-orange-400 hover:bg-zinc-900/50 rounded-lg transition-all"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  MERCHANT
+                  MERCH
                 </a>
               </li>
             </ul>

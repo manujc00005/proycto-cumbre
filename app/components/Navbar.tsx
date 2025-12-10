@@ -13,7 +13,7 @@ export default function Navbar() {
     { href: '/about', label: 'QUIÉNES SOMOS' },
     { href: '/adventures', label: 'AVENTURAS' },
     { href: '/events', label: 'EVENTS' },
-    { href: '/merchant', label: 'MERCHANT' },
+    { href: '/merchant', label: 'MERCH' },
   ];
 
   return (
