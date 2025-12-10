@@ -258,11 +258,11 @@ export default function MisaPage() {
           >
             <ul className="space-y-3 text-left">
               {[
-                { icon: '👕', text: 'Camiseta de regalo' },
-                { icon: '📍', text: 'Localización enviada 2 horas antes' },
-                { icon: '📲', text: 'Track enviado 1 hora antes' },
+                { icon: '👕', text: 'Camiseta para los infiltrados' },
+                { icon: '📍', text: 'Coordenadas 2h antes' },
+                { icon: '📲', text: 'Track 1h antes' },
                 { icon: '🔒', text: 'Plazas limitadas' },
-                { icon: '🍻', text: 'Post furtivo' },
+                { icon: '🍻', text: 'Post clandestino' },
               ].map((item, i) => (
                 <motion.li 
                   key={i}
@@ -321,7 +321,7 @@ export default function MisaPage() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
-            Pago seguro con Stripe
+            Pago 100% seguro
           </motion.p>
 
           {/* Urgency Footer - MÁS GRANDE */}
