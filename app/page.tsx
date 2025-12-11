@@ -27,16 +27,18 @@ export default function Home() {
 
   // Define los datos del carrusel del equipo
   const teamMembers: CarouselItem[] = [
-      { id: 1, title: "", subtitle: "", image: "/team/m1.jpg" },
-      { id: 2, title: "", subtitle: "", image: "/team/m2.jpg" },
-      { id: 3, title: "", subtitle: "", image: "/team/m3.jpg" },
-      { id: 4, title: "", subtitle: "", image: "/team/m4.jpg" },
-      { id: 5, title: "", subtitle: "", image: "/team/m5.jpg" },
-      { id: 6, title: "", subtitle: "", image: "/team/m6.jpg" },
-      // { id: 7, title: "Miembro 7", subtitle: "Aventurero", image: "/team/m4.jpg" },
-      { id: 8, title: "", subtitle: "", image: "/team/m8.jpg" },
-      // { id: 9, title: "Miembro 9", subtitle: "Trekker", image: "/team/m3.jpg" },
-      // { id: 10, title: "Miembro 10", subtitle: "Ultra runner", image: "/team/m2.jpg" }
+      { id: 1, title: "", subtitle: "", image: "/quienes/quienes1.jpeg" },
+      { id: 2, title: "", subtitle: "", image: "/quienes/quienes2.jpeg" },
+      { id: 3, title: "", subtitle: "", image: "/quienes/quienes3.jpeg" },
+      { id: 4, title: "", subtitle: "", image: "/quienes/quienes4.jpeg" },
+      { id: 5, title: "", subtitle: "", image: "/quienes/quienes5.jpeg" },
+      { id: 6, title: "", subtitle: "", image: "/quienes/quienes6.jpeg" },
+      { id: 7, title: "", subtitle: "", image: "/quienes/quienes7.jpeg" },
+      { id: 8, title: "", subtitle: "", image: "/quienes/quienes8.jpeg" },
+      { id: 9, title: "", subtitle: "", image:  "/quienes/quienes9.jpeg" },
+      { id: 10, title: "", subtitle: "", image:  "/quienes/quienes10.jpeg" },
+      { id: 11, title: "", subtitle: "", image:  "/quienes/quienes11.jpeg" },
+      { id: 12, title: "", subtitle: "", image:  "/quienes/quienes12.jpeg" }
     ];
 
   // Array de fotos de Picos

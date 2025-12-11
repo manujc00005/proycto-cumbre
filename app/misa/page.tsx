@@ -157,23 +157,25 @@ export default function MisaPage() {
         >
           
           {/* Main Title */}
-          <motion.h1 
+         {/* Main Title - Image */}
+          <motion.div
             className={`
-              font-black 
-              tracking-tighter 
-              leading-none 
               mb-8
               ${isMobile 
-                ? 'text-[clamp(60px,15vw,100px)]' 
-                : 'text-[clamp(100px,20vw,200px)]'
+                ? 'w-[clamp(300px,80vw,500px)]' 
+                : 'w-[clamp(500px,50vw,800px)]'
               }
             `}
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.8 }}
           >
-            MISA<span className={`text-white/40 align-super ${isMobile ? 'text-3xl' : 'text-5xl'}`}>™</span>
-          </motion.h1>
+            <img 
+              src="/misa3.png" 
+              alt="MISA" 
+              className="w-full h-auto"
+            />
+          </motion.div>
 
           {/* Subtitle - Date */}
           <motion.p 
@@ -247,7 +249,7 @@ export default function MisaPage() {
             </div>
           </motion.div>
 
-          {/* Info Box */}
+         {/* Info Box */}
           <motion.div
             className={`mx-auto mb-10 bg-zinc-900/60 backdrop-blur-md border border-white/10 rounded-2xl ${
               isMobile ? 'max-w-sm p-6' : 'max-w-md p-8'
@@ -258,7 +260,7 @@ export default function MisaPage() {
           >
             <ul className="space-y-3 text-left">
               {[
-                { icon: '👕', text: 'Camiseta para los infiltrados' },
+                { icon: '👕', text: 'Camiseta exclusiva corredores' },
                 { icon: '📍', text: 'Coordenadas 2h antes' },
                 { icon: '📲', text: 'Track 1h antes' },
                 { icon: '🔒', text: 'Plazas limitadas' },
@@ -266,11 +268,11 @@ export default function MisaPage() {
               ].map((item, i) => (
                 <motion.li 
                   key={i}
-                  className="flex items-center gap-3 text-white/80 text-sm"
+                  className="flex items-start gap-3 text-white/80 text-sm"
                   variants={fadeInUp}
                 >
-                  <span className="text-lg">{item.icon}</span>
-                  <span className="tracking-wide">{item.text}</span>
+                  <span className="text-lg w-6 flex-shrink-0">{item.icon}</span>
+                  <span className="tracking-wide flex-1">{item.text}</span>
                 </motion.li>
               ))}
             </ul>
