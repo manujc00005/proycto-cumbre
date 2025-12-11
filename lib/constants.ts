@@ -167,7 +167,7 @@ export const LICENSE_TYPES: LicenseType[] = [
   // ============================================================
   {
     id: 'a',
-    name: 'A - Autonómica',
+    name: 'A • Autonómica',
     shortName: 'A',
     territory: 'regional',
     includesExtras: false,
@@ -181,7 +181,7 @@ export const LICENSE_TYPES: LicenseType[] = [
   },
   {
     id: 'a_plus',
-    name: 'A+ - Autonómica Plus',
+    name: 'A+ • Autonómica Plus',
     shortName: 'A+',
     territory: 'regional',
     includesExtras: true,
@@ -200,7 +200,7 @@ export const LICENSE_TYPES: LicenseType[] = [
   // ============================================================
   {
     id: 'a_nac',
-    name: 'A NAC - Autonómica Nacional',
+    name: 'A NAC • Autonómica Nacional',
     shortName: 'A NAC',
     territory: 'regional_national',
     includesExtras: false,
@@ -214,7 +214,7 @@ export const LICENSE_TYPES: LicenseType[] = [
   },
   {
     id: 'a_nac_plus',
-    name: 'A NAC+ - Autonómica Nacional Plus',
+    name: 'A NAC+ • Autonómica Nacional Plus',
     shortName: 'A NAC+',
     territory: 'regional_national',
     includesExtras: true,
@@ -246,7 +246,7 @@ export const LICENSE_TYPES: LicenseType[] = [
   },
   {
     id: 'b_plus',
-    name: 'B+ - Nacional Plus',
+    name: 'B+ • Nacional Plus',
     shortName: 'B+',
     territory: 'national',
     includesExtras: true,
@@ -264,7 +264,7 @@ export const LICENSE_TYPES: LicenseType[] = [
   // ============================================================
   {
     id: 'c',
-    name: 'C - Europea',
+    name: 'C • Europea',
     shortName: 'C',
     territory: 'european',
     includesExtras: true,  // Siempre incluye extras según FEDME

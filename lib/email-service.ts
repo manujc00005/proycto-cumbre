@@ -729,4 +729,307 @@ export class EmailService {
       throw error;
     }
   }
+
+  /**
+   * Email de confirmación MISA
+   */
+  static async sendMisaConfirmation(data: {
+    email: string;
+    name: string;
+    phone: string;
+    shirtSize: string;
+    amount: number;
+  }) {
+    logger.log('📧 [MISA] Preparando email de confirmación:', {
+      email: data.email,
+      name: data.name,
+    });
+
+    const whatsappLink = process.env.MISA_WHATSAPP_GROUP || 'https://chat.whatsapp.com/tu-grupo-aqui';
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              line-height: 1.6; 
+              color: #e4e4e7;
+              background-color: #09090b;
+              padding: 20px;
+            }
+            .container { 
+              max-width: 600px; 
+              margin: 0 auto; 
+              background-color: #18181b;
+              border: 1px solid #27272a;
+              border-radius: 12px;
+              overflow: hidden;
+            }
+            .header { 
+              background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+              padding: 50px 30px;
+              text-align: center;
+            }
+            .header h1 {
+              color: #ffffff;
+              font-size: 48px;
+              font-weight: 900;
+              margin: 0;
+              letter-spacing: -1px;
+              text-transform: uppercase;
+            }
+            .header .tm {
+              font-size: 20px;
+              vertical-align: super;
+              opacity: 0.7;
+            }
+            .content { 
+              padding: 40px 30px;
+              background-color: #18181b;
+            }
+            .success-box {
+                background: linear-gradient(135deg, #022c22 0%, #064e3b 100%);
+                border: 1px solid #10b981;
+                border-radius: 8px;
+                padding: 20px;
+                text-align: center;
+                margin: 25px 0;
+              }
+              .success-icon {
+                font-size: 32px;
+                margin-bottom: 8px;
+              }
+             .success-title {
+                font-size: 18px;
+                font-weight: 600;
+                color: #10b981;
+                margin-bottom: 4px;
+              }
+              .success-subtitle {
+                color: #6ee7b7;
+                font-size: 13px;
+              }
+            .info-box {
+              background-color: #27272a;
+              border: 1px solid #3f3f46;
+              border-radius: 8px;
+              padding: 25px;
+              margin: 25px 0;
+            }
+            .info-box h3 {
+              color: #f97316;
+              font-size: 18px;
+              margin-bottom: 20px;
+              font-weight: 600;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+            }
+            .info-row {
+              display: flex;
+              justify-content: space-between;
+              padding: 12px 0;
+              border-bottom: 1px solid #3f3f46;
+            }
+            .info-row:last-child {
+              border-bottom: none;
+            }
+            .info-label {
+              color: #a1a1aa;
+              font-size: 14px;
+            }
+            .info-value {
+              color: #fafafa;
+              font-weight: 600;
+              font-size: 14px;
+            }
+            .whatsapp-box {
+              background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+              border-radius: 12px;
+              padding: 30px;
+              text-align: center;
+              margin: 30px 0;
+            }
+            .whatsapp-box h3 {
+              color: #ffffff;
+              font-size: 22px;
+              margin-bottom: 15px;
+              font-weight: 700;
+            }
+            .whatsapp-box p {
+              color: #d1fae5;
+              margin-bottom: 20px;
+              font-size: 15px;
+            }
+            .whatsapp-button {
+              display: inline-block;
+              background-color: #25D366;
+              color: #ffffff;
+              padding: 16px 40px;
+              border-radius: 8px;
+              text-decoration: none;
+              font-weight: 700;
+              font-size: 16px;
+              transition: all 0.3s;
+            }
+            .features-list {
+              list-style: none;
+              padding: 0;
+              margin: 25px 0;
+            }
+            .features-list li {
+              padding: 12px 0;
+              color: #a1a1aa;
+              font-size: 15px;
+              display: flex;
+              align-items: center;
+              gap: 12px;
+            }
+            .features-list .icon {
+              font-size: 20px;
+              width: 24px;
+              text-align: center;
+            }
+            .footer { 
+              text-align: center; 
+              padding: 30px;
+              background-color: #09090b;
+              border-top: 1px solid #27272a;
+            }
+            .footer p {
+              color: #71717a;
+              font-size: 13px;
+              margin: 5px 0;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>MISA<span class="tm">™</span></h1>
+              <p style="color: rgba(255,255,255,0.8); margin-top: 10px; font-size: 14px; letter-spacing: 2px;">
+                RITUAL FURTIVO · 23 ENERO 2026
+              </p>
+            </div>
+            
+            <div class="content">
+              <div class="success-box">
+                <div class="success-icon">✅</div>
+                <div class="success-title">¡PLAZA CONFIRMADA!</div>
+                <div class="success-subtitle">El pago se ha completado correctamente</div>
+              </div>
+
+              <p style="color: #fafafa; font-size: 18px; margin-bottom: 20px;">
+                Hola <strong>${data.name}</strong>,
+              </p>
+
+              <p style="color: #a1a1aa; margin-bottom: 25px;">
+                Tu reserva para MISA ha sido confirmada. Ya formas parte de este ritual único. 
+                A continuación encontrarás todos los detalles de tu inscripción.
+              </p>
+
+              <div class="info-box">
+                <h3>📋 Detalles de tu reserva</h3>
+                <div class="info-row">
+                  <span class="info-label">Nombre</span>
+                  <span class="info-value">${data.name}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Email</span>
+                  <span class="info-value">${data.email}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Móvil</span>
+                  <span class="info-value">${data.phone}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Talla camiseta</span>
+                  <span class="info-value">${data.shirtSize}</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Importe pagado</span>
+                  <span class="info-value">${(data.amount / 100).toFixed(2)}€</span>
+                </div>
+              </div>
+
+              <div class="info-box">
+                <h3>🎁 ¿Qué incluye tu plaza?</h3>
+                <ul class="features-list">
+                  <li>
+                    <span class="icon">👕</span>
+                    <span>Camiseta exclusiva para corredores (talla ${data.shirtSize})</span>
+                  </li>
+                  <li>
+                    <span class="icon">📍</span>
+                    <span>Coordenadas exactas 2h antes del evento</span>
+                  </li>
+                  <li>
+                    <span class="icon">📲</span>
+                    <span>Track en vivo 1h antes del inicio</span>
+                  </li>
+                  <li>
+                    <span class="icon">🔒</span>
+                    <span>Acceso al grupo privado de WhatsApp</span>
+                  </li>
+                  <li>
+                    <span class="icon">🍻</span>
+                    <span>Post clandestino tras el evento</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="whatsapp-box">
+                <h3>💬 Únete al grupo de WhatsApp</h3>
+                <p>
+                  Antes de la carrera, toda la información clave se compartirá únicamente en el grupo privado de WhatsApp.
+                  Detalles del evento, avisos de última hora y mensajes que sólo recibirán quienes estén dentro.<br />
+                  Si quieres estar realmente preparado para LA MISA, ya sabes dónde entrar.
+                </p>
+                <a href="${whatsappLink}" class="whatsapp-button">
+                  Unirse al grupo →
+                </a>
+              </div>
+
+              <p style="color: #a1a1aa; font-size: 14px; margin-top: 30px; padding: 20px; background-color: #27272a; border-radius: 8px; border-left: 4px solid #f97316;">
+                <strong style="color: #f97316; display: block; margin-bottom: 8px;">⏰ Recordatorio importante</strong>
+                Recibirás las coordenadas exactas 2 horas antes del evento (23 de enero, 17:00). 
+                Mantén activas tus notificaciones de WhatsApp.
+              </p>
+
+              <p style="margin-top: 40px; color: #fafafa; font-size: 16px;">
+                Nos vemos en la montaña 🏔️
+              </p>
+              <p style="color: #f97316; font-weight: 600; font-size: 14px;">
+                Equipo Proyecto Cumbre
+              </p>
+            </div>
+            
+            <div class="footer">
+              <p>Este es un email automático, por favor no respondas a este mensaje.</p>
+              <p>© ${new Date().getFullYear()} Proyecto Cumbre - MISA™</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    try {
+      const result = await this.send({
+        to: data.email,
+        subject: '✅ Plaza confirmada - MISA 23 Enero 2026',
+        html,
+        text: `Hola ${data.name}, tu plaza para MISA ha sido confirmada. Talla de camiseta: ${data.shirtSize}. Únete al grupo de WhatsApp: ${whatsappLink}`,
+      });
+
+      logger.apiSuccess('Email de confirmación MISA enviado');
+      return result;
+    } catch (error) {
+      logger.apiError('Fallo enviando email de confirmación MISA', error);
+      throw error;
+    }
+  }
 }

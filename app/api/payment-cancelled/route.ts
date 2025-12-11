@@ -1,3 +1,5 @@
+// app/api/payment-cancelled/route.ts - VERSIÓN CORREGIDA FINAL
+
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { logger } from '@/lib/logger';
@@ -23,7 +25,9 @@ export async function POST(request: NextRequest) {
         stripe_session_id: sessionId
       },
       include: {
-        member: true
+        member: true,
+        eventRegistration: true,  // 👈 camelCase, no snake_case
+        order: true,
       }
     });
 
@@ -57,23 +61,39 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // Actualizar el estado de la membresía del socio
-    await prisma.member.update({
-      where: {
-        id: payment.member_id
-      },
-      data: {
-        membership_status: 'failed',
-        updated_at: new Date()
-      }
-    });
+    // 🆕 Actualizar según el tipo de pago
+    if (payment.payment_type === 'membership' && payment.member_id) {
+      await prisma.member.update({
+        where: { id: payment.member_id },
+        data: {
+          membership_status: 'failed',
+          updated_at: new Date()
+        }
+      });
+    } else if (payment.payment_type === 'event' && payment.event_registration_id) {
+      await prisma.eventRegistration.update({
+        where: { id: payment.event_registration_id },
+        data: {
+          status: 'cancelled',
+          updated_at: new Date()
+        }
+      });
+    } else if (payment.payment_type === 'order' && payment.order_id) {
+      await prisma.order.update({
+        where: { id: payment.order_id },
+        data: {
+          status: 'cancelled',
+          updated_at: new Date()
+        }
+      });
+    }
 
     logger.log('✅ Pago marcado como cancelado');
 
     return NextResponse.json({
       success: true,
       message: 'Pago cancelado exitosamente',
-      memberId: payment.member_id
+      paymentType: payment.payment_type,
     });
 
   } catch (error: any) {

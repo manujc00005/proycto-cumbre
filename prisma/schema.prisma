@@ -1,151 +1,144 @@
-// prisma/schema.prisma - DEFINITIVO
+// prisma/schema.prisma - V3.1 OPTIMIZADO
+// Arquitectura: Eventos + Shop + Membresías + Pagos Flexibles
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
 // ============================================
-// ENUMS - DEBEN COINCIDIR CON constants.ts
+// ENUMS
 // ============================================
 
 enum Sex {
-  M  // Masculino
-  F  // Femenino
-  O  // Otro
+  M // Masculino
+  F // Femenino
+  O // Otro
 }
 
-// 🎯 LICENCIAS FEDME 2026 - SOLO 6 TIPOS
 enum LicenseType {
-  none        // Sin licencia
-  a           // A - Autonómica
-  a_plus      // A+ - Autonómica Plus
-  a_nac       // A NAC - Autonómica Nacional (NUEVO)
-  a_nac_plus  // A NAC+ - Autonómica Nacional Plus (NUEVO)
-  b           // B - Nacional
-  b_plus      // B+ - Nacional Plus
-  c           // C - Europea
+  none       // Sin licencia
+  a          // A - Autonómica
+  a_plus     // A+ - Autonómica Plus
+  a_nac      // A NAC - Autonómica Nacional
+  a_nac_plus // A NAC+ - Autonómica Nacional Plus
+  b          // B - Nacional
+  b_plus     // B+ - Nacional Plus
+  c          // C - Europea
 }
 
 enum FedmeStatus {
-  none        // Usuario eligió "Sin Licencia"
-  pending     // Pendiente de tramitar
-  processing  // En proceso con FEDME
-  active      // Licencia activa
-  rejected    // Rechazada por FEDME
-  expired     // Expirada
+  none       // Usuario eligió "Sin Licencia"
+  pending    // Pendiente de tramitar
+  processing // En proceso con FEDME
+  active     // Licencia activa
+  rejected   // Rechazada por FEDME
+  expired    // Expirada
 }
 
 enum MembershipStatus {
-  pending    // Esperando pago
-  active     // Pago completado, membresía activa
-  expired    // Expiró después de 1 año
-  failed     // Pago rechazado
-  cancelled  // Cancelada por admin
+  pending   // Esperando pago
+  active    // Pago completado, membresía activa
+  expired   // Expiró después de 1 año
+  failed    // Pago rechazado
+  cancelled // Cancelada por admin
+}
+
+enum PaymentType {
+  membership      // Cuota de socio
+  event           // Evento (MISA, etc)
+  order           // Pedido de shop
+  license_renewal // Renovación de licencia
 }
 
 enum PaymentStatus {
-  pending    // Pendiente
-  completed  // Completado
-  failed     // Fallido
+  pending   // Pendiente
+  completed // Completado
+  failed    // Fallido
+  refunded  // Reembolsado
+}
+
+enum EventStatus {
+  draft     // Borrador
+  published // Publicado
+  sold_out  // Agotado
+  cancelled // Cancelado
+  completed // Finalizado
+}
+
+enum OrderStatus {
+  pending    // Pendiente de pago
+  paid       // Pagado
+  processing // En preparación
+  shipped    // Enviado
+  delivered  // Entregado
+  cancelled  // Cancelado
   refunded   // Reembolsado
 }
 
 // ============================================
-// TABLA: Headquarters (Sedes)
+// MODELS
 // ============================================
 
 model Headquarters {
-  id        String   @id @default(uuid())
-  
-  // Información básica
-  name      String   @db.VarChar(255)
-  code      String   @unique @db.VarChar(20)
-  city      String   @db.VarChar(100)
-  
-  // Contacto
-  phone     String?  @db.VarChar(20)
-  email     String?  @db.VarChar(255)
-  
-  // Precios de membresía (JSONB)
+  id                String   @id @default(uuid())
+  name              String   @db.VarChar(255)
+  code              String   @unique @db.VarChar(20)
+  city              String   @db.VarChar(100)
+  phone             String?  @db.VarChar(20)
+  email             String?  @db.VarChar(255)
   membership_prices Json
-  
-  // Estado
-  status    String   @default("active") @db.VarChar(20)
-  
-  // Relaciones
-  members   Member[]
-  
-  // Timestamps
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now()) @updatedAt
-  
+  status            String   @default("active") @db.VarChar(20)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  members Member[]
+
   @@index([code])
   @@index([status])
   @@map("headquarters")
 }
 
-// ============================================
-// TABLA: Members (Socios)
-// ============================================
-
 model Member {
-  id                     String   @id @default(uuid())
-  
-  // Sede
+  id                     String           @id @default(uuid())
   headquarters_id        String?
-  headquarters           Headquarters? @relation(fields: [headquarters_id], references: [id])
-  member_number          String?  @unique @db.VarChar(50)
-  
-  // Datos personales
-  email                  String   @unique @db.VarChar(255)
-  first_name             String   @db.VarChar(100)
-  last_name              String   @db.VarChar(100)
-  birth_date             DateTime @db.Date
-  dni                    String   @unique @db.VarChar(20)
+  headquarters           Headquarters?    @relation(fields: [headquarters_id], references: [id])
+  member_number          String?          @unique @db.VarChar(50)
+  email                  String           @unique @db.VarChar(255)
+  first_name             String           @db.VarChar(100)
+  last_name              String           @db.VarChar(100)
+  birth_date             DateTime         @db.Date
+  dni                    String           @unique @db.VarChar(20)
   sex                    Sex
-  
-  // Contacto
-  phone                  String   @db.VarChar(20)
-  emergency_phone        String?  @db.VarChar(20)
-  emergency_contact_name String?  @db.VarChar(255)
-  
-  // Dirección
-  province               String   @db.VarChar(100)
-  city                   String?  @db.VarChar(100)
-  address                String   @db.Text
-  postal_code            String?  @db.VarChar(10)
-  
-  // Tallas
-  shirt_size             String?  @db.VarChar(10)
-  hoodie_size            String?  @db.VarChar(10)
-  pants_size             String?  @db.VarChar(10)
-  
-  // Licencia FEDME
+  phone                  String           @db.VarChar(20)
+  emergency_phone        String?          @db.VarChar(20)
+  emergency_contact_name String?          @db.VarChar(255)
+  province               String           @db.VarChar(100)
+  city                   String?          @db.VarChar(100)
+  address                String           @db.Text
+  postal_code            String?          @db.VarChar(10)
+  shirt_size             String?          @db.VarChar(10)
+  hoodie_size            String?          @db.VarChar(10)
+  pants_size             String?          @db.VarChar(10)
   license_type           LicenseType
-  fedme_license_number   String?  @unique @db.VarChar(50)
-  fedme_status           FedmeStatus @default(pending)
-  
-  // Estado de membresía
+  fedme_license_number   String?          @unique @db.VarChar(50)
+  fedme_status           FedmeStatus      @default(pending)
   membership_status      MembershipStatus @default(pending)
   membership_start_date  DateTime?
   membership_end_date    DateTime?
-  
-  // Notas administrativas
-  admin_notes            String?  @db.Text
-  
-  // Relaciones
-  payments               Payment[]
-  
-  // Timestamps
-  created_at             DateTime @default(now())
-  updated_at             DateTime @default(now()) @updatedAt
-  
+  admin_notes            String?          @db.Text
+  created_at             DateTime         @default(now())
+  updated_at             DateTime         @updatedAt
+
+  payments           Payment[]
+  eventRegistrations EventRegistration[]
+  orders             Order[]
+
   @@index([headquarters_id])
   @@index([email])
   @@index([dni])
@@ -156,35 +149,185 @@ model Member {
 }
 
 // ============================================
-// TABLA: Payments (Pagos)
+// 🆕 EVENTOS
+// ============================================
+
+model Event {
+  id                   String        @id @default(uuid())
+  slug                 String        @unique @db.VarChar(100)
+  name                 String        @db.VarChar(255)
+  description          String?       @db.Text
+  event_date           DateTime
+  location             String?       @db.VarChar(255)
+  max_participants     Int?
+  current_participants Int           @default(0)
+  price                Int // En centavos
+  currency             String        @default("eur") @db.VarChar(3)
+  requires_member      Boolean       @default(false)
+  member_discount      Int           @default(0) // En centavos
+  custom_fields        Json? // Campos personalizados requeridos
+  whatsapp_group       String?       @db.VarChar(500)
+  status               EventStatus   @default(draft)
+  image_url            String?       @db.VarChar(500)
+  meta_description     String?       @db.Text
+  created_at           DateTime      @default(now())
+  updated_at           DateTime      @updatedAt
+
+  registrations EventRegistration[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([event_date])
+  @@map("events")
+}
+
+model EventRegistration {
+  id                String   @id @default(uuid())
+  event_id          String
+  event             Event    @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  member_id         String?
+  member            Member?  @relation(fields: [member_id], references: [id], onDelete: SetNull)
+  participant_name  String   @db.VarChar(255)
+  participant_email String   @db.VarChar(255)
+  participant_phone String   @db.VarChar(20)
+  custom_data       Json? // Datos personalizados del evento
+  status            String   @default("pending") @db.VarChar(20)
+  registered_at     DateTime @default(now())
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  // 🔧 RELACIÓN 1:1 - Cada inscripción tiene exactamente 1 pago
+  payment Payment?
+
+  @@index([event_id])
+  @@index([member_id])
+  @@index([participant_email])
+  @@index([status])
+  @@map("event_registrations")
+}
+
+// ============================================
+// 🆕 SHOP / TIENDA
+// ============================================
+
+model Product {
+  id                  String   @id @default(uuid())
+  slug                String   @unique @db.VarChar(100)
+  name                String   @db.VarChar(255)
+  description         String?  @db.Text
+  price               Int // En centavos
+  compare_at_price    Int? // Precio tachado
+  currency            String   @default("eur") @db.VarChar(3)
+  stock               Int      @default(0)
+  low_stock_threshold Int      @default(5)
+  track_inventory     Boolean  @default(true)
+  has_variants        Boolean  @default(false)
+  variants            Json? // Array de variantes
+  category            String?  @db.VarChar(100)
+  tags                String[] // Array de tags
+  images              Json? // Array de URLs
+  meta_title          String?  @db.VarChar(255)
+  meta_description    String?  @db.Text
+  status              String   @default("draft") @db.VarChar(20)
+  featured            Boolean  @default(false)
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  orderItems OrderItem[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([category])
+  @@index([featured])
+  @@map("products")
+}
+
+model Order {
+  id               String      @id @default(uuid())
+  order_number     String      @unique @db.VarChar(50)
+  member_id        String?
+  member           Member?     @relation(fields: [member_id], references: [id], onDelete: SetNull)
+  customer_email   String      @db.VarChar(255)
+  customer_name    String      @db.VarChar(255)
+  customer_phone   String?     @db.VarChar(20)
+  shipping_address Json // Objeto con dirección completa
+  subtotal         Int // En centavos
+  shipping_cost    Int         @default(0)
+  tax              Int         @default(0)
+  discount         Int         @default(0)
+  total            Int // En centavos
+  currency         String      @default("eur") @db.VarChar(3)
+  status           OrderStatus @default(pending)
+  tracking_number  String?     @db.VarChar(255)
+  shipped_at       DateTime?
+  delivered_at     DateTime?
+  customer_notes   String?     @db.Text
+  admin_notes      String?     @db.Text
+  created_at       DateTime    @default(now())
+  updated_at       DateTime    @updatedAt
+
+  items    OrderItem[]
+  payments Payment[]
+
+  @@index([order_number])
+  @@index([member_id])
+  @@index([customer_email])
+  @@index([status])
+  @@index([created_at(sort: Desc)])
+  @@map("orders")
+}
+
+model OrderItem {
+  id           String   @id @default(uuid())
+  order_id     String
+  order        Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  product_id   String?
+  product      Product? @relation(fields: [product_id], references: [id], onDelete: SetNull)
+  product_name String   @db.VarChar(255)
+  product_slug String?  @db.VarChar(100)
+  variant_data Json? // Datos de la variante seleccionada
+  quantity     Int
+  unit_price   Int // En centavos
+  total_price  Int // En centavos
+  created_at   DateTime @default(now())
+
+  @@index([order_id])
+  @@index([product_id])
+  @@map("order_items")
+}
+
+// ============================================
+// 🔄 PAGOS (REFACTORIZADO - FLEXIBLE)
 // ============================================
 
 model Payment {
-  id                String        @id @default(uuid())
+  id                    String        @id @default(uuid())
+  payment_type          PaymentType
   
-  // Relación con socio
-  member_id         String
-  member            Member        @relation(fields: [member_id], references: [id], onDelete: Cascade)
+  // Foreign keys opcionales según el tipo
+  member_id             String?
+  event_registration_id String?       @unique // 🔧 UNIQUE para relación 1:1
+  order_id              String?
   
-  // Stripe
+  // Relaciones
+  member            Member?            @relation(fields: [member_id], references: [id], onDelete: SetNull)
+  eventRegistration EventRegistration? @relation(fields: [event_registration_id], references: [id], onDelete: SetNull)
+  order             Order?             @relation(fields: [order_id], references: [id], onDelete: SetNull)
+  
   stripe_session_id String        @unique @db.VarChar(255)
   stripe_payment_id String?       @db.VarChar(255)
-  
-  // Montos
   amount            Int
   currency          String        @default("eur") @db.VarChar(3)
-  
-  // Estado
   status            PaymentStatus @default(pending)
-  
-  // Metadata
   description       String?       @db.Text
-  
-  // Timestamps
+  metadata          Json? // Datos adicionales específicos
   created_at        DateTime      @default(now())
-  updated_at        DateTime      @default(now()) @updatedAt
-  
+  updated_at        DateTime      @updatedAt
+
+  @@index([payment_type])
   @@index([member_id])
+  @@index([event_registration_id])
+  @@index([order_id])
   @@index([stripe_session_id])
   @@index([status])
   @@index([created_at(sort: Desc)])

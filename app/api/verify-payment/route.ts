@@ -1,11 +1,11 @@
-// app/api/verify-payment/route.ts - VERSIÓN CORREGIDA
+// app/api/verify-payment/route.ts - VERSIÓN CORREGIDA FINAL
 
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 import { getStripe } from '@/lib/stripe';
-import { prisma } from '@/lib/prisma';
+import { PrismaClient } from '@prisma/client';
 
-
+const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       customer_email: session.customer_email,
     });
 
-    // 2. Buscar payment en base de datos
+    // 2. Buscar payment en base de datos CON TODAS LAS RELACIONES
     const payment = await prisma.payment.findUnique({
       where: { stripe_session_id: sessionId },
       include: {
@@ -45,6 +45,28 @@ export async function POST(request: NextRequest) {
             membership_status: true,
             fedme_status: true,
             license_type: true,
+          }
+        },
+        eventRegistration: {  // 👈 camelCase, no snake_case
+          select: {
+            participant_name: true,
+            participant_email: true,
+            participant_phone: true,
+            custom_data: true,
+            event: {
+              select: {
+                name: true,
+                slug: true,
+              }
+            }
+          }
+        },
+        order: {
+          select: {
+            order_number: true,
+            customer_name: true,
+            customer_email: true,
+            total: true,
           }
         }
       }
@@ -61,32 +83,63 @@ export async function POST(request: NextRequest) {
 
     logger.log('💾 Pago en BD:', {
       id: payment.id,
+      type: payment.payment_type,
       status: payment.status,
-      member_status: payment.member.membership_status,
     });
 
-    // 3. ✅ Devolver datos en el formato que espera el componente
-    return NextResponse.json({
+    // 3. ✅ Devolver datos según el tipo de pago
+    const baseResponse = {
       success: true,
-      // Datos del payment
-      amount: payment.amount, // Ya está en centavos
+      amount: payment.amount,
       currency: payment.currency,
       paymentStatus: payment.status,
-      
-      // Datos del member (formato que espera el componente)
-      firstName: payment.member.first_name,
-      lastName: payment.member.last_name,
-      email: payment.member.email,
-      memberNumber: payment.member.member_number,
-      membershipStatus: payment.member.membership_status,
-      fedmeStatus: payment.member.fedme_status,
-      licenseType: payment.member.license_type,
-      
-      // Datos de Stripe
+      paymentType: payment.payment_type,
       sessionId: session.id,
       stripeStatus: session.status,
       stripePaymentStatus: session.payment_status,
-    });
+    };
+
+    // Añadir datos específicos según el tipo
+    if (payment.payment_type === 'membership' && payment.member) {
+      return NextResponse.json({
+        ...baseResponse,
+        firstName: payment.member.first_name,
+        lastName: payment.member.last_name,
+        email: payment.member.email,
+        memberNumber: payment.member.member_number,
+        membershipStatus: payment.member.membership_status,
+        fedmeStatus: payment.member.fedme_status,
+        licenseType: payment.member.license_type,
+      });
+    }
+
+    if (payment.payment_type === 'event' && payment.eventRegistration) {
+      const participantName = payment.eventRegistration.participant_name || '';
+      const nameParts = participantName.split(' ');
+      return NextResponse.json({
+        ...baseResponse,
+        firstName: nameParts[0] || '',
+        lastName: nameParts.slice(1).join(' ') || '',
+        email: payment.eventRegistration.participant_email,
+        phone: payment.eventRegistration.participant_phone,
+        eventName: payment.eventRegistration.event.name,
+        eventSlug: payment.eventRegistration.event.slug,
+        customData: payment.eventRegistration.custom_data,
+      });
+    }
+
+    if (payment.payment_type === 'order' && payment.order) {
+      return NextResponse.json({
+        ...baseResponse,
+        orderNumber: payment.order.order_number,
+        customerName: payment.order.customer_name,
+        email: payment.order.customer_email,
+        total: payment.order.total,
+      });
+    }
+
+    // Fallback genérico si no coincide ningún tipo
+    return NextResponse.json(baseResponse);
 
   } catch (error: any) {
     logger.error('❌ Error verificando pago:', error);

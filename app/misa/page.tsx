@@ -21,6 +21,7 @@ export default function MisaPage() {
     name: '',
     email: '',
     phone: '',
+    shirtSize: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -111,16 +112,30 @@ export default function MisaPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // TODO: Integrar con Stripe
-    console.log('Datos del formulario:', formData);
+    try {
+      // Llamar a la API de checkout
+      const response = await fetch('/api/misa/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-    // Simular envío
-    setTimeout(() => {
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al procesar el pago');
+      }
+
+      // Redirigir a Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error: any) {
+      console.error('Error:', error);
+      alert(error.message || 'Hubo un error al procesar tu reserva. Por favor, inténtalo de nuevo.');
+    } finally {
       setIsSubmitting(false);
-      alert('¡Reserva confirmada! Te enviaremos los detalles por email.');
-      setShowForm(false);
-      setFormData({ name: '', email: '', phone: '' });
-    }, 2000);
+    }
   };
 
   // ========================================
@@ -441,10 +456,32 @@ export default function MisaPage() {
                       placeholder="+34 600 000 000"
                     />
                   </div>
+                  {/* Talla de camiseta */}
+                  <div>
+                    <label htmlFor="shirtSize" className="block text-sm font-semibold text-white/80 mb-2">
+                      Talla de camiseta *
+                    </label>
+                    <select
+                      id="shirtSize"
+                      name="shirtSize"
+                      required
+                      value={formData.shirtSize}
+                      onChange={(e) => setFormData(prev => ({ ...prev, shirtSize: e.target.value }))}
+                      className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-orange-500 transition"
+                    >
+                      <option value="">Selecciona tu talla</option>
+                      <option value="XS">XS</option>
+                      <option value="S">S</option>
+                      <option value="M">M</option>
+                      <option value="L">L</option>
+                      <option value="XL">XL</option>
+                      <option value="XXL">XXL</option>
+                    </select>
+                  </div>
 
                   {/* Price reminder */}
                   <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4 text-center">
-                    <p className="text-orange-400 font-bold text-2xl mb-1">25€</p>
+                    <p className="text-orange-400 font-bold text-2xl mb-1">20€</p>
                     <p className="text-xs text-white/60">Pago único por persona</p>
                   </div>
 

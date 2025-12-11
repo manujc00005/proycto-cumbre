@@ -117,6 +117,7 @@ export async function POST(req: NextRequest) {
       success_url: `${process.env.NEXT_PUBLIC_URL}/pago-exito?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_URL}/pago-cancelado?session_id={CHECKOUT_SESSION_ID}`,
       metadata: {
+        type: 'membership', 
         memberId: memberId,
         email: memberData.email,
         licenseType: memberData.licenseType,
@@ -134,6 +135,7 @@ export async function POST(req: NextRequest) {
       
       const payment = await prisma.payment.create({
         data: {
+          payment_type: 'membership',
           member_id: memberId,
           stripe_session_id: session.id,
           stripe_payment_id: session.payment_intent as string || null,
