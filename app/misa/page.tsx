@@ -157,7 +157,6 @@ export default function MisaPage() {
         >
           
           {/* Main Title */}
-         {/* Main Title - Image */}
           <motion.div
             className={`
               mb-8
@@ -191,46 +190,46 @@ export default function MisaPage() {
 
           {/* Countdown Timer CON SEGUNDOS */}
           <motion.div 
-            className={`flex mb-16 ${isMobile ? 'gap-2' : 'gap-6'}`}
+            className={`flex mb-16 ${isMobile ? 'gap-3' : 'gap-6'}`}
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.7 }}
           >
             {/* DÍAS */}
             <div className="text-center flex-1">
-              <div className={`font-black text-orange-500 mb-1 ${isMobile ? 'text-2xl' : 'text-5xl md:text-6xl'}`}>
+              <div className={`font-black text-orange-500 mb-1 ${isMobile ? 'text-5xl' : 'text-5xl md:text-6xl'}`}>
                 {String(timeLeft.days).padStart(2, '0')}
               </div>
-              <div className={`text-white/40 tracking-wider uppercase ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
+              <div className={`text-white/40 tracking-wider uppercase ${isMobile ? 'text-xs' : 'text-xs'}`}>
                 DÍAS
               </div>
             </div>
             
-            <div className={`font-black text-white/20 ${isMobile ? 'text-2xl' : 'text-5xl md:text-6xl'}`}>:</div>
+            <div className={`font-black text-white/20 ${isMobile ? 'text-4xl' : 'text-5xl md:text-6xl'}`}>:</div>
             
             {/* HORAS */}
             <div className="text-center flex-1">
-              <div className={`font-black text-orange-500 mb-1 ${isMobile ? 'text-2xl' : 'text-5xl md:text-6xl'}`}>
+              <div className={`font-black text-orange-500 mb-1 ${isMobile ? 'text-5xl' : 'text-5xl md:text-6xl'}`}>
                 {String(timeLeft.hours).padStart(2, '0')}
               </div>
-              <div className={`text-white/40 tracking-wider uppercase ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
+              <div className={`text-white/40 tracking-wider uppercase ${isMobile ? 'text-xs' : 'text-xs'}`}>
                 HORAS
               </div>
             </div>
             
-            <div className={`font-black text-white/20 ${isMobile ? 'text-2xl' : 'text-5xl md:text-6xl'}`}>:</div>
+            <div className={`font-black text-white/20 ${isMobile ? 'text-4xl' : 'text-5xl md:text-6xl'}`}>:</div>
             
             {/* MINUTOS */}
             <div className="text-center flex-1">
-              <div className={`font-black text-orange-500 mb-1 ${isMobile ? 'text-2xl' : 'text-5xl md:text-6xl'}`}>
+              <div className={`font-black text-orange-500 mb-1 ${isMobile ? 'text-5xl' : 'text-5xl md:text-6xl'}`}>
                 {String(timeLeft.minutes).padStart(2, '0')}
               </div>
-              <div className={`text-white/40 tracking-wider uppercase ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
+              <div className={`text-white/40 tracking-wider uppercase ${isMobile ? 'text-xs' : 'text-xs'}`}>
                 MIN
               </div>
             </div>
 
-            <div className={`font-black text-white/20 ${isMobile ? 'text-2xl' : 'text-5xl md:text-6xl'}`}>:</div>
+            <div className={`font-black text-white/20 ${isMobile ? 'text-4xl' : 'text-5xl md:text-6xl'}`}>:</div>
 
             {/* SEGUNDOS */}
             <div className="text-center flex-1">
@@ -239,11 +238,11 @@ export default function MisaPage() {
                 initial={{ scale: 1.1, opacity: 0.7 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.3 }}
-                className={`font-black text-orange-500 mb-1 ${isMobile ? 'text-2xl' : 'text-5xl md:text-6xl'}`}
+                className={`font-black text-orange-500 mb-1 ${isMobile ? 'text-5xl' : 'text-5xl md:text-6xl'}`}
               >
                 {String(timeLeft.seconds).padStart(2, '0')}
               </motion.div>
-              <div className={`text-white/40 tracking-wider uppercase ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
+              <div className={`text-white/40 tracking-wider uppercase ${isMobile ? 'text-xs' : 'text-xs'}`}>
                 SEG
               </div>
             </div>
