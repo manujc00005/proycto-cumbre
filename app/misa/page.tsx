@@ -307,6 +307,7 @@ export default function MisaPage() {
             <ul className="space-y-3 text-left">
               {[
                 { icon: '👕', text: 'Camiseta exclusiva corredores' },
+                { icon: '🖤', text: 'Dress code negro'},
                 { icon: '📍', text: 'Coordenadas 2h antes' },
                 { icon: '📲', text: 'Track 1h antes' },
                 { icon: '🔒', text: 'Plazas limitadas' },
@@ -522,7 +523,6 @@ export default function MisaPage() {
                   <div className="pt-4 border-t border-white/10">
                     <GDPRConsent
                       required={true}
-                      includeMarketing={false}
                       includeWhatsApp={true}
                       onConsentChange={setConsents}
                     />
