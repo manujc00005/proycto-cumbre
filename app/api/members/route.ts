@@ -14,10 +14,13 @@ export async function POST(request: NextRequest) {
     const { overwrite, consents, ...formData } = body;
 
     // 🆕 CAPTURAR IP
-    const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
-                      request.headers.get('x-real-ip') || 
-                      request.ip ||
-                      'unknown';
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    const realIp = request.headers.get('x-real-ip');
+
+    const ipAddress =
+      forwardedFor?.split(',')[0].trim() ||
+      realIp ||
+      'unknown';
 
     logger.apiStart('POST', '/api/members', {
       email: formData.email,
