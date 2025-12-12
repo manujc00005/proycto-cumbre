@@ -3,12 +3,11 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import GDPRConsent from '../components/gdpr/gdpr-consent-component';
+import GDPRConsentEvent from '../components/gdpr/gdpr-consent-event';
 
-// 🆕 Interfaz para consentimientos
 interface ConsentState {
   privacyPolicy: boolean;
-  whatsapp?: boolean;
+  whatsapp: boolean;
 }
 
 export default function MisaPage() {
@@ -31,14 +30,15 @@ export default function MisaPage() {
     shirtSize: '',
   });
   
-  // 🆕 Estado de consentimientos RGPD
   const [consents, setConsents] = useState<ConsentState>({
     privacyPolicy: false,
     whatsapp: false
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formError, setFormError] = useState(''); // 🆕 Para errores
+  const [formError, setFormError] = useState('');
+  const [isMember, setIsMember] = useState(false); // 🆕 Detectar si es socio
+  const [isCheckingMember, setIsCheckingMember] = useState(false);
 
   // ========================================
   // 2️⃣ SCROLL EFFECTS
@@ -89,6 +89,31 @@ export default function MisaPage() {
     return () => clearInterval(interval);
   }, []);
 
+  // 🆕 Verificar si el email es de un miembro cuando se completa
+  useEffect(() => {
+    const checkIfMember = async () => {
+      if (formData.email && /\S+@\S+\.\S+/.test(formData.email)) {
+        setIsCheckingMember(true);
+        try {
+          const response = await fetch(`/api/members?email=${encodeURIComponent(formData.email)}&check=true`);
+          const data = await response.json();
+          setIsMember(data.isMember || false);
+        } catch (error) {
+          console.error('Error checking member status:', error);
+          setIsMember(false);
+        } finally {
+          setIsCheckingMember(false);
+        }
+      } else {
+        setIsMember(false);
+      }
+    };
+
+    // Debounce de 500ms
+    const timeoutId = setTimeout(checkIfMember, 500);
+    return () => clearTimeout(timeoutId);
+  }, [formData.email]);
+
   // ========================================
   // 4️⃣ ANIMATION VARIANTS
   // ========================================
@@ -120,16 +145,21 @@ export default function MisaPage() {
       ...prev,
       [e.target.name]: e.target.value
     }));
-    setFormError(''); // Limpiar error al escribir
+    setFormError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
 
-    // 🆕 Validar consentimiento de privacidad
+    // Validar consentimientos
     if (!consents.privacyPolicy) {
       setFormError('Debes aceptar la Política de Privacidad para continuar');
+      return;
+    }
+
+    if (!consents.whatsapp) {
+      setFormError('Debes aceptar compartir tus datos en WhatsApp para participar');
       return;
     }
 
@@ -142,16 +172,14 @@ export default function MisaPage() {
     setIsSubmitting(true);
 
     try {
-      // Llamar a la API de checkout
       const response = await fetch('/api/misa/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          // 🆕 Incluir consentimientos RGPD
           consents: {
             privacy_accepted: consents.privacyPolicy,
-            whatsapp_consent: consents.whatsapp || false,
+            whatsapp_consent: consents.whatsapp,
           }
         }),
       });
@@ -162,7 +190,6 @@ export default function MisaPage() {
         throw new Error(data.error || 'Error al procesar el pago');
       }
 
-      // Redirigir a Stripe Checkout
       if (data.url) {
         window.location.href = data.url;
       }
@@ -199,7 +226,7 @@ export default function MisaPage() {
       {/* Main Content */}
       <div className="relative z-10 container mx-auto px-6 py-12 md:py-20">
         
-        {/* Hero Section - SIN CAMBIOS */}
+        {/* Hero Section */}
         <motion.div 
           className="min-h-screen flex flex-col justify-center items-center text-center"
           initial={{ opacity: 0 }}
@@ -227,7 +254,7 @@ export default function MisaPage() {
             />
           </motion.div>
 
-          {/* Subtitle - Date */}
+          {/* Subtitle */}
           <motion.p 
             className={`font-bold tracking-[0.2em] uppercase text-white/90 mb-20 ${
               isMobile ? 'text-base' : 'text-2xl'
@@ -392,7 +419,7 @@ export default function MisaPage() {
       </div>
 
       {/* ========================================
-          FORMULARIO MODAL (CON RGPD)
+          FORMULARIO MODAL
           ======================================== */}
       <AnimatePresence>
         {showForm && (
@@ -435,10 +462,13 @@ export default function MisaPage() {
                   </p>
                 </div>
 
-                {/* 🆕 Error Message */}
+                {/* Error Message */}
                 {formError && (
-                  <div className="mb-6 bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-lg text-sm">
-                    {formError}
+                  <div className="mb-6 bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-lg text-sm flex items-start gap-2">
+                    <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>{formError}</span>
                   </div>
                 )}
 
@@ -462,21 +492,39 @@ export default function MisaPage() {
                     />
                   </div>
 
-                  {/* Email */}
+                  {/* Email con indicador de socio */}
                   <div>
                     <label htmlFor="email" className="block text-sm font-semibold text-white/80 mb-2">
                       Email *
                     </label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      required
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-orange-500 transition"
-                      placeholder="tu@email.com"
-                    />
+                    <div className="relative">
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        required
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-orange-500 transition"
+                        placeholder="tu@email.com"
+                      />
+                      {isCheckingMember && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <svg className="animate-spin h-5 w-5 text-orange-400" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        </div>
+                      )}
+                      {/* {!isCheckingMember && isMember && (
+                        <div className="mt-2 flex items-center gap-2 text-xs text-green-400">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span>¡Ya eres socio del club!</span>
+                        </div>
+                      )} */}
+                    </div>
                   </div>
 
                   {/* Móvil */}
@@ -496,7 +544,7 @@ export default function MisaPage() {
                     />
                   </div>
 
-                  {/* Talla de camiseta */}
+                  {/* Talla */}
                   <div>
                     <label htmlFor="shirtSize" className="block text-sm font-semibold text-white/80 mb-2">
                       Talla de camiseta *
@@ -519,11 +567,10 @@ export default function MisaPage() {
                     </select>
                   </div>
 
-                  {/* 🆕 COMPONENTE RGPD */}
+                  {/* COMPONENTE RGPD */}
                   <div className="pt-4 border-t border-white/10">
-                    <GDPRConsent
-                      required={true}
-                      includeWhatsApp={true}
+                    <GDPRConsentEvent
+                      isMember={isMember}
                       onConsentChange={setConsents}
                     />
                   </div>
@@ -537,7 +584,7 @@ export default function MisaPage() {
                   {/* Submit button */}
                   <button
                     type="submit"
-                    disabled={isSubmitting || !consents.privacyPolicy}
+                    disabled={isSubmitting || !consents.privacyPolicy || !consents.whatsapp}
                     className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-orange-500/50 flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? (
@@ -573,7 +620,7 @@ export default function MisaPage() {
         )}
       </AnimatePresence>
 
-      {/* Bottom Gradient Fade */}
+      {/* Bottom Gradient */}
       <div className="fixed bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent pointer-events-none z-[2]"></div>
 
     </div>

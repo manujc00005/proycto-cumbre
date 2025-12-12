@@ -286,70 +286,40 @@ async function generateMemberNumber(headquartersCode: string): Promise<string> {
 }
 
 export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const email = searchParams.get('email');
+  const { searchParams } = new URL(request.url);
+  const email = searchParams.get('email');
+  const checkOnly = searchParams.get('check'); // 🆕 Nuevo parámetro
 
-    if (email) {
-      // 🆕 GET específico con info RGPD
-      const member = await prisma.member.findUnique({
-        where: { email },
-        select: {
-          id: true,
-          email: true,
-          first_name: true,
-          last_name: true,
-          member_number: true,
-          membership_status: true,
-          license_type: true,
-          fedme_status: true,
-          // 🆕 Campos RGPD
-          privacy_accepted: true,
-          privacy_accepted_at: true,
-          privacy_accepted_ip: true,
-          marketing_consent: true,
-          marketing_consent_at: true,
-          whatsapp_consent: true,
-          whatsapp_consent_at: true,
-          created_at: true,
-          updated_at: true
-        }
-      });
-
-      if (!member) {
-        return NextResponse.json(
-          { error: 'Member not found' },
-          { status: 404 }
-        );
-      }
-
-      return NextResponse.json({ 
-        success: true,
-        member 
-      }, { status: 200 });
-    }
-
-    // GET de lista de members
-    const members = await prisma.member.findMany({
-      orderBy: { created_at: 'desc' },
-      take: 100,
-      include: {
-        headquarters: true
-      }
+  // CASO 1: Verificación rápida (eventos)
+  if (email && checkOnly === 'true') {
+    const member = await prisma.member.findUnique({
+      where: { email: email.toLowerCase() },
+      select: { id: true, member_number: true, membership_status: true }
     });
+
+    const isMember = !!member && member.membership_status === 'active';
 
     return NextResponse.json({
-      success: true,
-      count: members.length,
-      members,
+      isMember,
+      memberNumber: isMember ? member.member_number : null
+    });
+  }
+
+  // CASO 2: Consulta completa
+  if (email) {
+    const member = await prisma.member.findUnique({
+      where: { email: email.toLowerCase() },
+      select: { /* todos los campos */ }
     });
 
-  } catch (error: any) {
-    logger.error('❌ Error en GET /api/members:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener miembros', details: error.message },
-      { status: 500 }
-    );
+    if (!member) {
+      return NextResponse.json({ error: 'Member not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, member });
   }
-  // 👈 SIN finally con $disconnect (usamos singleton)
+
+  // CASO 3: Lista de todos los miembros
+  const members = await prisma.member.findMany({ /* ... */ });
+  return NextResponse.json({ success: true, count: members.length, members });
 }

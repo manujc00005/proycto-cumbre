@@ -1,9 +1,9 @@
-// app/api/misa/checkout/route.ts - VERSIÓN CON SINGLETON Y RGPD
+// app/api/misa/checkout/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getStripe } from '@/lib/stripe';
 import { logger } from '@/lib/logger';
-import { prisma } from '@/lib/prisma'; // 👈 Usar singleton
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +12,10 @@ export async function POST(request: NextRequest) {
 
     logger.apiStart('POST', '/api/misa/checkout', { email, shirtSize });
 
-    // Validaciones
+    // ========================================
+    // VALIDACIONES
+    // ========================================
+    
     if (!name || !email || !phone || !shirtSize) {
       return NextResponse.json(
         { error: 'Todos los campos son obligatorios' },
@@ -20,13 +23,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 🆕 Validar consentimiento de privacidad (obligatorio)
-    // if (!consents?.privacy_accepted) {
-    //   return NextResponse.json(
-    //     { error: 'Debes aceptar la Política de Privacidad' },
-    //     { status: 400 }
-    //   );
-    // }
+    // Validar consentimientos RGPD
+    if (!consents?.privacy_accepted) {
+      return NextResponse.json(
+        { error: 'Debes aceptar la Política de Privacidad' },
+        { status: 400 }
+      );
+    }
+
+    if (!consents?.whatsapp_consent) {
+      return NextResponse.json(
+        { error: 'Debes aceptar compartir tus datos en WhatsApp para participar' },
+        { status: 400 }
+      );
+    }
 
     // Validar formato de email
     if (!/\S+@\S+\.\S+/.test(email)) {
@@ -36,13 +46,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validar teléfono (9 dígitos)
+    // Validar teléfono
     const normalizedPhone = phone.replace(/\s/g, '');
     const phoneRegex = /^(\+?[1-9]\d{0,2})?\d{9}$/;
 
     if (!phoneRegex.test(normalizedPhone)) {
       return NextResponse.json(
-        { error: 'El teléfono debe tener 9 dígitos o un formato internacional válido (+XX...)' },
+        { error: 'El teléfono debe tener 9 dígitos o un formato internacional válido' },
         { status: 400 }
       );
     }
@@ -56,7 +66,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Buscar evento MISA
+    // ========================================
+    // BUSCAR EVENTO MISA
+    // ========================================
+    
     const misaEvent = await prisma.event.findUnique({
       where: { slug: 'misa-2026' }
     });
@@ -77,37 +90,74 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 🆕 Obtener IP del cliente
+    // ========================================
+    // 🆕 BUSCAR SI ES MIEMBRO EXISTENTE
+    // ========================================
+    
+    const existingMember = await prisma.member.findUnique({
+      where: { email: email.toLowerCase() },
+      select: { 
+        id: true, 
+        member_number: true,
+        membership_status: true,
+        first_name: true,
+        last_name: true
+      }
+    });
+
+    const memberId = existingMember?.id || null;
+    const isMember = !!existingMember && existingMember.membership_status === 'active';
+
+    if (isMember) {
+      logger.log('✅ Usuario es socio activo:', {
+        member_number: existingMember.member_number,
+        name: `${existingMember.first_name} ${existingMember.last_name}`
+      });
+    }
+
+    // ========================================
+    // OBTENER IP DEL CLIENTE
+    // ========================================
+    
     const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
                      request.headers.get('x-real-ip') || 
                      'unknown';
 
-    // Crear inscripción con campos RGPD
+    // ========================================
+    // CREAR INSCRIPCIÓN
+    // ========================================
+    
     const registration = await prisma.eventRegistration.create({
       data: {
         event_id: misaEvent.id,
+        member_id: memberId, // 🆕 Vincular si es miembro
         participant_name: name,
         participant_email: email.toLowerCase(),
         participant_phone: phone,
         custom_data: { shirt_size: shirtSize },
         status: 'pending',
         
-        // 🆕 CAMPOS RGPD
+        // CAMPOS RGPD
         privacy_accepted: consents.privacy_accepted,
         privacy_accepted_at: new Date(),
-        whatsapp_consent: consents.whatsapp_consent || false,
-        whatsapp_consent_at: consents.whatsapp_consent ? new Date() : null,
+        whatsapp_consent: consents.whatsapp_consent,
+        whatsapp_consent_at: new Date(),
       }
     });
 
     logger.log('✅ Inscripción creada:', {
       id: registration.id,
       email: registration.participant_email,
+      member_id: memberId,
+      is_member: isMember,
       privacy_accepted: registration.privacy_accepted,
       whatsapp_consent: registration.whatsapp_consent,
     });
 
-    // Crear sesión de Stripe
+    // ========================================
+    // CREAR SESIÓN DE STRIPE
+    // ========================================
+    
     const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -117,10 +167,10 @@ export async function POST(request: NextRequest) {
             currency: 'eur',
             product_data: {
               name: 'MISA - Ritual Furtivo',
-              description: `Inscripción para ${name} - Talla: ${shirtSize}`,
-              images: ['https://proyecto-cumbre.es/misa-cover.jpg'], // Opcional
+              description: `Inscripción para ${name} - Talla: ${shirtSize}${isMember ? ' (Socio)' : ''}`,
+              images: ['https://proyecto-cumbre.es/misa-cover.jpg'],
             },
-            unit_amount: misaEvent.price, // Ya está en centavos
+            unit_amount: misaEvent.price,
           },
           quantity: 1,
         },
@@ -133,31 +183,38 @@ export async function POST(request: NextRequest) {
         type: 'event',
         event_registration_id: registration.id,
         event_id: misaEvent.id,
+        member_id: memberId || '',
+        is_member: isMember ? 'true' : 'false',
         name,
         email,
         phone,
         shirtSize,
-        privacy_accepted: consents.privacy_accepted ? 'true' : 'false',
-        whatsapp_consent: consents.whatsapp_consent ? 'true' : 'false',
+        privacy_accepted: 'true',
+        whatsapp_consent: 'true',
       },
     });
 
     logger.log('✅ Sesión de Stripe creada:', session.id);
 
-    // Crear payment
+    // ========================================
+    // CREAR PAYMENT
+    // ========================================
+    
     await prisma.payment.create({
       data: {
         payment_type: 'event',
+        member_id: memberId, // 🆕 Vincular si es miembro
         event_registration_id: registration.id,
         stripe_session_id: session.id,
         amount: misaEvent.price,
         currency: 'eur',
         status: 'pending',
-        description: `MISA 2026 - ${name}`,
+        description: `MISA 2026 - ${name}${isMember ? ' (Socio)' : ''}`,
         metadata: {
           shirt_size: shirtSize,
           phone,
           ip_address: clientIp,
+          is_member: isMember,
         },
       },
     });
@@ -165,6 +222,7 @@ export async function POST(request: NextRequest) {
     logger.apiSuccess('Checkout MISA completado', {
       registration_id: registration.id,
       session_id: session.id,
+      is_member: isMember,
     });
 
     return NextResponse.json({
@@ -188,5 +246,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-
 }
