@@ -1,4 +1,4 @@
-// app/api/webhooks/stripe/route.ts - VERSIÓN CORREGIDA SIN DISCONNECT
+// app/api/webhooks/stripe/route.ts - VERSIÓN CON EVENTOS INFORMATIVOS COMPLETOS
 
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
@@ -6,7 +6,7 @@ import { MembershipStatus, PaymentStatus } from '@prisma/client';
 import { logger } from '@/lib/logger';
 import { getStripe } from '@/lib/stripe';
 import { EmailService } from '@/lib/email-service';
-import { prisma } from '@/lib/prisma';  // 👈 Importar desde singleton
+import { prisma } from '@/lib/prisma';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -109,8 +109,12 @@ export async function POST(request: NextRequest) {
         break;
       }
 
+      // 🆕 Eventos informativos que se ignoran (NO son errores)
       case 'charge.succeeded':
       case 'charge.updated':
+      case 'payment_intent.created':        // 🆕 AÑADIDO
+      case 'payment_intent.processing':     // 🆕 AÑADIDO (por si acaso)
+      case 'charge.pending':                // 🆕 AÑADIDO (por si acaso)
         logger.log(`ℹ️ Evento informativo: ${event.type}`);
         break;
 
@@ -124,7 +128,6 @@ export async function POST(request: NextRequest) {
     logger.apiError('Error processing webhook', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-  // 👈 NO HAY finally con $disconnect()
 }
 
 // ========================================

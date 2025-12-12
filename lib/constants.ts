@@ -167,7 +167,7 @@ export const LICENSE_TYPES: LicenseType[] = [
   // ============================================================
   {
     id: 'a',
-    name: 'A • Autonómica',
+    name: 'A (Autonómica)',
     shortName: 'A',
     territory: 'regional',
     includesExtras: false,
@@ -181,7 +181,7 @@ export const LICENSE_TYPES: LicenseType[] = [
   },
   {
     id: 'a_plus',
-    name: 'A+ • Autonómica Plus',
+    name: 'A+ (Autonómica +)',
     shortName: 'A+',
     territory: 'regional',
     includesExtras: true,
@@ -200,7 +200,7 @@ export const LICENSE_TYPES: LicenseType[] = [
   // ============================================================
   {
     id: 'a_nac',
-    name: 'A NAC • Autonómica Nacional',
+    name: 'A NAC (Autonómica Nacional)',
     shortName: 'A NAC',
     territory: 'regional_national',
     includesExtras: false,
@@ -209,12 +209,12 @@ export const LICENSE_TYPES: LicenseType[] = [
       juvenil: 22.00,
       mayor: 52.00
     },
-    coverage: 'Cobertura autonómica ampliada a toda España: Excursiones, Senderismo, Escalada, Vías Ferratas, Alpinismo, Esquí de Montaña, Descenso de Barrancos, Acampadas Alpinísticas, Raquetas de Nieve, Marcha Nórdica, Travesías y Carreras por Montaña',
+    coverage: 'Cobertura autonómica ampliada a toda España: Excursiones, Senderismo, Escalada, Vías Ferratas, Alpinismo, Esquí de Montaña, Descenso de Barrancos, Acampadas Alpinísticas, Raquetas de Nieve, Marcha Nórdica, Travesías y Carreras por Montaña. NO válida para competiciones, actividades o formaciones FEDME ni para descuentos en refugios del convenio de reciprocidad.',
     popular: false
   },
   {
     id: 'a_nac_plus',
-    name: 'A NAC+ • Autonómica Nacional Plus',
+    name: 'A NAC+ (Autonómica Nacional +)',
     shortName: 'A NAC+',
     territory: 'regional_national',
     includesExtras: true,
@@ -223,7 +223,7 @@ export const LICENSE_TYPES: LicenseType[] = [
       juvenil: 36.00,
       mayor: 69.00
     },
-    coverage: 'Todo lo de A NAC + BTT, Espeleología y Esquí Nórdico (no competitivos) con cobertura en toda España',
+    coverage: 'Todo lo de A NAC + BTT, Espeleología y Esquí Nórdico con cobertura en toda España NO COMPETITIVA. Válida solo para competiciones de ámbito autonómico. NO válida para FEDME ni para descuentos en refugios del convenio de reciprocidad.',
     popular: true  // ⭐ Recomendada para quienes quieren cobertura nacional desde autonómica
   },
 
@@ -232,7 +232,7 @@ export const LICENSE_TYPES: LicenseType[] = [
   // ============================================================
   {
     id: 'b',
-    name: 'B - Nacional',
+    name: 'B (Nacional)',
     shortName: 'B',
     territory: 'national',
     includesExtras: false,
@@ -246,7 +246,7 @@ export const LICENSE_TYPES: LicenseType[] = [
   },
   {
     id: 'b_plus',
-    name: 'B+ • Nacional Plus',
+    name: 'B+ (Nacional +)',
     shortName: 'B+',
     territory: 'national',
     includesExtras: true,
@@ -264,7 +264,7 @@ export const LICENSE_TYPES: LicenseType[] = [
   // ============================================================
   {
     id: 'c',
-    name: 'C • Europea',
+    name: 'C (Europea)',
     shortName: 'C',
     territory: 'european',
     includesExtras: true,  // Siempre incluye extras según FEDME

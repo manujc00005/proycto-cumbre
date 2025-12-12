@@ -3,6 +3,13 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import GDPRConsent from '../components/gdpr/gdpr-consent-component';
+
+// 🆕 Interfaz para consentimientos
+interface ConsentState {
+  privacyPolicy: boolean;
+  whatsapp?: boolean;
+}
 
 export default function MisaPage() {
   // ========================================
@@ -23,7 +30,15 @@ export default function MisaPage() {
     phone: '',
     shirtSize: '',
   });
+  
+  // 🆕 Estado de consentimientos RGPD
+  const [consents, setConsents] = useState<ConsentState>({
+    privacyPolicy: false,
+    whatsapp: false
+  });
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState(''); // 🆕 Para errores
 
   // ========================================
   // 2️⃣ SCROLL EFFECTS
@@ -48,10 +63,9 @@ export default function MisaPage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Countdown timer - CORREGIDO CON 2026
+  // Countdown timer
   useEffect(() => {
     const updateCountdown = () => {
-      // Fecha objetivo: 23 enero 2026, 19:00
       const target = new Date(2026, 0, 23, 19, 0, 0, 0);
       const now = new Date();
       
@@ -106,10 +120,25 @@ export default function MisaPage() {
       ...prev,
       [e.target.name]: e.target.value
     }));
+    setFormError(''); // Limpiar error al escribir
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
+
+    // 🆕 Validar consentimiento de privacidad
+    if (!consents.privacyPolicy) {
+      setFormError('Debes aceptar la Política de Privacidad para continuar');
+      return;
+    }
+
+    // Validar campos obligatorios
+    if (!formData.name || !formData.email || !formData.phone || !formData.shirtSize) {
+      setFormError('Todos los campos son obligatorios');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -117,7 +146,14 @@ export default function MisaPage() {
       const response = await fetch('/api/misa/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          // 🆕 Incluir consentimientos RGPD
+          consents: {
+            privacy_accepted: consents.privacyPolicy,
+            whatsapp_consent: consents.whatsapp || false,
+          }
+        }),
       });
 
       const data = await response.json();
@@ -132,7 +168,7 @@ export default function MisaPage() {
       }
     } catch (error: any) {
       console.error('Error:', error);
-      alert(error.message || 'Hubo un error al procesar tu reserva. Por favor, inténtalo de nuevo.');
+      setFormError(error.message || 'Hubo un error al procesar tu reserva. Por favor, inténtalo de nuevo.');
     } finally {
       setIsSubmitting(false);
     }
@@ -163,7 +199,7 @@ export default function MisaPage() {
       {/* Main Content */}
       <div className="relative z-10 container mx-auto px-6 py-12 md:py-20">
         
-        {/* Hero Section */}
+        {/* Hero Section - SIN CAMBIOS */}
         <motion.div 
           className="min-h-screen flex flex-col justify-center items-center text-center"
           initial={{ opacity: 0 }}
@@ -203,14 +239,13 @@ export default function MisaPage() {
             23 DE ENERO 2026 · 19:00
           </motion.p>
 
-          {/* Countdown Timer CON SEGUNDOS */}
+          {/* Countdown Timer */}
           <motion.div 
             className={`flex mb-16 ${isMobile ? 'gap-3' : 'gap-6'}`}
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.7 }}
           >
-            {/* DÍAS */}
             <div className="text-center flex-1">
               <div className={`font-black text-orange-500 mb-1 ${isMobile ? 'text-5xl' : 'text-5xl md:text-6xl'}`}>
                 {String(timeLeft.days).padStart(2, '0')}
@@ -222,7 +257,6 @@ export default function MisaPage() {
             
             <div className={`font-black text-white/20 ${isMobile ? 'text-4xl' : 'text-5xl md:text-6xl'}`}>:</div>
             
-            {/* HORAS */}
             <div className="text-center flex-1">
               <div className={`font-black text-orange-500 mb-1 ${isMobile ? 'text-5xl' : 'text-5xl md:text-6xl'}`}>
                 {String(timeLeft.hours).padStart(2, '0')}
@@ -234,7 +268,6 @@ export default function MisaPage() {
             
             <div className={`font-black text-white/20 ${isMobile ? 'text-4xl' : 'text-5xl md:text-6xl'}`}>:</div>
             
-            {/* MINUTOS */}
             <div className="text-center flex-1">
               <div className={`font-black text-orange-500 mb-1 ${isMobile ? 'text-5xl' : 'text-5xl md:text-6xl'}`}>
                 {String(timeLeft.minutes).padStart(2, '0')}
@@ -246,7 +279,6 @@ export default function MisaPage() {
 
             <div className={`font-black text-white/20 ${isMobile ? 'text-4xl' : 'text-5xl md:text-6xl'}`}>:</div>
 
-            {/* SEGUNDOS */}
             <div className="text-center flex-1">
               <motion.div 
                 key={timeLeft.seconds}
@@ -263,7 +295,7 @@ export default function MisaPage() {
             </div>
           </motion.div>
 
-         {/* Info Box */}
+          {/* Info Box */}
           <motion.div
             className={`mx-auto mb-10 bg-zinc-900/60 backdrop-blur-md border border-white/10 rounded-2xl ${
               isMobile ? 'max-w-sm p-6' : 'max-w-md p-8'
@@ -340,7 +372,7 @@ export default function MisaPage() {
             Pago 100% seguro
           </motion.p>
 
-          {/* Urgency Footer - MÁS GRANDE */}
+          {/* Urgency Footer */}
           <motion.div 
             className="mt-10"
             initial={{ opacity: 0 }}
@@ -348,7 +380,6 @@ export default function MisaPage() {
             transition={{ delay: 1.7 }}
           >
             <div className="inline-flex items-center gap-3 px-6 py-3 bg-orange-500/10 border border-orange-500/30 rounded-full">
-              {/* <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span> */}
               <span className={`font-bold tracking-widest uppercase text-orange-400 ${isMobile ? 'text-sm' : 'text-base'}`}>
                 🔥 Plazas limitadas
               </span>
@@ -360,7 +391,7 @@ export default function MisaPage() {
       </div>
 
       {/* ========================================
-          FORMULARIO MODAL
+          FORMULARIO MODAL (CON RGPD)
           ======================================== */}
       <AnimatePresence>
         {showForm && (
@@ -376,12 +407,12 @@ export default function MisaPage() {
 
             {/* Modal */}
             <motion.div
-              className="fixed inset-0 z-50 flex items-center justify-center p-6"
+              className="fixed inset-0 z-50 flex items-center justify-center p-6 overflow-y-auto"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
             >
-              <div className="bg-zinc-900 border border-orange-500/30 rounded-2xl p-8 max-w-md w-full relative">
+              <div className="bg-zinc-900 border border-orange-500/30 rounded-2xl p-8 max-w-md w-full relative my-8">
                 
                 {/* Close button */}
                 <button
@@ -402,6 +433,13 @@ export default function MisaPage() {
                     Completa tus datos para confirmar
                   </p>
                 </div>
+
+                {/* 🆕 Error Message */}
+                {formError && (
+                  <div className="mb-6 bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-lg text-sm">
+                    {formError}
+                  </div>
+                )}
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -456,6 +494,7 @@ export default function MisaPage() {
                       placeholder="+34 600 000 000"
                     />
                   </div>
+
                   {/* Talla de camiseta */}
                   <div>
                     <label htmlFor="shirtSize" className="block text-sm font-semibold text-white/80 mb-2">
@@ -479,6 +518,16 @@ export default function MisaPage() {
                     </select>
                   </div>
 
+                  {/* 🆕 COMPONENTE RGPD */}
+                  <div className="pt-4 border-t border-white/10">
+                    <GDPRConsent
+                      required={true}
+                      includeMarketing={false}
+                      includeWhatsApp={true}
+                      onConsentChange={setConsents}
+                    />
+                  </div>
+
                   {/* Price reminder */}
                   <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4 text-center">
                     <p className="text-orange-400 font-bold text-2xl mb-1">20€</p>
@@ -488,7 +537,7 @@ export default function MisaPage() {
                   {/* Submit button */}
                   <button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !consents.privacyPolicy}
                     className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all shadow-lg hover:shadow-orange-500/50 flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? (

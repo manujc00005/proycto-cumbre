@@ -1,5 +1,5 @@
-// prisma/schema.prisma - V3.1 OPTIMIZADO
-// Arquitectura: Eventos + Shop + Membresías + Pagos Flexibles
+// prisma/schema.prisma - V3.2 CON RGPD
+// Arquitectura: Eventos + Shop + Membresías + Pagos Flexibles + RGPD
 
 generator client {
   provider = "prisma-client-js"
@@ -131,6 +131,16 @@ model Member {
   membership_status      MembershipStatus @default(pending)
   membership_start_date  DateTime?
   membership_end_date    DateTime?
+  
+  // 🆕 CONSENTIMIENTOS RGPD
+  privacy_accepted       Boolean          @default(false)
+  privacy_accepted_at    DateTime?
+  privacy_accepted_ip    String?          @db.VarChar(45)
+  marketing_consent      Boolean          @default(false)
+  marketing_consent_at   DateTime?
+  whatsapp_consent       Boolean          @default(false)
+  whatsapp_consent_at    DateTime?
+  
   admin_notes            String?          @db.Text
   created_at             DateTime         @default(now())
   updated_at             DateTime         @updatedAt
@@ -145,6 +155,8 @@ model Member {
   @@index([membership_status])
   @@index([member_number])
   @@index([created_at(sort: Desc)])
+  @@index([privacy_accepted])
+  @@index([marketing_consent])
   @@map("members")
 }
 
@@ -192,6 +204,13 @@ model EventRegistration {
   participant_phone String   @db.VarChar(20)
   custom_data       Json? // Datos personalizados del evento
   status            String   @default("pending") @db.VarChar(20)
+  
+  // 🆕 CONSENTIMIENTOS RGPD
+  privacy_accepted    Boolean  @default(false)
+  privacy_accepted_at DateTime?
+  whatsapp_consent    Boolean  @default(false)
+  whatsapp_consent_at DateTime?
+  
   registered_at     DateTime @default(now())
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
@@ -203,6 +222,7 @@ model EventRegistration {
   @@index([member_id])
   @@index([participant_email])
   @@index([status])
+  @@index([privacy_accepted])
   @@map("event_registrations")
 }
 

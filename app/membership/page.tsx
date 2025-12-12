@@ -7,10 +7,16 @@ import LicenseConfigurator from './LicenseConfigurator';
 import { AgeCategory, calculateAge, calculateAgeCategory, getCategoryLabel, getLicensePrice, LICENSE_TYPES, MEMBERSHIP_FEE } from '@/lib/constants';
 import { logger } from '@/lib/logger';
 import styles from './page.module.css';
+import GDPRConsent from '../components/gdpr/gdpr-consent-component';
 
 const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const PANTS_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
+// Interfaz para consentimientos
+interface ConsentState {
+  privacyPolicy: boolean;
+  whatsapp?: boolean;
+}
 
 export default function MembershipPage() {
   const router = useRouter();
@@ -46,6 +52,12 @@ export default function MembershipPage() {
     shirtSize: '',
     hoodieSize: '',
     pantsSize: '',
+  });
+
+  // Estado de consentimientos RGPD
+  const [consents, setConsents] = useState<ConsentState>({
+    privacyPolicy: false,
+    whatsapp: false
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -174,6 +186,9 @@ export default function MembershipPage() {
       case 'address':
         if (!value) error = 'La dirección es obligatoria';
         break;
+      case 'shirtSize':
+        if (!value) error = 'Debes seleccionar una talla de camiseta';
+        break;
       case 'phone':
         if (!value) error = 'El teléfono es obligatorio';
         else if (!/^[0-9]{9}$/.test(value.replace(/\s/g, ''))) 
@@ -233,6 +248,20 @@ export default function MembershipPage() {
     else if (!/^[0-9]{9}$/.test(formData.phone.replace(/\s/g, ''))) 
       newErrors.phone = 'Debe tener 9 dígitos';
 
+    if (!formData.shirtSize) {
+      newErrors.shirtSize = 'Debes seleccionar una talla de camiseta';
+    }
+
+    // 🚨 Validar consentimientos OBLIGATORIOS
+    if (!consents.privacyPolicy) {
+      newErrors.privacy = 'Debes aceptar la Política de Privacidad';
+    }
+    
+    // 🚨 Validar WhatsApp obligatorio para socios
+    if (!consents.whatsapp) {
+      newErrors.whatsapp = 'Debes aceptar compartir tus datos en WhatsApp para formar parte del club';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -276,7 +305,13 @@ export default function MembershipPage() {
         body: JSON.stringify({
           ...formData,
           ageCategory: ageCategory,
-          overwrite: true
+          overwrite: true,
+          consents: {
+            privacy_accepted: consents.privacyPolicy,
+            privacy_accepted_at: new Date().toISOString(),
+            whatsapp_consent: consents.whatsapp || false,
+            whatsapp_consent_at: consents.whatsapp ? new Date().toISOString() : null,
+          }
         }) 
       });
 
@@ -713,7 +748,7 @@ export default function MembershipPage() {
                     const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
                     return minDate.toISOString().split('T')[0];
                   })()}
-                  className={`${styles.dateInput}  w-full px-4 py-3 bg-zinc-800 border-2 ${
+                  className={`${styles.dateInput} w-full px-4 py-3 bg-zinc-800 border-2 ${
                     errors.birthDate ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
                   } rounded-lg text-white focus:outline-none transition-all`}
                 />
@@ -723,7 +758,6 @@ export default function MembershipPage() {
                     {errors.birthDate}
                   </p>
                 )}
-                
               </div>
 
               {/* DNI/NIE */}
@@ -960,21 +994,32 @@ export default function MembershipPage() {
           </section>
 
           {/* Tallas */}
-          <section className="bg-zinc-900 rounded-xl p-6 md:p-8 border border-zinc-800">
+                    <section className="bg-zinc-900 rounded-xl p-6 md:p-8 border border-zinc-800">
             <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
               <span className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">4</span>
               Tallas de Ropa
             </h2>
-
+            
             <p className="text-zinc-400 text-sm mb-6">
               Para que puedas ir fronteando con estilo CUMBRE
             </p>
 
+            {/* 🎯 INFO BOX DESTACADO */}
+            <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 mb-6 flex gap-2">
+              <AlertCircle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-orange-300">
+                <p className="font-semibold">¡Incluida en tu membresía!</p>
+                <p className="text-orange-400 text-xs mt-1">
+                  Recibirás tu camiseta oficial del club con el logo de Proyecto Cumbre
+                </p>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 gap-6">
-              {/* Camiseta */}
+              {/* Camiseta - CAMPO PRINCIPAL */}
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-2">
-                  Camiseta
+                  Talla de Camiseta  <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="shirtSize"
@@ -982,15 +1027,52 @@ export default function MembershipPage() {
                   onChange={handleChange}
                   className="w-full px-4 py-3 bg-zinc-800 border-2 border-zinc-700 focus:border-orange-500 rounded-lg text-white focus:outline-none transition-all"
                 >
-                  <option value="">Selecciona...</option>
+                  <option value="">Selecciona tu talla...</option>
                   {SHIRT_SIZES.map(size => (
                     <option key={size} value={size}>{size}</option>
                   ))}
                 </select>
+              
               </div>
             </div>
           </section>
 
+          {/* SECCIÓN 5: PROTECCIÓN DE DATOS (RGPD) */}
+          <section className="bg-zinc-900 rounded-xl p-6 md:p-8 border border-zinc-800">
+            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+              <span className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">5</span>
+              Protección de Datos
+            </h2>
+
+            <p className="text-zinc-400 text-sm mb-6">
+              Tus datos están seguros. Lee nuestra política antes de continuar.
+            </p>
+
+            {/* Componente RGPD */}
+            <GDPRConsent
+              required={true}
+              includeWhatsApp={true}
+              whatsappRequired={true} 
+              whatsappContext="club" 
+              onConsentChange={setConsents}
+            />
+
+            {/* Error de privacidad */}
+            {errors.privacy && (
+              <p className="mt-4 text-sm text-red-400 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {errors.privacy}
+              </p>
+            )}
+
+            {/* 🚨 Error de WhatsApp */}
+            {errors.whatsapp && (
+              <p className="mt-4 text-sm text-red-400 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {errors.whatsapp}
+              </p>
+            )}
+          </section>
 
           {/* Resumen de costos */}
           {ageCategory && formData.licenseType && (
@@ -1049,7 +1131,8 @@ export default function MembershipPage() {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              // 🚨 AQUÍ ESTÁ EL CAMBIO CRÍTICO: validar privacy Y whatsapp
+              disabled={isSubmitting || !consents.privacyPolicy || !consents.whatsapp}
               className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-lg transition-colors disabled:bg-orange-500/50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
@@ -1071,7 +1154,7 @@ export default function MembershipPage() {
 
           {/* Footer Note */}
           <p className="text-center text-zinc-500 text-sm">
-            Al hacer clic en "Continuar al Pago", tus datos se guardarán en nuestro sistema.
+            Al hacer clic en "Continuar al Pago", aceptas nuestra Política de Privacidad y Aviso Legal.
           </p>
         </form>
       </div>
@@ -1092,9 +1175,12 @@ function getFieldLabel(field: string): string {
     city: 'Ciudad',
     address: 'Dirección',
     postalCode: 'Código postal',
+    shirtSize: 'Talla de camiseta',
     phone: 'Teléfono',
     emergencyPhone: 'Teléfono de emergencia',
-    emergencyContactName: 'Nombre del contacto de emergencia', 
+    emergencyContactName: 'Nombre del contacto de emergencia',
+    privacy: 'Política de Privacidad',
+    whatsapp: 'Consentimiento de WhatsApp', // 🚨 AÑADIDO
     submit: 'Error del servidor'
   };
   return labels[field] || field;

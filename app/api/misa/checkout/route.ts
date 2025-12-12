@@ -1,65 +1,88 @@
-// app/api/misa/checkout/route.ts - VERSIÓN CORREGIDA
+// app/api/misa/checkout/route.ts - VERSIÓN CON SINGLETON Y RGPD
 
 import { NextRequest, NextResponse } from 'next/server';
-import { PaymentStatus } from '@prisma/client';
-import { logger } from '@/lib/logger';
 import { getStripe } from '@/lib/stripe';
-import { prisma } from '@/lib/prisma';  // 👈 Usar singleton
+import { logger } from '@/lib/logger';
+import { prisma } from '@/lib/prisma'; // 👈 Usar singleton
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const stripe = getStripe();
-    const body = await req.json();
-    const { name, email, phone, shirtSize } = body;
+    const body = await request.json();
+    const { name, email, phone, shirtSize, consents } = body;
 
-    logger.log('💳 [MISA] Procesando checkout:', { name, email, phone, shirtSize });
+    logger.apiStart('POST', '/api/misa/checkout', { email, shirtSize });
 
     // Validaciones
     if (!name || !email || !phone || !shirtSize) {
       return NextResponse.json(
-        { error: 'Todos los campos son requeridos' },
+        { error: 'Todos los campos son obligatorios' },
         { status: 400 }
       );
     }
 
-    // 1. Buscar el evento MISA
+    // 🆕 Validar consentimiento de privacidad (obligatorio)
+    // if (!consents?.privacy_accepted) {
+    //   return NextResponse.json(
+    //     { error: 'Debes aceptar la Política de Privacidad' },
+    //     { status: 400 }
+    //   );
+    // }
+
+    // Validar formato de email
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      return NextResponse.json(
+        { error: 'Email inválido' },
+        { status: 400 }
+      );
+    }
+
+    // Validar teléfono (9 dígitos)
+    const normalizedPhone = phone.replace(/\s/g, '');
+    const phoneRegex = /^(\+?[1-9]\d{0,2})?\d{9}$/;
+
+    if (!phoneRegex.test(normalizedPhone)) {
+      return NextResponse.json(
+        { error: 'El teléfono debe tener 9 dígitos o un formato internacional válido (+XX...)' },
+        { status: 400 }
+      );
+    }
+
+    // Validar talla
+    const validSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+    if (!validSizes.includes(shirtSize)) {
+      return NextResponse.json(
+        { error: 'Talla inválida' },
+        { status: 400 }
+      );
+    }
+
+    // Buscar evento MISA
     const misaEvent = await prisma.event.findUnique({
       where: { slug: 'misa-2026' }
     });
 
-    if (!misaEvent || misaEvent.status !== 'published') {
+    if (!misaEvent) {
       return NextResponse.json(
-        { error: 'Evento no disponible' },
+        { error: 'Evento MISA no encontrado' },
         { status: 404 }
       );
     }
 
-    // 2. Verificar plazas disponibles
+    // Verificar disponibilidad
     if (misaEvent.max_participants && 
         misaEvent.current_participants >= misaEvent.max_participants) {
       return NextResponse.json(
-        { error: 'No quedan plazas disponibles' },
-        { status: 409 }
+        { error: 'El evento está agotado' },
+        { status: 400 }
       );
     }
 
-    // 3. Verificar si ya está registrado
-    const existingRegistration = await prisma.eventRegistration.findFirst({
-      where: {
-        event_id: misaEvent.id,
-        participant_email: email.toLowerCase(),
-        status: 'confirmed'
-      }
-    });
+    // 🆕 Obtener IP del cliente
+    const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
+                     request.headers.get('x-real-ip') || 
+                     'unknown';
 
-    if (existingRegistration) {
-      return NextResponse.json(
-        { error: 'Ya existe una reserva con este email' },
-        { status: 409 }
-      );
-    }
-
-    // 4. Crear el registro del evento (pendiente)
+    // Crear inscripción con campos RGPD
     const registration = await prisma.eventRegistration.create({
       data: {
         event_id: misaEvent.id,
@@ -67,50 +90,61 @@ export async function POST(req: NextRequest) {
         participant_email: email.toLowerCase(),
         participant_phone: phone,
         custom_data: { shirt_size: shirtSize },
-        status: 'pending'
+        status: 'pending',
+        
+        // 🆕 CAMPOS RGPD
+        privacy_accepted: consents.privacy_accepted,
+        privacy_accepted_at: new Date(),
+        whatsapp_consent: consents.whatsapp_consent || false,
+        whatsapp_consent_at: consents.whatsapp_consent ? new Date() : null,
       }
     });
 
-    logger.log('✅ [MISA] Registro creado:', registration.id);
+    logger.log('✅ Inscripción creada:', {
+      id: registration.id,
+      email: registration.participant_email,
+      privacy_accepted: registration.privacy_accepted,
+      whatsapp_consent: registration.whatsapp_consent,
+    });
 
-    // 5. Crear sesión de Stripe CON METADATA COMPLETO
+    // Crear sesión de Stripe
+    const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      line_items: [{
-        price_data: {
-          currency: 'eur',
-          product_data: {
-            name: misaEvent.name,
-            description: `Plaza para ${name} - Camiseta talla ${shirtSize}`,
-            images: [
-              misaEvent.image_url 
-                ? `${process.env.NEXT_PUBLIC_URL}${misaEvent.image_url}`
-                : `${process.env.NEXT_PUBLIC_URL}/misa3.png`
-            ]
+      line_items: [
+        {
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: 'MISA - Ritual Furtivo',
+              description: `Inscripción para ${name} - Talla: ${shirtSize}`,
+              images: ['https://proyecto-cumbre.es/misa-cover.jpg'], // Opcional
+            },
+            unit_amount: misaEvent.price, // Ya está en centavos
           },
-          unit_amount: misaEvent.price,
+          quantity: 1,
         },
-        quantity: 1,
-      }],
+      ],
       mode: 'payment',
       success_url: `${process.env.NEXT_PUBLIC_URL}/misa/confirmacion?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_URL}/misa?canceled=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_URL}/misa?cancelled=true`,
+      customer_email: email,
       metadata: {
-        // 👇 IMPORTANTE: Estos valores se usan en el webhook
         type: 'event',
         event_registration_id: registration.id,
         event_id: misaEvent.id,
-        name: name,
-        email: email,
-        phone: phone,
-        shirtSize: shirtSize,
+        name,
+        email,
+        phone,
+        shirtSize,
+        privacy_accepted: consents.privacy_accepted ? 'true' : 'false',
+        whatsapp_consent: consents.whatsapp_consent ? 'true' : 'false',
       },
-      customer_email: email,
     });
 
-    logger.log('✅ [MISA] Sesión de Stripe creada:', session.id);
+    logger.log('✅ Sesión de Stripe creada:', session.id);
 
-    // 6. Crear payment asociado al registro
+    // Crear payment
     await prisma.payment.create({
       data: {
         payment_type: 'event',
@@ -118,32 +152,41 @@ export async function POST(req: NextRequest) {
         stripe_session_id: session.id,
         amount: misaEvent.price,
         currency: 'eur',
-        status: 'pending' as PaymentStatus,
-        description: `${misaEvent.name} - ${name}`,
+        status: 'pending',
+        description: `MISA 2026 - ${name}`,
         metadata: {
-          event_slug: misaEvent.slug,
-          participant_name: name,
-          participant_email: email,
-          participant_phone: phone,
           shirt_size: shirtSize,
-        }
-      }
+          phone,
+          ip_address: clientIp,
+        },
+      },
     });
 
-    logger.log('✅ [MISA] Payment creado en BD');
+    logger.apiSuccess('Checkout MISA completado', {
+      registration_id: registration.id,
+      session_id: session.id,
+    });
 
     return NextResponse.json({
+      success: true,
       sessionId: session.id,
       url: session.url,
     });
 
   } catch (error: any) {
-    logger.error('❌ [MISA] Error en checkout:', error);
-    
+    logger.apiError('Error en checkout MISA', error);
+
+    if (error.code === 'P2002') {
+      return NextResponse.json(
+        { error: 'Ya existe una inscripción con este email' },
+        { status: 409 }
+      );
+    }
+
     return NextResponse.json(
-      { error: error.message || 'Error al crear sesión de pago' },
+      { error: 'Error al procesar la inscripción', details: error.message },
       { status: 500 }
     );
   }
-  // 👈 NO HAY finally con $disconnect()
+
 }

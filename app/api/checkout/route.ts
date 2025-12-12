@@ -1,13 +1,12 @@
-// app/api/checkout/route.ts - VERSIÓN CORREGIDA
+// app/api/checkout/route.ts - VERSIÓN CON SINGLETON PRISMA
 
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { PrismaClient, PaymentStatus } from '@prisma/client';
+import { PaymentStatus } from '@prisma/client';
 import { getLicensePrice, LICENSE_TYPES, MEMBERSHIP_FEE } from '@/lib/constants';
 import { logger } from '@/lib/logger';
 import { getStripe } from '@/lib/stripe';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
   try {
@@ -178,7 +177,6 @@ export async function POST(req: NextRequest) {
       { error: error.message || 'Error al crear sesión de pago' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
+  // 👈 NO HAY finally con $disconnect()
 }

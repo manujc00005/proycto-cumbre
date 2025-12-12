@@ -239,7 +239,7 @@ export default function LicenseConfigurator({
             </div>
           </div>
           <p className="text-xs text-zinc-500 italic">
-            Solo modalidades NO competitivas. Para competición necesitas licencias específicas.
+            <strong> NO válida para competiciones, actividades o formaciones FEDME ni para descuentos en refugios del convenio de reciprocidad.</strong>
           </p>
         </div>
 

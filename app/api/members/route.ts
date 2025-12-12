@@ -1,10 +1,9 @@
-// /api/members/route.ts - VERSIÓN FINAL CORREGIDA
+// /api/members/route.ts - VERSIÓN FINAL CON RGPD
 
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient, LicenseType, FedmeStatus, Sex, MembershipStatus } from '@prisma/client';
+import { LicenseType, FedmeStatus, Sex, MembershipStatus } from '@prisma/client';
 import { logger } from '@/lib/logger';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';  // 👈 Usar singleton
 
 // ✅ NO HAY MAPPING - Los IDs ya coinciden entre frontend y BD
 const VALID_LICENSE_TYPES: LicenseType[] = ['none', 'a', 'a_plus', 'a_nac', 'a_nac_plus', 'b', 'b_plus', 'c'];
@@ -12,13 +11,30 @@ const VALID_LICENSE_TYPES: LicenseType[] = ['none', 'a', 'a_plus', 'a_nac', 'a_n
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { overwrite, ...formData } = body;
+    const { overwrite, consents, ...formData } = body;
+
+    // 🆕 CAPTURAR IP
+    const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || 
+                      request.headers.get('x-real-ip') || 
+                      request.ip ||
+                      'unknown';
 
     logger.apiStart('POST', '/api/members', {
       email: formData.email,
       dni: formData.dni,
-      licenseType: formData.licenseType
-    })
+      licenseType: formData.licenseType,
+      hasConsents: !!consents,
+      ip: ipAddress
+    });
+
+    // 🆕 LOG DE CONSENTIMIENTOS RECIBIDOS
+    if (consents) {
+      logger.log('📋 Consentimientos RGPD recibidos:', {
+        privacy: consents.privacy_accepted,
+        marketing: consents.marketing_consent || false,
+        whatsapp: consents.whatsapp_consent || false
+      });
+    }
 
     // Validaciones
     const errors: Record<string, string> = {};
@@ -47,7 +63,13 @@ export async function POST(request: NextRequest) {
       logger.error(`❌ Licencia inválida recibida: "${formData.licenseType}"`);
     }
 
+    // 🆕 VALIDAR CONSENTIMIENTOS RGPD
+    if (!consents || !consents.privacy_accepted) {
+      errors.privacy = 'Debes aceptar la Política de Privacidad para continuar';
+    }
+
     if (Object.keys(errors).length > 0) {
+      logger.apiError('Errores de validación', errors);
       return NextResponse.json(
         { error: 'Errores de validación', errors },
         { status: 400 }
@@ -100,7 +122,7 @@ export async function POST(request: NextRequest) {
 
     logger.log('✅ Tipo de licencia:', licenseType);
 
-    // Preparar datos
+    // Preparar datos del member
     const memberData = {
       headquarters_id: headquarters.id,
       member_number: memberNumber,
@@ -125,36 +147,65 @@ export async function POST(request: NextRequest) {
       membership_status: membershipStatus,
       membership_start_date: null,
       membership_end_date: null,
+      
+      // 🆕 CAMPOS RGPD
+      privacy_accepted: consents.privacy_accepted,
+      privacy_accepted_at: consents.privacy_accepted_at ? new Date(consents.privacy_accepted_at) : new Date(),
+      privacy_accepted_ip: ipAddress,
+      
+      marketing_consent: true, 
+      marketing_consent_at: new Date(),  
+      
+      whatsapp_consent: consents.whatsapp_consent || false,
+      whatsapp_consent_at: consents.whatsapp_consent && consents.whatsapp_consent_at 
+        ? new Date(consents.whatsapp_consent_at) 
+        : null,
+      // whatsapp_consent_ip: consents.whatsapp_consent ? ipAddress : null,
     };
 
     logger.log('📦 Guardando:', {
       license_type: memberData.license_type,
       fedme_status: memberData.fedme_status,
+      privacy_accepted: memberData.privacy_accepted,
+      whatsapp_consent: memberData.whatsapp_consent,
+      ip: memberData.privacy_accepted_ip
     });
 
     let member;
 
     if (existingMember && overwrite) {
+      // Para UPDATE, no incluir headquarters_id (es una relación)
+      const { headquarters_id, ...updateData } = memberData;
+      
       member = await prisma.member.update({
         where: { id: existingMember.id },
-        data: { ...memberData, updated_at: new Date() }
+        data: { ...updateData, updated_at: new Date() }
       });
-      logger.log('✅ Socio actualizado');
+      logger.log('✅ Socio actualizado con RGPD');
     } else {
       member = await prisma.member.create({
         data: memberData
       });
-      logger.apiSuccess('Socio creado', {
+      logger.apiSuccess('Socio creado con RGPD', {
         id: member.id,
         license_type: member.license_type,
-        fedme_status: member.fedme_status
+        fedme_status: member.fedme_status,
+        privacy_accepted: member.privacy_accepted,
+        whatsapp_consent: member.whatsapp_consent,
+        ip: member.privacy_accepted_ip
       });
     }
 
-    logger.log('✅ Guardado en BD:', {
+    logger.log('✅ Guardado en BD con RGPD:', {
       id: member.id,
+      email: member.email,
       license_type: member.license_type,
       fedme_status: member.fedme_status,
+      privacy_accepted: member.privacy_accepted,
+      privacy_accepted_at: member.privacy_accepted_at?.toISOString(),
+      privacy_accepted_ip: member.privacy_accepted_ip,
+      marketing_consent: member.marketing_consent,
+      whatsapp_consent: member.whatsapp_consent,
     });
 
     return NextResponse.json({
@@ -169,11 +220,18 @@ export async function POST(request: NextRequest) {
         license_type: member.license_type,
         membership_status: member.membership_status,
         fedme_status: member.fedme_status,
+        // 🆕 Incluir info RGPD en respuesta
+        privacy_accepted: member.privacy_accepted,
+        whatsapp_consent: member.whatsapp_consent,
       },
     }, { status: existingMember ? 200 : 201 });
 
   } catch (error: any) {
-    logger.error('❌ Error:', error);
+    logger.error('❌ Error en /api/members:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack?.split('\n').slice(0, 3).join('\n')
+    });
     
     if (error.code === 'P2007') {
       return NextResponse.json(
@@ -193,9 +251,8 @@ export async function POST(request: NextRequest) {
       { error: 'Error interno del servidor', details: error.message },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
+  // 👈 SIN finally con $disconnect (usamos singleton)
 }
 
 async function generateMemberNumber(headquartersCode: string): Promise<string> {
@@ -227,6 +284,49 @@ async function generateMemberNumber(headquartersCode: string): Promise<string> {
 
 export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get('email');
+
+    if (email) {
+      // 🆕 GET específico con info RGPD
+      const member = await prisma.member.findUnique({
+        where: { email },
+        select: {
+          id: true,
+          email: true,
+          first_name: true,
+          last_name: true,
+          member_number: true,
+          membership_status: true,
+          license_type: true,
+          fedme_status: true,
+          // 🆕 Campos RGPD
+          privacy_accepted: true,
+          privacy_accepted_at: true,
+          privacy_accepted_ip: true,
+          marketing_consent: true,
+          marketing_consent_at: true,
+          whatsapp_consent: true,
+          whatsapp_consent_at: true,
+          created_at: true,
+          updated_at: true
+        }
+      });
+
+      if (!member) {
+        return NextResponse.json(
+          { error: 'Member not found' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({ 
+        success: true,
+        member 
+      }, { status: 200 });
+    }
+
+    // GET de lista de members
     const members = await prisma.member.findMany({
       orderBy: { created_at: 'desc' },
       take: 100,
@@ -240,13 +340,13 @@ export async function GET(request: NextRequest) {
       count: members.length,
       members,
     });
+
   } catch (error: any) {
-    logger.error('❌ Error:', error);
+    logger.error('❌ Error en GET /api/members:', error);
     return NextResponse.json(
       { error: 'Error al obtener miembros', details: error.message },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
+  // 👈 SIN finally con $disconnect (usamos singleton)
 }

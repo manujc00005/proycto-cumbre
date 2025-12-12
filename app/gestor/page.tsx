@@ -375,19 +375,38 @@ export default function GestorPage() {
                         {getStatusBadge(member.membership_status)}
                       </td>
                       <td className="px-6 py-4">
-                        {member.fedme_status === 'pending' && member.license_type !== 'none' && (
+                        {member.fedme_status === 'pending' && member.license_type !== 'none' ? (
+                          // 🔵 BOTÓN ACTIVO - AZUL BRILLANTE CON ACCIÓN
                           <button
                             onClick={() => processLicense(member.id, member.member_number)}
                             disabled={processingLicense === member.id}
-                            className="px-3 py-1 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded text-xs font-medium transition disabled:opacity-50"
+                            className="group relative inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-lg text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105"
                           >
                             {processingLicense === member.id ? (
-                              <Loader2 className="w-3 h-3 animate-spin inline" />
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <span>Procesando...</span>
+                              </>
                             ) : (
-                              'Procesar Licencia'
+                              <>
+                                <CheckCircle className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                <span>Activar Licencia</span>
+                              </>
                             )}
                           </button>
-                        )}
+                        ) : member.fedme_status === 'active' ? (
+                          // ✅ BADGE INFORMATIVO - VERDE SUAVE SIN ACCIÓN
+                          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/30 rounded-lg text-green-400 text-xs font-medium">
+                            <CheckCircle className="w-3 h-3" />
+                            <span>Licencia Activa</span>
+                          </div>
+                        ) : member.license_type === 'none' ? (
+                          // ⚠️ BADGE INFORMATIVO - GRIS SIN ACCIÓN
+                          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-500 text-xs font-medium">
+                            <AlertCircle className="w-3 h-3" />
+                            <span>Sin Licencia</span>
+                          </div>
+                        ) : null}
                       </td>
                     </tr>
                   ))}
