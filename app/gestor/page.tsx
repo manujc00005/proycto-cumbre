@@ -14,7 +14,13 @@ import {
   Shirt,
   Calendar,
   Ticket,
-  Download
+  Download,
+  Shield, // 🆕 Para tab RGPD
+  Trash2, // 🆕 Para soft delete
+  RefreshCw, // 🆕 Para restaurar
+  XCircle, // 🆕 Para revocar
+  FileText, // 🆕 Para versión de política
+  AlertTriangle
 } from 'lucide-react';
 
 interface Member {
@@ -22,10 +28,19 @@ interface Member {
   member_number: string;
   first_name: string;
   last_name: string;
+  email: string;
   phone: string;
   license_type: string;
   fedme_status: string;
   membership_status: string;
+  
+  // 🆕 CAMPOS RGPD
+  privacy_policy_version?: string;
+  marketing_consent?: boolean;
+  marketing_revoked_at?: string | null;
+  whatsapp_consent?: boolean;
+  whatsapp_revoked_at?: string | null;
+  deleted_at?: string | null;
 }
 
 interface Payment {
@@ -73,14 +88,35 @@ interface MisaRegistration {
   };
 }
 
+// 🆕 Interface para stats RGPD
+interface RGPDStats {
+  total: {
+    active: number;
+    deleted: number;
+  };
+  policy_versions: Array<{ privacy_policy_version: string | null; _count: number }>;
+  whatsapp: {
+    active: number;
+    revoked: number;
+    percentage: number;
+  };
+  marketing: {
+    active: number;
+    revoked: number;
+    percentage: number;
+  };
+}
+
 export default function GestorPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [misaRegistrations, setMisaRegistrations] = useState<MisaRegistration[]>([]);
+  const [rgpdStats, setRgpdStats] = useState<RGPDStats | null>(null); // 🆕
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'members' | 'payments' | 'misa'>('members');
+  const [activeTab, setActiveTab] = useState<'members' | 'payments' | 'misa' | 'rgpd'>('members'); // 🆕 Añadir 'rgpd'
   const [processingLicense, setProcessingLicense] = useState<string | null>(null);
+  const [processingAction, setProcessingAction] = useState<string | null>(null); // 🆕
 
   useEffect(() => {
     fetchData();
@@ -89,21 +125,204 @@ export default function GestorPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [membersRes, paymentsRes, misaRes] = await Promise.all([
+      const requests = [
         fetch('/api/gestor/members'),
         fetch('/api/gestor/payments'),
         fetch('/api/gestor/misa-registrations')
-      ]);
+      ];
 
-      const membersData = await membersRes.json();
-      const paymentsData = await paymentsRes.json();
-      const misaData = await misaRes.json();
+      // 🆕 Si estamos en la pestaña RGPD, obtener stats
+      if (activeTab === 'rgpd') {
+        requests.push(fetch('/api/gestor/rgpd-stats'));
+      }
+
+      const responses = await Promise.all(requests);
+      const [membersData, paymentsData, misaData, rgpdData] = await Promise.all(
+        responses.map(r => r.json())
+      );
 
       if (membersData.success) setMembers(membersData.members);
       if (paymentsData.success) setPayments(paymentsData.payments);
       if (misaData.success) setMisaRegistrations(misaData.registrations);
+      if (rgpdData?.success) setRgpdStats(rgpdData.stats); // 🆕
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🆕 SOFT DELETE
+  const softDeleteMember = async (memberId: string, memberName: string) => {
+    const reason = prompt(`¿Por qué eliminas a ${memberName}?\n(Opcional, presiona OK para continuar)`);
+    
+    if (reason === null) return; // Usuario canceló
+
+    const confirm = window.confirm(
+      `⚠️ ¿Estás seguro de ELIMINAR a ${memberName}?\n\n` +
+      `Esto marcará al usuario como eliminado pero mantendrá los registros históricos.\n` +
+      `El usuario dejará de aparecer en las listas normales.`
+    );
+
+    if (!confirm) return;
+
+    try {
+      setProcessingAction(memberId);
+      
+      const response = await fetch('/api/gestor/soft-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memberId, reason: reason || undefined }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al eliminar usuario');
+      }
+
+      alert('✅ Usuario eliminado correctamente');
+      fetchData();
+    } catch (err: any) {
+      alert(`❌ Error: ${err.message}`);
+    } finally {
+      setProcessingAction(null);
+    }
+  };
+
+  // 🆕 RESTAURAR USUARIO
+  const restoreMember = async (memberId: string, memberName: string) => {
+    const confirm = window.confirm(
+      `¿Restaurar a ${memberName}?\n\n` +
+      `El usuario volverá a aparecer en las listas normales.`
+    );
+
+    if (!confirm) return;
+
+    try {
+      setProcessingAction(memberId);
+      
+      const response = await fetch('/api/gestor/restore-member', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memberId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al restaurar usuario');
+      }
+
+      alert('✅ Usuario restaurado correctamente');
+      fetchData();
+    } catch (err: any) {
+      alert(`❌ Error: ${err.message}`);
+    } finally {
+      setProcessingAction(null);
+    }
+  };
+
+  // 🆕 REVOCAR WHATSAPP
+  const revokeWhatsApp = async (memberId: string, memberName: string) => {
+    const confirm = window.confirm(
+      `¿Revocar WhatsApp de ${memberName}?\n\n` +
+      `El usuario será marcado como "sin consentimiento de WhatsApp".\n` +
+      `Deberías removerlo de los grupos manualmente.`
+    );
+
+    if (!confirm) return;
+
+    try {
+      setProcessingAction(memberId);
+      
+      const response = await fetch('/api/gestor/revoke-consent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memberId, consentType: 'whatsapp' }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al revocar WhatsApp');
+      }
+
+      alert('✅ Consentimiento de WhatsApp revocado');
+      fetchData();
+    } catch (err: any) {
+      alert(`❌ Error: ${err.message}`);
+    } finally {
+      setProcessingAction(null);
+    }
+  };
+
+  // 🆕 REVOCAR MARKETING
+  const revokeMarketing = async (memberId: string, memberName: string) => {
+    const confirm = window.confirm(
+      `¿Revocar marketing de ${memberName}?\n\n` +
+      `El usuario dejará de recibir comunicaciones de marketing.`
+    );
+
+    if (!confirm) return;
+
+    try {
+      setProcessingAction(memberId);
+      
+      const response = await fetch('/api/gestor/revoke-consent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memberId, consentType: 'marketing' }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al revocar marketing');
+      }
+
+      alert('✅ Consentimiento de marketing revocado');
+      fetchData();
+    } catch (err: any) {
+      alert(`❌ Error: ${err.message}`);
+    } finally {
+      setProcessingAction(null);
+    }
+  };
+
+  // 🆕 ACTUALIZAR VERSIÓN DE POLÍTICA MASIVAMENTE
+  const updatePolicyVersion = async () => {
+    const newVersion = prompt('Introduce la nueva versión de política (ej: 2.0):');
+    
+    if (!newVersion) return;
+
+    const confirm = window.confirm(
+      `⚠️ ATENCIÓN: Esto actualizará la versión de política de TODOS los usuarios activos a "${newVersion}".\n\n` +
+      `IMPORTANTE: Deberías tener el consentimiento de los usuarios antes de hacer esto.\n\n` +
+      `¿Continuar?`
+    );
+
+    if (!confirm) return;
+
+    try {
+      setLoading(true);
+      
+      const response = await fetch('/api/gestor/update-policy-version', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newVersion }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al actualizar versión');
+      }
+
+      alert(`✅ ${data.updated} usuarios actualizados a versión ${newVersion}`);
+      fetchData();
+    } catch (err: any) {
+      alert(`❌ Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -240,6 +459,10 @@ export default function GestorPage() {
   }
 
   const confirmedMisaRegistrations = misaRegistrations.filter(r => r.status === 'confirmed').length;
+  
+  // 🆕 Filtrar miembros activos vs eliminados
+  const activeMembers = members.filter(m => !m.deleted_at);
+  const deletedMembers = members.filter(m => m.deleted_at);
 
   return (
     <div className="min-h-screen bg-zinc-950 py-12 px-4">
@@ -248,7 +471,7 @@ export default function GestorPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Panel de Gestión</h1>
-          <p className="text-zinc-400">Administración de socios, pagos y eventos</p>
+          <p className="text-zinc-400">Administración de socios, pagos, eventos y RGPD</p>
         </div>
 
         {/* Stats */}
@@ -256,8 +479,11 @@ export default function GestorPage() {
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-zinc-400 text-sm mb-1">Total Socios</p>
-                <p className="text-3xl font-bold text-white">{members.length}</p>
+                <p className="text-zinc-400 text-sm mb-1">Socios Activos</p>
+                <p className="text-3xl font-bold text-white">{activeMembers.length}</p>
+                {deletedMembers.length > 0 && (
+                  <p className="text-xs text-red-400 mt-1">{deletedMembers.length} eliminados</p>
+                )}
               </div>
               <Users className="w-12 h-12 text-orange-500 opacity-20" />
             </div>
@@ -278,7 +504,7 @@ export default function GestorPage() {
               <div>
                 <p className="text-zinc-400 text-sm mb-1">Licencias Pendientes</p>
                 <p className="text-3xl font-bold text-white">
-                  {members.filter(m => m.fedme_status === 'pending').length}
+                  {activeMembers.filter(m => m.fedme_status === 'pending').length}
                 </p>
               </div>
               <AlertCircle className="w-12 h-12 text-yellow-500 opacity-20" />
@@ -297,10 +523,10 @@ export default function GestorPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-zinc-800">
+        <div className="flex gap-2 mb-6 border-b border-zinc-800 overflow-x-auto">
           <button
             onClick={() => setActiveTab('members')}
-            className={`px-6 py-3 font-medium transition-colors ${
+            className={`px-6 py-3 font-medium transition-colors whitespace-nowrap ${
               activeTab === 'members'
                 ? 'text-orange-500 border-b-2 border-orange-500'
                 : 'text-zinc-400 hover:text-white'
@@ -311,7 +537,7 @@ export default function GestorPage() {
           </button>
           <button
             onClick={() => setActiveTab('payments')}
-            className={`px-6 py-3 font-medium transition-colors ${
+            className={`px-6 py-3 font-medium transition-colors whitespace-nowrap ${
               activeTab === 'payments'
                 ? 'text-orange-500 border-b-2 border-orange-500'
                 : 'text-zinc-400 hover:text-white'
@@ -322,7 +548,7 @@ export default function GestorPage() {
           </button>
           <button
             onClick={() => setActiveTab('misa')}
-            className={`px-6 py-3 font-medium transition-colors ${
+            className={`px-6 py-3 font-medium transition-colors whitespace-nowrap ${
               activeTab === 'misa'
                 ? 'text-orange-500 border-b-2 border-orange-500'
                 : 'text-zinc-400 hover:text-white'
@@ -330,6 +556,21 @@ export default function GestorPage() {
           >
             <Mountain className="w-4 h-4 inline mr-2" />
             MISA
+          </button>
+          {/* 🆕 TAB RGPD */}
+          <button
+            onClick={() => {
+              setActiveTab('rgpd');
+              fetchData(); // Recargar para obtener stats
+            }}
+            className={`px-6 py-3 font-medium transition-colors whitespace-nowrap ${
+              activeTab === 'rgpd'
+                ? 'text-orange-500 border-b-2 border-orange-500'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            <Shield className="w-4 h-4 inline mr-2" />
+            RGPD
           </button>
         </div>
 
@@ -352,7 +593,7 @@ export default function GestorPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-800">
-                  {members.map((member) => (
+                  {activeMembers.map((member) => (
                     <tr key={member.id} className="hover:bg-zinc-800/30 transition">
                       <td className="px-6 py-4 text-sm text-white font-mono">
                         {member.member_number || 'N/A'}
@@ -376,7 +617,6 @@ export default function GestorPage() {
                       </td>
                       <td className="px-6 py-4">
                         {member.fedme_status === 'pending' && member.license_type !== 'none' ? (
-                          // 🔵 BOTÓN ACTIVO - AZUL BRILLANTE CON ACCIÓN
                           <button
                             onClick={() => processLicense(member.id, member.member_number)}
                             disabled={processingLicense === member.id}
@@ -395,13 +635,11 @@ export default function GestorPage() {
                             )}
                           </button>
                         ) : member.fedme_status === 'active' ? (
-                          // ✅ BADGE INFORMATIVO - VERDE SUAVE SIN ACCIÓN
                           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/30 rounded-lg text-green-400 text-xs font-medium">
                             <CheckCircle className="w-3 h-3" />
                             <span>Licencia Activa</span>
                           </div>
                         ) : member.license_type === 'none' ? (
-                          // ⚠️ BADGE INFORMATIVO - GRIS SIN ACCIÓN
                           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-500 text-xs font-medium">
                             <AlertCircle className="w-3 h-3" />
                             <span>Sin Licencia</span>
@@ -479,7 +717,6 @@ export default function GestorPage() {
           {/* MISA Tab */}
           {activeTab === 'misa' && (
             <>
-              {/* Header con botón de exportar */}
               <div className="px-6 py-4 bg-zinc-800/50 border-b border-zinc-800 flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-bold">Inscripciones MISA 2026</h3>
@@ -580,6 +817,241 @@ export default function GestorPage() {
                 )}
               </div>
             </>
+          )}
+
+          {/* 🆕 RGPD TAB */}
+          {activeTab === 'rgpd' && (
+            <div className="p-6">
+              {/* Header con botón de actualizar versión */}
+              <div className="mb-6 flex items-center justify-between">
+                <div>
+                  <h3 className="text-white font-bold text-xl mb-1">Gestión RGPD</h3>
+                  <p className="text-zinc-400 text-sm">Protección de datos y consentimientos</p>
+                </div>
+                <button
+                  onClick={updatePolicyVersion}
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-lg transition text-sm font-medium"
+                >
+                  <FileText className="w-4 h-4" />
+                  Actualizar Versión de Política
+                </button>
+              </div>
+
+              {/* Stats RGPD */}
+              {rgpdStats && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                  <div className="bg-zinc-800/50 rounded-lg p-4 border border-zinc-700">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-zinc-400 text-sm font-medium">Usuarios</h4>
+                      <Users className="w-5 h-5 text-blue-500" />
+                    </div>
+                    <p className="text-2xl font-bold text-white mb-1">{rgpdStats.total.active}</p>
+                    <p className="text-xs text-zinc-500">
+                      {rgpdStats.total.deleted} eliminados
+                    </p>
+                  </div>
+
+                  <div className="bg-zinc-800/50 rounded-lg p-4 border border-zinc-700">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-zinc-400 text-sm font-medium">WhatsApp</h4>
+                      <Phone className="w-5 h-5 text-green-500" />
+                    </div>
+                    <p className="text-2xl font-bold text-white mb-1">
+                      {rgpdStats.whatsapp.percentage}%
+                    </p>
+                    <p className="text-xs text-zinc-500">
+                      {rgpdStats.whatsapp.active} activos, {rgpdStats.whatsapp.revoked} revocados
+                    </p>
+                  </div>
+
+                  <div className="bg-zinc-800/50 rounded-lg p-4 border border-zinc-700">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-zinc-400 text-sm font-medium">Marketing</h4>
+                      <Mail className="w-5 h-5 text-orange-500" />
+                    </div>
+                    <p className="text-2xl font-bold text-white mb-1">
+                      {rgpdStats.marketing.percentage}%
+                    </p>
+                    <p className="text-xs text-zinc-500">
+                      {rgpdStats.marketing.active} activos, {rgpdStats.marketing.revoked} revocados
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Versiones de política */}
+              {rgpdStats && rgpdStats.policy_versions.length > 0 && (
+                <div className="bg-zinc-800/30 rounded-lg p-4 mb-6 border border-zinc-700">
+                  <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Versiones de Política Aceptadas
+                  </h4>
+                  <div className="space-y-2">
+                    {rgpdStats.policy_versions.map((version, idx) => (
+                      <div key={idx} className="flex items-center justify-between text-sm">
+                        <span className="text-zinc-300">
+                          Versión {version.privacy_policy_version || 'sin especificar'}
+                        </span>
+                        <span className="text-white font-semibold">
+                          {version._count} usuarios
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Advertencia */}
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-6 flex gap-3">
+                <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="text-yellow-300 font-bold mb-1">Uso responsable</p>
+                  <p className="text-yellow-200/90">
+                    Las acciones de soft delete y revocación son permanentes. 
+                    Usa estas funciones solo cuando sea necesario por cumplimiento RGPD o solicitud del usuario.
+                  </p>
+                </div>
+              </div>
+
+              {/* Tabla de miembros activos */}
+              <div className="mb-8">
+                <h4 className="text-white font-semibold mb-4">Usuarios Activos con Consentimientos</h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-zinc-800/50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Nombre</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Email</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Versión</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-zinc-400 uppercase">WhatsApp</th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-zinc-400 uppercase">Marketing</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-800">
+                      {activeMembers.map((member) => (
+                        <tr key={member.id} className="hover:bg-zinc-800/30 transition">
+                          <td className="px-4 py-3 text-sm text-white">
+                            {member.first_name} {member.last_name}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-zinc-300 text-xs">
+                            {member.email}
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded text-xs font-mono">
+                              v{member.privacy_policy_version || '?'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            {member.whatsapp_revoked_at ? (
+                              <span className="text-red-400 text-xs flex items-center justify-center gap-1">
+                                <XCircle className="w-3 h-3" />
+                                Revocado
+                              </span>
+                            ) : member.whatsapp_consent ? (
+                              <CheckCircle className="w-4 h-4 text-green-400 mx-auto" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-zinc-600 mx-auto" />
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            {member.marketing_revoked_at ? (
+                              <span className="text-red-400 text-xs flex items-center justify-center gap-1">
+                                <XCircle className="w-3 h-3" />
+                                Revocado
+                              </span>
+                            ) : member.marketing_consent ? (
+                              <CheckCircle className="w-4 h-4 text-green-400 mx-auto" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-zinc-600 mx-auto" />
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              {member.whatsapp_consent && !member.whatsapp_revoked_at && (
+                                <button
+                                  onClick={() => revokeWhatsApp(member.id, `${member.first_name} ${member.last_name}`)}
+                                  disabled={processingAction === member.id}
+                                  className="text-xs px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded transition"
+                                  title="Revocar WhatsApp"
+                                >
+                                  <XCircle className="w-3 h-3" />
+                                </button>
+                              )}
+                              {member.marketing_consent && !member.marketing_revoked_at && (
+                                <button
+                                  onClick={() => revokeMarketing(member.id, `${member.first_name} ${member.last_name}`)}
+                                  disabled={processingAction === member.id}
+                                  className="text-xs px-2 py-1 bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 rounded transition"
+                                  title="Revocar Marketing"
+                                >
+                                  <Mail className="w-3 h-3" />
+                                </button>
+                              )}
+                              <button
+                                onClick={() => softDeleteMember(member.id, `${member.first_name} ${member.last_name}`)}
+                                disabled={processingAction === member.id}
+                                className="text-xs px-2 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded transition flex items-center gap-1"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                                Eliminar
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Tabla de usuarios eliminados */}
+              {deletedMembers.length > 0 && (
+                <div>
+                  <h4 className="text-white font-semibold mb-4 flex items-center gap-2">
+                    <Trash2 className="w-4 h-4 text-red-400" />
+                    Usuarios Eliminados ({deletedMembers.length})
+                  </h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full opacity-60">
+                      <thead className="bg-zinc-800/50">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Nombre</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Email</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Eliminado</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-zinc-400 uppercase">Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-800">
+                        {deletedMembers.map((member) => (
+                          <tr key={member.id} className="hover:bg-zinc-800/30 transition">
+                            <td className="px-4 py-3 text-sm text-zinc-500">
+                              {member.first_name} {member.last_name}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-zinc-600 text-xs">
+                              {member.email}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-red-400 text-xs">
+                              {member.deleted_at && new Date(member.deleted_at).toLocaleDateString('es-ES')}
+                            </td>
+                            <td className="px-4 py-3">
+                              <button
+                                onClick={() => restoreMember(member.id, `${member.first_name} ${member.last_name}`)}
+                                disabled={processingAction === member.id}
+                                className="text-xs px-3 py-1 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded transition flex items-center gap-1"
+                              >
+                                <RefreshCw className="w-3 h-3" />
+                                Restaurar
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
