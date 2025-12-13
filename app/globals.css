@@ -72,3 +72,25 @@ body {
 .glitch:hover {
   animation: glitch 0.3s infinite;
 }
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-fade-in { animation: fade-in 0.6s ease-out; }
+.animate-fade-in-delay { animation: fade-in 0.8s ease-out 0.2s backwards; }
+.animate-fade-in-delay-2 { animation: fade-in 0.8s ease-out 0.4s backwards; }
+.animate-fade-in-delay-3 { animation: fade-in 0.8s ease-out 0.6s backwards; }
+.animate-slide-up { animation: slide-up 0.8s ease-out; }
+.animate-bounce-slow { animation: bounce-slow 2s ease-in-out infinite; }
