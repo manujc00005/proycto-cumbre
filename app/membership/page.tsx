@@ -12,12 +12,6 @@ import GDPRConsent from '../components/gdpr/gdpr-consent-component';
 const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const PANTS_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
-// Interfaz para consentimientos
-interface ConsentState {
-  privacyPolicy: boolean;
-  whatsapp?: boolean;
-}
-
 export default function MembershipPage() {
   const router = useRouter();
   const errorBannerRef = useRef<HTMLDivElement>(null);
@@ -308,8 +302,8 @@ export default function MembershipPage() {
           overwrite: true,
           consents: {
             privacy_accepted: consents.privacyPolicy,
-            privacy_accepted_at: new Date().toISOString(),
-            whatsapp_consent: consents.whatsapp || false,
+            privacy_accepted_at: consents.privacyPolicy ? new Date().toISOString() : null,
+            whatsapp_consent: consents.whatsapp,
             whatsapp_consent_at: consents.whatsapp ? new Date().toISOString() : null,
           }
         }) 
@@ -1052,9 +1046,14 @@ export default function MembershipPage() {
             <GDPRConsent
               required={true}
               includeWhatsApp={true}
-              whatsappRequired={true} 
-              whatsappContext="club" 
-              onConsentChange={setConsents}
+              whatsappRequired={true}
+              whatsappContext="club"
+              onConsentChange={(next) =>
+                setConsents((prev) => ({
+                  ...prev,
+                  ...next,
+                }))
+              }
             />
 
             {/* Error de privacidad */}

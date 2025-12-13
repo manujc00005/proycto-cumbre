@@ -143,6 +143,9 @@ export async function POST(request: NextRequest) {
         privacy_policy_version: "1.0",
         whatsapp_consent: consents.whatsapp_consent,
         whatsapp_consent_at: new Date(),
+        marketing_consent: true,
+        marketing_consent_at: new Date(),
+        marketing_revoked_at: null,
       }
     });
 

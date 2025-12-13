@@ -1,5 +1,7 @@
-// prisma/schema.prisma - V3.3 CON RGPD AVANZADO
-// Cambios: privacy_policy_version, revocaciones, soft delete, dni opcional
+// ========================================
+// PROYECTO CUMBRE - SCHEMA PRISMA V3.4
+// Con marketing_consent en event_registrations
+// ========================================
 
 generator client {
   provider = "prisma-client-js"
@@ -12,7 +14,7 @@ datasource db {
 }
 
 // ============================================
-// ENUMS (sin cambios)
+// ENUMS
 // ============================================
 
 enum Sex {
@@ -113,7 +115,7 @@ model Member {
   first_name             String           @db.VarChar(100)
   last_name              String           @db.VarChar(100)
   birth_date             DateTime         @db.Date
-  dni                    String?          @db.VarChar(20) // 🔧 Ahora opcional
+  dni                    String?          @db.VarChar(20)
   sex                    Sex
   phone                  String           @db.VarChar(20)
   emergency_phone        String?          @db.VarChar(20)
@@ -133,21 +135,21 @@ model Member {
   membership_end_date    DateTime?
   
   // CONSENTIMIENTOS RGPD
-  privacy_accepted          Boolean   @default(false)
+  privacy_accepted          Boolean   @default(true)
   privacy_accepted_at       DateTime?
   privacy_accepted_ip       String?   @db.VarChar(45)
-  privacy_policy_version    String?   @default("1.0") @db.VarChar(20) // 🆕
+  privacy_policy_version    String?   @default("1.0") @db.VarChar(20)
   
-  marketing_consent         Boolean   @default(false)
+  marketing_consent         Boolean   @default(true)
   marketing_consent_at      DateTime?
-  marketing_revoked_at      DateTime? // 🆕
+  marketing_revoked_at      DateTime?
   
-  whatsapp_consent          Boolean   @default(false)
+  whatsapp_consent          Boolean   @default(true)
   whatsapp_consent_at       DateTime?
-  whatsapp_revoked_at       DateTime? // 🆕
+  whatsapp_revoked_at       DateTime?
   
   // SOFT DELETE
-  deleted_at                DateTime? // 🆕
+  deleted_at                DateTime?
   
   admin_notes               String?   @db.Text
   created_at                DateTime  @default(now())
@@ -159,20 +161,16 @@ model Member {
 
   @@index([headquarters_id])
   @@index([email])
-  @@index([dni]) // 🔧 Ya no es unique, pero mantiene índice
+  @@index([dni])
   @@index([membership_status])
   @@index([member_number])
   @@index([created_at(sort: Desc)])
   @@index([privacy_accepted])
   @@index([marketing_consent])
-  @@index([deleted_at]) // 🆕 Para filtrar activos
-  @@index([privacy_policy_version]) // 🆕
+  @@index([deleted_at])
+  @@index([privacy_policy_version])
   @@map("members")
 }
-
-// ============================================
-// EVENTOS
-// ============================================
 
 model Event {
   id                   String        @id @default(uuid())
@@ -218,10 +216,15 @@ model EventRegistration {
   // CONSENTIMIENTOS RGPD
   privacy_accepted        Boolean   @default(false)
   privacy_accepted_at     DateTime?
-  privacy_policy_version  String?   @default("1.0") @db.VarChar(20) // 🆕
+  privacy_policy_version  String?   @default("1.0") @db.VarChar(20)
   
   whatsapp_consent        Boolean   @default(false)
   whatsapp_consent_at     DateTime?
+  
+  // 🆕 MARKETING CONSENT
+  marketing_consent       Boolean   @default(false)
+  marketing_consent_at    DateTime?
+  marketing_revoked_at    DateTime?
   
   registered_at     DateTime @default(now())
   created_at        DateTime @default(now())
@@ -234,13 +237,10 @@ model EventRegistration {
   @@index([participant_email])
   @@index([status])
   @@index([privacy_accepted])
-  @@index([privacy_policy_version]) // 🆕
+  @@index([privacy_policy_version])
+  @@index([marketing_consent]) // 🆕
   @@map("event_registrations")
 }
-
-// ============================================
-// SHOP / TIENDA
-// ============================================
 
 model Product {
   id                  String   @id @default(uuid())
@@ -275,32 +275,29 @@ model Product {
 }
 
 model Order {
-  id               String      @id @default(uuid())
-  order_number     String      @unique @db.VarChar(50)
-  member_id        String?
-  member           Member?     @relation(fields: [member_id], references: [id], onDelete: SetNull)
-  customer_email   String      @db.VarChar(255)
-  customer_name    String      @db.VarChar(255)
-  customer_phone   String?     @db.VarChar(20)
-  shipping_address Json
-  subtotal         Int
-  shipping_cost    Int         @default(0)
-  tax              Int         @default(0)
-  discount         Int         @default(0)
-  total            Int
-  currency         String      @default("eur") @db.VarChar(3)
-  status           OrderStatus @default(pending)
-  tracking_number  String?     @db.VarChar(255)
-  shipped_at       DateTime?
-  delivered_at     DateTime?
-  customer_notes   String?     @db.Text
-  admin_notes      String?     @db.Text
-  
-  // RGPD
-  privacy_policy_version String? @default("1.0") @db.VarChar(20) // 🆕
-  
-  created_at       DateTime    @default(now())
-  updated_at       DateTime    @updatedAt
+  id                     String      @id @default(uuid())
+  order_number           String      @unique @db.VarChar(50)
+  member_id              String?
+  member                 Member?     @relation(fields: [member_id], references: [id], onDelete: SetNull)
+  customer_email         String      @db.VarChar(255)
+  customer_name          String      @db.VarChar(255)
+  customer_phone         String?     @db.VarChar(20)
+  shipping_address       Json
+  subtotal               Int
+  shipping_cost          Int         @default(0)
+  tax                    Int         @default(0)
+  discount               Int         @default(0)
+  total                  Int
+  currency               String      @default("eur") @db.VarChar(3)
+  status                 OrderStatus @default(pending)
+  tracking_number        String?     @db.VarChar(255)
+  shipped_at             DateTime?
+  delivered_at           DateTime?
+  customer_notes         String?     @db.Text
+  admin_notes            String?     @db.Text
+  privacy_policy_version String?     @default("1.0") @db.VarChar(20)
+  created_at             DateTime    @default(now())
+  updated_at             DateTime    @updatedAt
 
   items    OrderItem[]
   payments Payment[]
@@ -310,7 +307,7 @@ model Order {
   @@index([customer_email])
   @@index([status])
   @@index([created_at(sort: Desc)])
-  @@index([privacy_policy_version]) // 🆕
+  @@index([privacy_policy_version])
   @@map("orders")
 }
 
@@ -333,31 +330,24 @@ model OrderItem {
   @@map("order_items")
 }
 
-// ============================================
-// PAGOS
-// ============================================
-
 model Payment {
   id                    String        @id @default(uuid())
   payment_type          PaymentType
-  
   member_id             String?
   event_registration_id String?       @unique
   order_id              String?
-  
-  member            Member?            @relation(fields: [member_id], references: [id], onDelete: SetNull)
-  eventRegistration EventRegistration? @relation(fields: [event_registration_id], references: [id], onDelete: SetNull)
-  order             Order?             @relation(fields: [order_id], references: [id], onDelete: SetNull)
-  
-  stripe_session_id String        @unique @db.VarChar(255)
-  stripe_payment_id String?       @db.VarChar(255)
-  amount            Int
-  currency          String        @default("eur") @db.VarChar(3)
-  status            PaymentStatus @default(pending)
-  description       String?       @db.Text
-  metadata          Json?
-  created_at        DateTime      @default(now())
-  updated_at        DateTime      @updatedAt
+  member                Member?            @relation(fields: [member_id], references: [id], onDelete: SetNull)
+  eventRegistration     EventRegistration? @relation(fields: [event_registration_id], references: [id], onDelete: SetNull)
+  order                 Order?             @relation(fields: [order_id], references: [id], onDelete: SetNull)
+  stripe_session_id     String        @unique @db.VarChar(255)
+  stripe_payment_id     String?       @db.VarChar(255)
+  amount                Int
+  currency              String        @default("eur") @db.VarChar(3)
+  status                PaymentStatus @default(pending)
+  description           String?       @db.Text
+  metadata              Json?
+  created_at            DateTime      @default(now())
+  updated_at            DateTime      @updatedAt
 
   @@index([payment_type])
   @@index([member_id])

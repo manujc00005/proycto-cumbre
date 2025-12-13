@@ -5,11 +5,6 @@ import Image from 'next/image';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import GDPRConsentEvent from '../components/gdpr/gdpr-consent-event';
 
-interface ConsentState {
-  privacyPolicy: boolean;
-  whatsapp: boolean;
-}
-
 export default function MisaPage() {
   // ========================================
   // 1️⃣ STATES
@@ -179,7 +174,9 @@ export default function MisaPage() {
           ...formData,
           consents: {
             privacy_accepted: consents.privacyPolicy,
+            privacy_accepted_at: consents.privacyPolicy ? new Date().toISOString() : null,
             whatsapp_consent: consents.whatsapp,
+            whatsapp_consent_at: consents.whatsapp ? new Date().toISOString() : null,
           }
         }),
       });

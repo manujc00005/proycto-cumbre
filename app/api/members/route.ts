@@ -156,14 +156,15 @@ export async function POST(request: NextRequest) {
       privacy_accepted_at: consents.privacy_accepted_at ? new Date(consents.privacy_accepted_at) : new Date(),
       privacy_accepted_ip: ipAddress,
       privacy_policy_version: "1.0", 
-      marketing_consent: true, 
-      marketing_consent_at: new Date(),  
       
       whatsapp_consent: consents.whatsapp_consent || false,
       whatsapp_consent_at: consents.whatsapp_consent && consents.whatsapp_consent_at 
         ? new Date(consents.whatsapp_consent_at) 
         : null,
-       whatsapp_revoked_at: null,
+      whatsapp_revoked_at: null,
+      marketing_consent: true,
+      marketing_consent_at: new Date(),
+      marketing_revoked_at: null,
     };
 
     logger.log('📦 Guardando:', {
