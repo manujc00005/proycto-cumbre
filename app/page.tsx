@@ -216,10 +216,10 @@ export default function Home() {
       {/* Versión MÓVIL - Tagline corto e impactante */}
       <div className="md:hidden mb-8 space-y-3 animate-fade-in-delay">
         <p className="text-lg sm:text-xl text-zinc-100 font-medium leading-relaxed">
-          El club que nació en un bar después de una ruta.
+          Somos ese club que nació sudados, hambrientos y doloridos… y que terminó fundándose en un antro cualquiera después de una ruta. Nada épico, nada místico. Solo montaña, cerveza caliente y la brillante idea de crear un club del que ni nosotros mismos nos fiaríamos demasiado.
         </p>
         <p className="text-base sm:text-lg text-orange-400 font-semibold">
-          Nada épico. Solo montaña y buena gente.
+          Bienvenido a Proyecto Cumbre. Solo montaña y buena gente.
         </p>
         
         {/* Bullets rápidos - Valor añadido */}
@@ -258,7 +258,7 @@ export default function Home() {
           con gente que está igual de tocada por la montaña que tú.
         </p>
         <p className="text-lg lg:text-xl text-orange-400 font-bold leading-relaxed drop-shadow-lg">
-          Bienvenido a Proyecto Cumbre: un social club de montaña impresentable, pero auténtico.
+          Bienvenido a Proyecto Cumbre: un club de montaña impresentable, pero auténtico.
         </p>
       </div>
 
