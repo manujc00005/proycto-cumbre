@@ -140,6 +140,7 @@ export async function POST(request: NextRequest) {
         // CAMPOS RGPD
         privacy_accepted: consents.privacy_accepted,
         privacy_accepted_at: new Date(),
+        privacy_policy_version: "1.0",
         whatsapp_consent: consents.whatsapp_consent,
         whatsapp_consent_at: new Date(),
       }

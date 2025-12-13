@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
       privacy_accepted: consents.privacy_accepted,
       privacy_accepted_at: consents.privacy_accepted_at ? new Date(consents.privacy_accepted_at) : new Date(),
       privacy_accepted_ip: ipAddress,
-      
+      privacy_policy_version: "1.0", 
       marketing_consent: true, 
       marketing_consent_at: new Date(),  
       
@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
       whatsapp_consent_at: consents.whatsapp_consent && consents.whatsapp_consent_at 
         ? new Date(consents.whatsapp_consent_at) 
         : null,
-      // whatsapp_consent_ip: consents.whatsapp_consent ? ipAddress : null,
+       whatsapp_revoked_at: null,
     };
 
     logger.log('📦 Guardando:', {
@@ -294,10 +294,16 @@ export async function GET(request: NextRequest) {
   if (email && checkOnly === 'true') {
     const member = await prisma.member.findUnique({
       where: { email: email.toLowerCase() },
-      select: { id: true, member_number: true, membership_status: true }
+      select: { 
+        id: true, 
+        member_number: true, 
+        membership_status: true,
+        deleted_at: true }
     });
 
-    const isMember = !!member && member.membership_status === 'active';
+    const isMember = !!member 
+      && member.membership_status === 'active'
+      &&  member.deleted_at === null;
 
     return NextResponse.json({
       isMember,
@@ -308,11 +314,10 @@ export async function GET(request: NextRequest) {
   // CASO 2: Consulta completa
   if (email) {
     const member = await prisma.member.findUnique({
-      where: { email: email.toLowerCase() },
-      select: { /* todos los campos */ }
+      where: { email: email.toLowerCase() }
     });
 
-    if (!member) {
+    if (!member || member.deleted_at !== null) {
       return NextResponse.json({ error: 'Member not found' }, { status: 404 });
     }
 
@@ -320,6 +325,8 @@ export async function GET(request: NextRequest) {
   }
 
   // CASO 3: Lista de todos los miembros
-  const members = await prisma.member.findMany({ /* ... */ });
+  const members = await prisma.member.findMany({
+    where: { deleted_at: null } 
+  });
   return NextResponse.json({ success: true, count: members.length, members });
 }

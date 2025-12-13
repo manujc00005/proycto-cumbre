@@ -9,6 +9,7 @@ export async function GET() {
     logger.log('📥 GET /api/gestor/members - Obteniendo socios...');
     
     const members = await prisma.member.findMany({
+      where: { deleted_at: null },
       orderBy: [
         { fedme_status: 'asc' },
         { created_at: 'desc' }

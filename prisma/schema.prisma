@@ -1,5 +1,5 @@
-// prisma/schema.prisma - V3.2 CON RGPD
-// Arquitectura: Eventos + Shop + Membresías + Pagos Flexibles + RGPD
+// prisma/schema.prisma - V3.3 CON RGPD AVANZADO
+// Cambios: privacy_policy_version, revocaciones, soft delete, dni opcional
 
 generator client {
   provider = "prisma-client-js"
@@ -12,73 +12,73 @@ datasource db {
 }
 
 // ============================================
-// ENUMS
+// ENUMS (sin cambios)
 // ============================================
 
 enum Sex {
-  M // Masculino
-  F // Femenino
-  O // Otro
+  M
+  F
+  O
 }
 
 enum LicenseType {
-  none       // Sin licencia
-  a          // A - Autonómica
-  a_plus     // A+ - Autonómica Plus
-  a_nac      // A NAC - Autonómica Nacional
-  a_nac_plus // A NAC+ - Autonómica Nacional Plus
-  b          // B - Nacional
-  b_plus     // B+ - Nacional Plus
-  c          // C - Europea
+  none
+  a
+  a_plus
+  a_nac
+  a_nac_plus
+  b
+  b_plus
+  c
 }
 
 enum FedmeStatus {
-  none       // Usuario eligió "Sin Licencia"
-  pending    // Pendiente de tramitar
-  processing // En proceso con FEDME
-  active     // Licencia activa
-  rejected   // Rechazada por FEDME
-  expired    // Expirada
+  none
+  pending
+  processing
+  active
+  rejected
+  expired
 }
 
 enum MembershipStatus {
-  pending   // Esperando pago
-  active    // Pago completado, membresía activa
-  expired   // Expiró después de 1 año
-  failed    // Pago rechazado
-  cancelled // Cancelada por admin
+  pending
+  active
+  expired
+  failed
+  cancelled
 }
 
 enum PaymentType {
-  membership      // Cuota de socio
-  event           // Evento (MISA, etc)
-  order           // Pedido de shop
-  license_renewal // Renovación de licencia
+  membership
+  event
+  order
+  license_renewal
 }
 
 enum PaymentStatus {
-  pending   // Pendiente
-  completed // Completado
-  failed    // Fallido
-  refunded  // Reembolsado
+  pending
+  completed
+  failed
+  refunded
 }
 
 enum EventStatus {
-  draft     // Borrador
-  published // Publicado
-  sold_out  // Agotado
-  cancelled // Cancelado
-  completed // Finalizado
+  draft
+  published
+  sold_out
+  cancelled
+  completed
 }
 
 enum OrderStatus {
-  pending    // Pendiente de pago
-  paid       // Pagado
-  processing // En preparación
-  shipped    // Enviado
-  delivered  // Entregado
-  cancelled  // Cancelado
-  refunded   // Reembolsado
+  pending
+  paid
+  processing
+  shipped
+  delivered
+  cancelled
+  refunded
 }
 
 // ============================================
@@ -113,7 +113,7 @@ model Member {
   first_name             String           @db.VarChar(100)
   last_name              String           @db.VarChar(100)
   birth_date             DateTime         @db.Date
-  dni                    String           @unique @db.VarChar(20)
+  dni                    String?          @db.VarChar(20) // 🔧 Ahora opcional
   sex                    Sex
   phone                  String           @db.VarChar(20)
   emergency_phone        String?          @db.VarChar(20)
@@ -132,18 +132,26 @@ model Member {
   membership_start_date  DateTime?
   membership_end_date    DateTime?
   
-  // 🆕 CONSENTIMIENTOS RGPD
-  privacy_accepted       Boolean          @default(false)
-  privacy_accepted_at    DateTime?
-  privacy_accepted_ip    String?          @db.VarChar(45)
-  marketing_consent      Boolean          @default(false)
-  marketing_consent_at   DateTime?
-  whatsapp_consent       Boolean          @default(false)
-  whatsapp_consent_at    DateTime?
+  // CONSENTIMIENTOS RGPD
+  privacy_accepted          Boolean   @default(false)
+  privacy_accepted_at       DateTime?
+  privacy_accepted_ip       String?   @db.VarChar(45)
+  privacy_policy_version    String?   @default("1.0") @db.VarChar(20) // 🆕
   
-  admin_notes            String?          @db.Text
-  created_at             DateTime         @default(now())
-  updated_at             DateTime         @updatedAt
+  marketing_consent         Boolean   @default(false)
+  marketing_consent_at      DateTime?
+  marketing_revoked_at      DateTime? // 🆕
+  
+  whatsapp_consent          Boolean   @default(false)
+  whatsapp_consent_at       DateTime?
+  whatsapp_revoked_at       DateTime? // 🆕
+  
+  // SOFT DELETE
+  deleted_at                DateTime? // 🆕
+  
+  admin_notes               String?   @db.Text
+  created_at                DateTime  @default(now())
+  updated_at                DateTime  @updatedAt
 
   payments           Payment[]
   eventRegistrations EventRegistration[]
@@ -151,17 +159,19 @@ model Member {
 
   @@index([headquarters_id])
   @@index([email])
-  @@index([dni])
+  @@index([dni]) // 🔧 Ya no es unique, pero mantiene índice
   @@index([membership_status])
   @@index([member_number])
   @@index([created_at(sort: Desc)])
   @@index([privacy_accepted])
   @@index([marketing_consent])
+  @@index([deleted_at]) // 🆕 Para filtrar activos
+  @@index([privacy_policy_version]) // 🆕
   @@map("members")
 }
 
 // ============================================
-// 🆕 EVENTOS
+// EVENTOS
 // ============================================
 
 model Event {
@@ -173,11 +183,11 @@ model Event {
   location             String?       @db.VarChar(255)
   max_participants     Int?
   current_participants Int           @default(0)
-  price                Int // En centavos
+  price                Int
   currency             String        @default("eur") @db.VarChar(3)
   requires_member      Boolean       @default(false)
-  member_discount      Int           @default(0) // En centavos
-  custom_fields        Json? // Campos personalizados requeridos
+  member_discount      Int           @default(0)
+  custom_fields        Json?
   whatsapp_group       String?       @db.VarChar(500)
   status               EventStatus   @default(draft)
   image_url            String?       @db.VarChar(500)
@@ -202,20 +212,21 @@ model EventRegistration {
   participant_name  String   @db.VarChar(255)
   participant_email String   @db.VarChar(255)
   participant_phone String   @db.VarChar(20)
-  custom_data       Json? // Datos personalizados del evento
+  custom_data       Json?
   status            String   @default("pending") @db.VarChar(20)
   
-  // 🆕 CONSENTIMIENTOS RGPD
-  privacy_accepted    Boolean  @default(false)
-  privacy_accepted_at DateTime?
-  whatsapp_consent    Boolean  @default(false)
-  whatsapp_consent_at DateTime?
+  // CONSENTIMIENTOS RGPD
+  privacy_accepted        Boolean   @default(false)
+  privacy_accepted_at     DateTime?
+  privacy_policy_version  String?   @default("1.0") @db.VarChar(20) // 🆕
+  
+  whatsapp_consent        Boolean   @default(false)
+  whatsapp_consent_at     DateTime?
   
   registered_at     DateTime @default(now())
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
 
-  // 🔧 RELACIÓN 1:1 - Cada inscripción tiene exactamente 1 pago
   payment Payment?
 
   @@index([event_id])
@@ -223,11 +234,12 @@ model EventRegistration {
   @@index([participant_email])
   @@index([status])
   @@index([privacy_accepted])
+  @@index([privacy_policy_version]) // 🆕
   @@map("event_registrations")
 }
 
 // ============================================
-// 🆕 SHOP / TIENDA
+// SHOP / TIENDA
 // ============================================
 
 model Product {
@@ -235,17 +247,17 @@ model Product {
   slug                String   @unique @db.VarChar(100)
   name                String   @db.VarChar(255)
   description         String?  @db.Text
-  price               Int // En centavos
-  compare_at_price    Int? // Precio tachado
+  price               Int
+  compare_at_price    Int?
   currency            String   @default("eur") @db.VarChar(3)
   stock               Int      @default(0)
   low_stock_threshold Int      @default(5)
   track_inventory     Boolean  @default(true)
   has_variants        Boolean  @default(false)
-  variants            Json? // Array de variantes
+  variants            Json?
   category            String?  @db.VarChar(100)
-  tags                String[] // Array de tags
-  images              Json? // Array de URLs
+  tags                String[]
+  images              Json?
   meta_title          String?  @db.VarChar(255)
   meta_description    String?  @db.Text
   status              String   @default("draft") @db.VarChar(20)
@@ -270,12 +282,12 @@ model Order {
   customer_email   String      @db.VarChar(255)
   customer_name    String      @db.VarChar(255)
   customer_phone   String?     @db.VarChar(20)
-  shipping_address Json // Objeto con dirección completa
-  subtotal         Int // En centavos
+  shipping_address Json
+  subtotal         Int
   shipping_cost    Int         @default(0)
   tax              Int         @default(0)
   discount         Int         @default(0)
-  total            Int // En centavos
+  total            Int
   currency         String      @default("eur") @db.VarChar(3)
   status           OrderStatus @default(pending)
   tracking_number  String?     @db.VarChar(255)
@@ -283,6 +295,10 @@ model Order {
   delivered_at     DateTime?
   customer_notes   String?     @db.Text
   admin_notes      String?     @db.Text
+  
+  // RGPD
+  privacy_policy_version String? @default("1.0") @db.VarChar(20) // 🆕
+  
   created_at       DateTime    @default(now())
   updated_at       DateTime    @updatedAt
 
@@ -294,6 +310,7 @@ model Order {
   @@index([customer_email])
   @@index([status])
   @@index([created_at(sort: Desc)])
+  @@index([privacy_policy_version]) // 🆕
   @@map("orders")
 }
 
@@ -305,10 +322,10 @@ model OrderItem {
   product      Product? @relation(fields: [product_id], references: [id], onDelete: SetNull)
   product_name String   @db.VarChar(255)
   product_slug String?  @db.VarChar(100)
-  variant_data Json? // Datos de la variante seleccionada
+  variant_data Json?
   quantity     Int
-  unit_price   Int // En centavos
-  total_price  Int // En centavos
+  unit_price   Int
+  total_price  Int
   created_at   DateTime @default(now())
 
   @@index([order_id])
@@ -317,19 +334,17 @@ model OrderItem {
 }
 
 // ============================================
-// 🔄 PAGOS (REFACTORIZADO - FLEXIBLE)
+// PAGOS
 // ============================================
 
 model Payment {
   id                    String        @id @default(uuid())
   payment_type          PaymentType
   
-  // Foreign keys opcionales según el tipo
   member_id             String?
-  event_registration_id String?       @unique // 🔧 UNIQUE para relación 1:1
+  event_registration_id String?       @unique
   order_id              String?
   
-  // Relaciones
   member            Member?            @relation(fields: [member_id], references: [id], onDelete: SetNull)
   eventRegistration EventRegistration? @relation(fields: [event_registration_id], references: [id], onDelete: SetNull)
   order             Order?             @relation(fields: [order_id], references: [id], onDelete: SetNull)
@@ -340,7 +355,7 @@ model Payment {
   currency          String        @default("eur") @db.VarChar(3)
   status            PaymentStatus @default(pending)
   description       String?       @db.Text
-  metadata          Json? // Datos adicionales específicos
+  metadata          Json?
   created_at        DateTime      @default(now())
   updated_at        DateTime      @updatedAt
 
