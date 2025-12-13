@@ -172,7 +172,7 @@ export default function Home() {
 <section id="inicio" className="relative min-h-screen flex items-end">
   <div className="absolute inset-0">
     <Image 
-      src="/p3.jpg"
+      src="/p31.jpg"
       alt="Proyecto Cumbre"
       fill
       className="object-cover object-center"
