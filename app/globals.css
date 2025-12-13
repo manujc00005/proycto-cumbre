@@ -94,3 +94,49 @@ body {
 .animate-fade-in-delay-3 { animation: fade-in 0.8s ease-out 0.6s backwards; }
 .animate-slide-up { animation: slide-up 0.8s ease-out; }
 .animate-bounce-slow { animation: bounce-slow 2s ease-in-out infinite; }
+
+
+ @keyframes bounce-slow {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-12px);
+    }
+  }
+
+  .animate-bounce-slow {
+    animation: bounce-slow 2.5s ease-in-out infinite;
+  }
+
+  /* Tipografía ultra-bold para headlines */
+  h1 {
+    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
+
+  /* Mejora de legibilidad en móvil */
+  @media (max-width: 768px) {
+    h1 span {
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+
+  /* Animación bounce suave */
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0) translateX(-50%);
+    }
+    50% {
+      transform: translateY(-10px) translateX(-50%);
+    }
+  }
+
+  .animate-bounce {
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+   .bg-gradient-radial {
+    background: radial-gradient(circle at center, var(--tw-gradient-stops));
+  }

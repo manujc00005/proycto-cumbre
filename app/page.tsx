@@ -169,174 +169,105 @@ export default function Home() {
       <HeaderSection />
 
       {/* Section 1 - Hero / Inicio */}
-      <section id="inicio" className="relative min-h-screen flex flex-col pt-16">
-  {/* Background con overlay optimizado */}
+<section id="inicio" className="relative min-h-screen flex items-end">
   <div className="absolute inset-0">
     <Image 
-      src="/quienes-bg.jpg"
-      alt="Proyecto Cumbre - Club de montaña"
+      src="/p3.jpg"
+      alt="Proyecto Cumbre"
       fill
       className="object-cover object-center"
-      quality={90}
+      quality={95}
       priority
     />
-    {/* Gradiente adaptativo - más oscuro en móvil */}
-    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/70 to-black/85 md:bg-gradient-to-b md:from-black/60 md:via-black/50 md:to-black/70"></div>
-    
-    {/* Overlay con patrón de puntos (opcional - efecto sutil) */}
-    <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(circle_at_1px_1px,_white_1px,_transparent_0)] bg-[length:24px_24px]"></div>
+    {/* Gradient más oscuro abajo para mejor legibilidad */}
+    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
   </div>
 
-  {/* Contenido principal */}
-  <div className="relative z-10 flex-1 flex flex-col justify-end md:justify-center px-4 sm:px-6 pb-12 md:pb-20">
-    <div className="container mx-auto max-w-5xl">
+  <div className="relative z-10 w-full px-6 pb-10 md:pb-12">
+    <div className="container mx-auto max-w-6xl">
       
-      {/* Badge superior - Identidad */}
-      <div className="mb-6 md:mb-8 animate-fade-in">
-        <div className="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-500/20 backdrop-blur-md border border-orange-500/40 rounded-full shadow-lg shadow-orange-500/10">
-          <svg className="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z"/>
-          </svg>
-          <span className="text-orange-400 text-xs sm:text-sm font-bold tracking-wide">CLUB DE MONTAÑA</span>
+      {/* MÓVIL: igual */}
+      <div className="md:hidden space-y-6">
+        <p className="text-base text-white/95 font-light leading-relaxed max-w-sm">
+          Un club de amigos que practica un estilo de vida activo
+        </p>
+
+        <div className="space-y-3 pt-2">
+          <Link href="/membership" className="w-full py-4 bg-white text-black hover:bg-zinc-100 rounded-full font-bold text-base transition-all shadow-xl flex items-center justify-center gap-2">
+            <span>Hazte Socio 2026</span>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </Link>
+          
+          <a href="https://chat.whatsapp.com/EHmIEAcK7EBFP3UgntDdX9" target="_blank" rel="noopener noreferrer" className="w-full py-4 border-2 border-white text-white hover:bg-white hover:text-black rounded-full font-semibold text-base transition-all flex items-center justify-center gap-2">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+            </svg>
+            <span>Únete al Grupo</span>
+          </a>
         </div>
       </div>
 
-      {/* Headline principal */}
-      {/* <h1 className="mb-6 md:mb-8 animate-slide-up">
-        <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-tight mb-2 drop-shadow-2xl">
-          Proyecto
-        </span>
-        <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent leading-tight drop-shadow-2xl">
-          Cumbre
-        </span>
-      </h1> */}
+      {/* DESKTOP: MÁS COMPACTO */}
+      <div className="hidden md:grid md:grid-cols-2 md:gap-8 lg:gap-12">
+        <div className="space-y-5">
+          
+          <div className="inline-block">
+            <div className="px-4 py-2 bg-orange-500/20 backdrop-blur-md border border-orange-500/40 rounded-full">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z"/>
+                </svg>
+                <span className="text-orange-400 text-sm font-bold tracking-wide uppercase">Club de Montaña</span>
+              </div>
+            </div>
+          </div>
 
-      {/* Descripción - Adaptativa según viewport */}
-      
-      {/* Versión MÓVIL - Tagline corto e impactante */}
-      <div className="md:hidden mb-8 space-y-3 animate-fade-in-delay">
-        <p className="text-lg sm:text-xl text-zinc-100 font-medium leading-relaxed">
-          Somos ese club que nació sudados, hambrientos y doloridos… y que terminó fundándose en un antro cualquiera después de una ruta. Nada épico, nada místico. Solo montaña, cerveza caliente y la brillante idea de crear un club del que ni nosotros mismos nos fiaríamos demasiado.
-        </p>
-        <p className="text-base sm:text-lg text-orange-400 font-semibold">
-          Bienvenido a Proyecto Cumbre. Solo montaña y buena gente.
-        </p>
-        
-        {/* Bullets rápidos - Valor añadido */}
-        <div className="flex flex-wrap gap-2 pt-2">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-xs text-zinc-200">
-            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z"/>
-            </svg>
-            Rutas épicas
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-xs text-zinc-200">
-            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
-            Comunidad real
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-xs text-zinc-200">
-            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            Federados FEDME
-          </span>
+          <div className="space-y-4 max-w-xl">
+            <p className="text-sm lg:text-base text-zinc-100 leading-relaxed">
+              Somos ese club que nació sudados, hambrientos y doloridos… y que terminó fundándose en un antro 
+              cualquiera después de una ruta. Nada épico, nada místico. Solo montaña, cerveza caliente y la 
+              brillante idea de crear un club del que ni nosotros mismos nos fiaríamos demasiado.
+            </p>
+            
+            <p className="text-sm lg:text-base text-zinc-100 leading-relaxed">
+              Si buscas postureo… sí, también hay. Y si buscas éxito deportivo, gloria o disciplina militar, 
+              este no es tu sitio. Aquí venimos a explorar, a ensuciarnos, a perdernos un poco y a juntarnos 
+              con gente que está igual de tocada por la montaña que tú.
+            </p>
+            
+            <p className="text-sm lg:text-base text-orange-400 font-bold leading-relaxed">
+              Bienvenido a Proyecto Cumbre: un club de montaña impresentable, pero auténtico.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3 max-w-md">
+            <Link href="/membership" className="group relative overflow-hidden bg-gradient-to-r from-orange-600 via-orange-500 to-orange-600 text-white px-8 py-3.5 rounded-2xl font-bold text-base shadow-2xl hover:scale-[1.02] border-2 border-orange-400/50 flex items-center justify-center gap-3 transition-all">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <svg className="w-5 h-5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="relative z-10">Hazte Socio 2026</span>
+            </Link>
+            
+            <a href="https://chat.whatsapp.com/EHmIEAcK7EBFP3UgntDdX9" target="_blank" rel="noopener noreferrer" className="bg-green-600/95 hover:bg-green-500 text-white px-8 py-3.5 rounded-2xl font-bold text-base shadow-xl hover:scale-[1.02] border border-green-500/50 flex items-center justify-center gap-3 transition-all">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+              </svg>
+              <span>Únete al Grupo</span>
+            </a>
+          </div>
         </div>
-      </div>
 
-      {/* Versión DESKTOP - Texto completo */}
-      <div className="hidden md:block max-w-3xl mb-10 space-y-5 animate-fade-in-delay">
-        <p className="text-lg lg:text-xl text-zinc-100 leading-relaxed drop-shadow-lg">
-          Somos ese club que nació sudados, hambrientos y doloridos… y que terminó fundándose en un antro 
-          cualquiera después de una ruta. Nada épico, nada místico. Solo montaña, cerveza caliente y la 
-          brillante idea de crear un club del que ni nosotros mismos nos fiaríamos demasiado.
-        </p>
-        <p className="text-lg lg:text-xl text-zinc-100 leading-relaxed drop-shadow-lg">
-          Si buscas postureo… sí, también hay. Y si buscas éxito deportivo, gloria o disciplina militar, 
-          este no es tu sitio. Aquí venimos a explorar, a ensuciarnos, a perdernos un poco y a juntarnos 
-          con gente que está igual de tocada por la montaña que tú.
-        </p>
-        <p className="text-lg lg:text-xl text-orange-400 font-bold leading-relaxed drop-shadow-lg">
-          Bienvenido a Proyecto Cumbre: un club de montaña impresentable, pero auténtico.
-        </p>
-      </div>
-
-      {/* CTAs - Stack vertical en móvil, horizontal en desktop */}
-      <div className="flex flex-col sm:flex-row gap-3 md:gap-4 max-w-3xl animate-fade-in-delay-2">
-        
-        {/* CTA PRINCIPAL - Hazte Socio */}
-        <Link
-          href="/membership"
-          className="group relative overflow-hidden bg-gradient-to-r from-orange-600 via-orange-500 to-orange-600 hover:from-orange-500 hover:via-orange-600 hover:to-orange-500 text-white text-center px-8 py-4 md:py-5 rounded-2xl font-bold text-base md:text-lg transition-all duration-300 shadow-2xl shadow-orange-500/40 hover:shadow-orange-500/60 hover:scale-[1.02] border-2 border-orange-400/50 backdrop-blur-sm flex items-center justify-center gap-3"
-        >
-          {/* Efecto shimmer animado */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
-          
-          <svg className="w-6 h-6 relative z-10 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-          </svg>
-          <span className="relative z-10">Hazte Socio 2026</span>
-          
-        </Link>
-        
-        {/* CTA SECUNDARIO - WhatsApp */}
-        <a 
-          href="https://chat.whatsapp.com/EHmIEAcK7EBFP3UgntDdX9"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-green-600/95 backdrop-blur-sm hover:bg-green-500 text-white text-center px-8 py-4 md:py-5 rounded-2xl font-bold text-base md:text-lg transition-all duration-300 shadow-xl hover:shadow-green-500/50 hover:scale-[1.02] border border-green-500/50 flex items-center justify-center gap-3"
-        >
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-          </svg>
-          <span>Únete al Grupo</span>
-        </a>
-
-        {/* CTA TERCIARIO - Scroll - Solo desktop */}
-        <a 
-          href="#aventuras" 
-          className="hidden lg:flex text-orange-400 hover:text-white px-6 py-5 font-bold text-lg transition-all items-center justify-center border-2 border-orange-400/60 hover:border-orange-400 hover:bg-orange-400/10 rounded-2xl backdrop-blur-sm gap-2 group"
-        >
-          <span>Ver Aventuras</span>
-          <svg className="w-5 h-5 group-hover:translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-          </svg>
-        </a>
-      </div>
-
-      {/* Indicador de scroll - Solo móvil */}
-      <div className="lg:hidden mt-12 flex flex-col items-center gap-2 animate-bounce-slow">
-        <span className="text-zinc-400 text-xs font-medium tracking-wide">DESCUBRE MÁS</span>
-        <a href="#quienes-somos" className="text-orange-400 hover:text-orange-300 transition">
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-          </svg>
-        </a>
+        <div className="hidden lg:block"></div>
       </div>
     </div>
   </div>
+</section>
 
-  {/* Badge flotante inferior - Solo desktop */}
-  <div className="hidden lg:block absolute bottom-10 left-1/2 -translate-x-1/2 z-20 animate-fade-in-delay-3">
-    <div className="bg-zinc-900/90 backdrop-blur-xl border border-zinc-700/50 rounded-full px-8 py-4 flex items-center gap-4 shadow-2xl hover:shadow-orange-500/20 transition-all hover:scale-105 group cursor-default">
-      <div className="flex items-center gap-3">
-        <div className="relative">
-          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-          <div className="absolute inset-0 bg-green-500 rounded-full animate-ping"></div>
-        </div>
-        <span className="text-zinc-300 text-sm font-medium">Inscripciones abiertas 2026</span>
-      </div>
-      <div className="w-px h-5 bg-zinc-600"></div>
-      <span className="text-orange-400 text-sm font-bold flex items-center gap-2">
-        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-        </svg>
-        Plazas limitadas
-      </span>
-    </div>
-  </div>
-      </section>
+
+
 
       {/* Section 2 - Quiénes somos */}
       <section id="quienes-somos" className="py-16 md:py-24 bg-zinc-900/50">
@@ -368,7 +299,7 @@ export default function Home() {
                 <li>Y una comunidad que, pese a todo… funciona.</li>
               </ul>
               <p className="text-base md:text-lg text-zinc-300 leading-relaxed">
-Proyecto Cumbre: el club que no debería existir, pero existe. Y cada día somos más.              </p>
+                Proyecto Cumbre: el club que no debería existir, pero existe. Y cada día somos más.              </p>
             </div>
 
             {/* Carrusel reutilizable */}
