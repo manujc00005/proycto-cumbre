@@ -189,7 +189,10 @@ export default function Home() {
       {/* MÓVIL: igual */}
       <div className="md:hidden space-y-6">
         <p className="text-base text-white/95 font-light leading-relaxed max-w-sm">
-          Un club de amigos que practica un estilo de vida activo
+          Nada épico. Nada místico. Solo montaña
+        </p>
+        <p className="text-base text-white/95 font-light leading-relaxed max-w-sm">
+           <strong>Un club de montaña de gente real.</strong>
         </p>
 
         <div className="space-y-3 pt-2">
