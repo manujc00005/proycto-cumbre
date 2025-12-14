@@ -92,17 +92,17 @@ export const productsData = [
     sizes: ['S', 'M', 'L', 'XL'],
     tags: [],
   },
-  {
-    id: 'socks-005',
-    name: 'T-Shit Goat 90s',
-    desc: 'Retro con alma montañera. Estilo noventero que nunca pasa de moda',
-    price: 25,
-    images: [
-       "/shop/camiseta_goat_front.jpg"
-    ],
-    sizes: ['S', 'M', 'L', 'XL'],
-    tags: [],
-  },
+  // {
+  //   id: 'socks-005',
+  //   name: 'T-Shit Goat 90s',
+  //   desc: 'Retro con alma montañera. Estilo noventero que nunca pasa de moda',
+  //   price: 25,
+  //   images: [
+  //      "/shop/camiseta_goat_front.jpg"
+  //   ],
+  //   sizes: ['S', 'M', 'L', 'XL'],
+  //   tags: [],
+  // },
    {
     id: 'socks-006',
     name: 'Sweather Cowboy',
@@ -114,16 +114,16 @@ export const productsData = [
     sizes: ['S', 'M', 'L', 'XL'],
     tags: [],
   },
-   {
-    id: 'socks-012',
-    name: 'Sweather DateCampo',
-    desc: 'Abraza la naturaleza. Calidez y estilo campestre',
-    price: 50,
-    images: [
-       "/shop/datecampo_front.jpg"
-    ],
-    sizes: ['S', 'M', 'L', 'XL'],
-    tags: [],
-  },
+  //  {
+  //   id: 'socks-012',
+  //   name: 'Sweather DateCampo',
+  //   desc: 'Abraza la naturaleza. Calidez y estilo campestre',
+  //   price: 50,
+  //   images: [
+  //      "/shop/datecampo_front.jpg"
+  //   ],
+  //   sizes: ['S', 'M', 'L', 'XL'],
+  //   tags: [],
+  // },
 ];
 
