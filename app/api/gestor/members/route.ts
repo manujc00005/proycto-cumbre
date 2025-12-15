@@ -5,12 +5,11 @@ import { logger } from '@/lib/logger';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const includeDeleted = searchParams.get('includeDeleted'); // 🆕 Parámetro opcional
+    const includeDeleted = searchParams.get('includeDeleted');
 
-    // Query base
     const whereClause = includeDeleted === 'true' 
-      ? {} // Incluir todos (para pestaña RGPD)
-      : { deleted_at: null }; // Solo activos (para pestaña Members normal)
+      ? {} 
+      : { deleted_at: null };
 
     const members = await prisma.member.findMany({
       where: whereClause,
@@ -23,23 +22,31 @@ export async function GET(request: NextRequest) {
         member_number: true,
         first_name: true,
         last_name: true,
-        email: true, // 🆕 Para RGPD
+        dni: true, // 🆕
+        birth_date: true, // 🆕
+        email: true,
         phone: true,
+        address: true, // 🆕
+        city: true, // 🆕
+        province: true, // 🆕
+        postal_code: true, // 🆕
         license_type: true,
         fedme_status: true,
+        fedme_license_number: true, // 🆕
         membership_status: true,
-        
-        // 🆕 CAMPOS RGPD
+        membership_start_date: true,
+        membership_end_date: true,
         privacy_policy_version: true,
         marketing_consent: true,
         marketing_revoked_at: true,
         whatsapp_consent: true,
         whatsapp_revoked_at: true,
         deleted_at: true,
+        created_at: true,
       }
     });
 
-    logger.log(`📋 ${members.length} miembros obtenidos (includeDeleted: ${includeDeleted})`);
+    logger.log(`📋 ${members.length} miembros obtenidos`);
 
     return NextResponse.json({
       success: true,

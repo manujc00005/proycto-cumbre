@@ -29,19 +29,27 @@ interface Member {
   member_number: string;
   first_name: string;
   last_name: string;
+  dni?: string | null; // 🆕
+  birth_date: string; // 🆕
   email: string;
   phone: string;
+  address: string; // 🆕
+  city: string; // 🆕
+  province: string; // 🆕
+  postal_code?: string | null; // 🆕
   license_type: string;
   fedme_status: string;
+  fedme_license_number?: string | null; // 🆕
   membership_status: string;
-  
-  // 🆕 CAMPOS RGPD
+  membership_start_date?: string | null;
+  membership_end_date?: string | null;
   privacy_policy_version?: string;
   marketing_consent?: boolean;
   marketing_revoked_at?: string | null;
   whatsapp_consent?: boolean;
   whatsapp_revoked_at?: string | null;
   deleted_at?: string | null;
+  created_at?: string;
 }
 
 interface Payment {
@@ -585,8 +593,12 @@ export default function GestorPage() {
                 <thead className="bg-zinc-800/50">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase">Nº Socio</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase">Nombre</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase">Nombre Completo</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase">DNI/NIE</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase">Fecha Nac.</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase">Email</th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase">Teléfono</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase">Dirección</th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase">Licencia</th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase">Estado FEDME</th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase">Membresía</th>
@@ -596,26 +608,114 @@ export default function GestorPage() {
                 <tbody className="divide-y divide-zinc-800">
                   {activeMembers.map((member) => (
                     <tr key={member.id} className="hover:bg-zinc-800/30 transition">
+                      {/* Nº Socio */}
                       <td className="px-6 py-4 text-sm text-white font-mono">
                         {member.member_number || 'N/A'}
                       </td>
-                      <td className="px-6 py-4 text-sm text-white">
-                        {member.first_name} {member.last_name}
+                      
+                      {/* Nombre Completo */}
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-medium text-white">
+                          {member.first_name} {member.last_name}
+                        </div>
+                        {member.city && (
+                          <div className="text-xs text-zinc-500 mt-0.5">
+                            {member.city}, {member.province}
+                          </div>
+                        )}
                       </td>
-                      <td className="px-6 py-4 text-sm text-zinc-300">
-                        {member.phone}
+                      
+                      {/* DNI/NIE */}
+                      <td className="px-6 py-4">
+                        {member.dni ? (
+                          <span className="text-sm font-mono text-zinc-300">{member.dni}</span>
+                        ) : (
+                          <span className="text-xs text-zinc-600">Sin DNI</span>
+                        )}
                       </td>
-                      <td className="px-6 py-4 text-sm">
+                      
+                      {/* Fecha Nacimiento */}
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-zinc-300">
+                          {new Date(member.birth_date).toLocaleDateString('es-ES', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                          })}
+                        </div>
+                        <div className="text-xs text-zinc-500">
+                          {(() => {
+                            const today = new Date();
+                            const birthDate = new Date(member.birth_date);
+                            let age = today.getFullYear() - birthDate.getFullYear();
+                            const m = today.getMonth() - birthDate.getMonth();
+                            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                              age--;
+                            }
+                            return `${age} años`;
+                          })()}
+                        </div>
+                      </td>
+                      
+                      {/* Email */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-3 h-3 text-zinc-500 flex-shrink-0" />
+                          <span className="text-sm text-zinc-300 truncate max-w-[200px]">
+                            {member.email}
+                          </span>
+                        </div>
+                      </td>
+                      
+                      {/* Teléfono */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-3 h-3 text-zinc-500 flex-shrink-0" />
+                          <span className="text-sm text-zinc-300 font-mono">
+                            {member.phone}
+                          </span>
+                        </div>
+                      </td>
+                      
+                      {/* Dirección */}
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-zinc-300 max-w-[250px]">
+                          <div className="truncate">{member.address}</div>
+                          <div className="text-xs text-zinc-500 mt-1">
+                            {member.postal_code && `${member.postal_code}, `}
+                            {member.city}
+                          </div>
+                        </div>
+                      </td>
+                      
+                      {/* Licencia */}
+                      <td className="px-6 py-4">
                         <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded text-xs font-medium">
                           {member.license_type.toUpperCase()}
                         </span>
+                        {member.fedme_license_number && (
+                          <div className="text-xs text-zinc-500 mt-1 font-mono">
+                            {member.fedme_license_number}
+                          </div>
+                        )}
                       </td>
+                      
+                      {/* Estado FEDME */}
                       <td className="px-6 py-4">
                         {getStatusBadge(member.fedme_status)}
                       </td>
+                      
+                      {/* Membresía */}
                       <td className="px-6 py-4">
                         {getStatusBadge(member.membership_status)}
+                        {member.membership_end_date && (
+                          <div className="text-xs text-zinc-500 mt-1">
+                            Hasta {new Date(member.membership_end_date).toLocaleDateString('es-ES')}
+                          </div>
+                        )}
                       </td>
+                      
+                      {/* Acciones */}
                       <td className="px-6 py-4">
                         {member.fedme_status === 'pending' && member.license_type !== 'none' ? (
                           <button
@@ -651,6 +751,13 @@ export default function GestorPage() {
                   ))}
                 </tbody>
               </table>
+              
+              {activeMembers.length === 0 && (
+                <div className="text-center py-12">
+                  <Users className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
+                  <p className="text-zinc-500 text-lg">No hay socios activos</p>
+                </div>
+              )}
             </div>
           )}
 

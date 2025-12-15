@@ -192,7 +192,7 @@ export default function Home() {
           Nada épico. Nada místico. Solo montaña
         </p>
         <p className="text-base text-white/95 font-light leading-relaxed max-w-sm">
-           <strong>Un club de montaña de gente real.</strong>
+           <strong>ESTE ES TU CLUB</strong>
         </p>
 
         <div className="space-y-3 pt-2">
