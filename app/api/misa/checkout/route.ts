@@ -8,7 +8,8 @@ import { prisma } from '@/lib/prisma';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, phone, shirtSize, consents } = body;
+    const { name, email, phone, dni, shirtSize, consents, waiver_acceptance_id } = body; // 🆕 Añadir dni y waiver_acceptance_id
+
 
     logger.apiStart('POST', '/api/misa/checkout', { email, shirtSize });
 
@@ -157,6 +158,22 @@ export async function POST(request: NextRequest) {
       privacy_accepted: registration.privacy_accepted,
       whatsapp_consent: registration.whatsapp_consent,
     });
+
+    // 🆕 VINCULAR ACEPTACIÓN DEL PLIEGO (si existe)
+    if (waiver_acceptance_id) {
+      await prisma.waiverAcceptance.update({
+        where: { id: waiver_acceptance_id },
+        data: {
+          event_registration_id: registration.id,
+          member_id: memberId
+        }
+      });
+      
+      logger.log('🔗 Pliego vinculado a inscripción:', {
+        waiverAcceptanceId: waiver_acceptance_id,
+        registrationId: registration.id
+      });
+    }
 
     // ========================================
     // CREAR SESIÓN DE STRIPE

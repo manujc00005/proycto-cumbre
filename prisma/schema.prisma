@@ -1,6 +1,7 @@
 // ========================================
-// PROYECTO CUMBRE - SCHEMA PRISMA V3.4
-// Con marketing_consent en event_registrations
+// PROYECTO CUMBRE - SCHEMA PRISMA V3.5
+// ✅ CORREGIDO: Relaciones WaiverAcceptance
+// ✅ AÑADIDO: Campos faltantes en WaiverAcceptance
 // ========================================
 
 generator client {
@@ -364,32 +365,49 @@ model Payment {
 }
 
 model WaiverAcceptance {
-  id                     String   @id @default(uuid())
+  id                      String    @id @default(uuid())
 
-  event_id               String
-  event                  Event    @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  // Relación con evento (obligatorio)
+  event_id                String
+  event                   Event     @relation(fields: [event_id], references: [id], onDelete: Cascade)
 
-  waiver_version         String   @db.VarChar(50)  // v1.0, v2.0, etc
-  participant_full_name  String   @db.VarChar(255)
-  participant_document_id String  @db.VarChar(50)
-  participant_birth_date DateTime? @db.Date
+  // Versión del pliego (obligatorio)
+  waiver_version          String    @db.VarChar(50)  // v1.0, v2.0, etc
 
-  waiver_text_hash       String   @db.VarChar(64)  // SHA-256
-  accepted_at            DateTime
-  created_at             DateTime @default(now())
+  // Datos del participante (obligatorios)
+  participant_full_name   String    @db.VarChar(255)
+  participant_document_id String    @db.VarChar(50)
+  participant_birth_date  DateTime? @db.Date
 
-  // Relaciones opcionales
-  event_registration_id  String?
-  eventRegistration      EventRegistration? @relation(fields: [event_registration_id], references: [id], onDelete: SetNull)
+  // Hash SHA-256 del texto (obligatorio para verificación)
+  waiver_text_hash        String    @db.VarChar(64)
 
-  member_id              String?
-  member                 Member?  @relation(fields: [member_id], references: [id], onDelete: SetNull)
+  // Timestamp de aceptación (obligatorio)
+  accepted_at             DateTime
 
+  // 🆕 METADATA ADICIONAL (IMPORTANTE)
+  ip_address              String?   @db.VarChar(45)   // IP del cliente
+  user_agent              String?   @db.Text          // Navegador/dispositivo
+
+  // Timestamps automáticos
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt        // 🆕 AÑADIDO
+
+  // ✅ RELACIONES OPCIONALES (se vinculan después de crear)
+  event_registration_id   String?
+  eventRegistration       EventRegistration? @relation(fields: [event_registration_id], references: [id], onDelete: SetNull)
+
+  member_id               String?
+  member                  Member?   @relation(fields: [member_id], references: [id], onDelete: SetNull)
+  
+  @@unique([event_id, participant_document_id, waiver_version])
+  // Índices para búsquedas eficientes
   @@index([event_id])
   @@index([participant_document_id])
   @@index([waiver_version])
   @@index([event_registration_id])
   @@index([member_id])
+  @@index([accepted_at(sort: Desc)])
 
   @@map("waiver_acceptances")
 }

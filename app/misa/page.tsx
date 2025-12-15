@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import GDPRConsentEvent from '../components/gdpr/gdpr-consent-event';
+import WaiverAcceptance from '../components/PliegoDescarga/WaiverAcceptances';
+import { MISA_2026_WAIVER } from './misa-waiver';
 
 export default function MisaPage() {
   // ========================================
@@ -23,6 +25,7 @@ export default function MisaPage() {
     email: '',
     phone: '',
     shirtSize: '',
+    dni: ''
   });
   
   const [consents, setConsents] = useState<ConsentState>({
@@ -34,6 +37,11 @@ export default function MisaPage() {
   const [formError, setFormError] = useState('');
   const [isMember, setIsMember] = useState(false); // 🆕 Detectar si es socio
   const [isCheckingMember, setIsCheckingMember] = useState(false);
+
+  // 🆕 ESTADOS PARA EL PLIEGO
+  const [showWaiver, setShowWaiver] = useState(false);
+  const [waiverAccepted, setWaiverAccepted] = useState(false);
+  const [waiverAcceptanceId, setWaiverAcceptanceId] = useState<string | null>(null);
 
   // ========================================
   // 2️⃣ SCROLL EFFECTS
@@ -143,31 +151,63 @@ export default function MisaPage() {
     setFormError('');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
 
-    // Validar consentimientos
-    if (!consents.privacyPolicy) {
-      setFormError('Debes aceptar la Política de Privacidad para continuar');
-      return;
-    }
-
-    if (!consents.whatsapp) {
-      setFormError('Debes aceptar compartir tus datos en WhatsApp para participar');
-      return;
-    }
-
     // Validar campos obligatorios
-    if (!formData.name || !formData.email || !formData.phone || !formData.shirtSize) {
+    if (!formData.name || !formData.email || !formData.phone || !formData.dni || !formData.shirtSize) {
       setFormError('Todos los campos son obligatorios');
       return;
     }
 
-    setIsSubmitting(true);
+    // Validar consentimientos RGPD
+    if (!consents.privacyPolicy || !consents.whatsapp) {
+      setFormError('Debes aceptar la política de privacidad y WhatsApp');
+      return;
+    }
 
+    // Validar formato DNI/NIE
+    const dniRegex = /^[0-9]{8}[A-Za-z]$/;
+    const nieRegex = /^[XYZ][0-9]{7}[A-Za-z]$/;
+    if (!dniRegex.test(formData.dni.toUpperCase()) && !nieRegex.test(formData.dni.toUpperCase())) {
+      setFormError('DNI/NIE inválido. Formato: 12345678A o X1234567A');
+      return;
+    }
+
+    // 🆕 Mostrar pliego de descargo en lugar de ir directamente al pago
+    setShowWaiver(true);
+  };
+
+  // 🆕 HANDLER PARA ACEPTACIÓN DEL PLIEGO
+  const handleWaiverAccept = async (payload: any) => {
     try {
-      const response = await fetch('/api/misa/checkout', {
+      setIsSubmitting(true);
+
+      // 1. Guardar aceptación del pliego
+      console.log('📝 Enviando aceptación del pliego...', payload);
+      
+      const waiverResponse = await fetch('/api/misa/waiver-acceptance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!waiverResponse.ok) {
+        const errorData = await waiverResponse.json();
+        throw new Error(errorData.error || 'Error al guardar la aceptación del pliego');
+      }
+
+      const waiverData = await waiverResponse.json();
+      setWaiverAcceptanceId(waiverData.acceptanceId);
+      setWaiverAccepted(true);
+
+      console.log('✅ Pliego aceptado:', waiverData.acceptanceId);
+
+      // 2. Proceder con el checkout de Stripe
+      console.log('💳 Iniciando checkout de Stripe...');
+      
+      const checkoutResponse = await fetch('/api/misa/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -177,22 +217,26 @@ export default function MisaPage() {
             privacy_accepted_at: consents.privacyPolicy ? new Date().toISOString() : null,
             whatsapp_consent: consents.whatsapp,
             whatsapp_consent_at: consents.whatsapp ? new Date().toISOString() : null,
-          }
+          },
+          waiver_acceptance_id: waiverData.acceptanceId // 🆕 Vincular aceptación
         }),
       });
 
-      const data = await response.json();
+      const checkoutData = await checkoutResponse.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Error al procesar el pago');
+      if (!checkoutResponse.ok) {
+        throw new Error(checkoutData.error || 'Error al procesar el pago');
       }
 
-      if (data.url) {
-        window.location.href = data.url;
+      if (checkoutData.url) {
+        // Redirigir a Stripe
+        window.location.href = checkoutData.url;
       }
+
     } catch (error: any) {
-      console.error('Error:', error);
-      setFormError(error.message || 'Hubo un error al procesar tu reserva. Por favor, inténtalo de nuevo.');
+      console.error('❌ Error:', error);
+      setFormError(error.message || 'Hubo un error. Por favor, inténtalo de nuevo.');
+      setShowWaiver(false); // Cerrar modal del pliego para que vea el error
     } finally {
       setIsSubmitting(false);
     }
@@ -470,7 +514,7 @@ export default function MisaPage() {
                 )}
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleFormSubmit} className="space-y-5">
                   
                   {/* Nombre */}
                   <div>
@@ -540,6 +584,26 @@ export default function MisaPage() {
                       placeholder="+34 600 000 000"
                     />
                   </div>
+                  {/* 🆕 DNI/NIE */}
+                  <div>
+                    <label htmlFor="dni" className="block text-sm font-semibold text-white/80 mb-2">
+                      DNI/NIE *
+                    </label>
+                    <input
+                      type="text"
+                      id="dni"
+                      name="dni"
+                      required
+                      value={formData.dni}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-orange-500 transition uppercase"
+                      placeholder="12345678A o X1234567A"
+                      maxLength={9}
+                    />
+                    <p className="text-xs text-zinc-500 mt-1">
+                      Formato válido: 12345678A (DNI) o X1234567A (NIE)
+                    </p>
+                  </div>
 
                   {/* Talla */}
                   <div>
@@ -594,7 +658,7 @@ export default function MisaPage() {
                       </>
                     ) : (
                       <>
-                        Confirmar y pagar
+                        Aceptar pliego y continuar {/* 🆕 CAMBIAR TEXTO */}
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
@@ -619,7 +683,44 @@ export default function MisaPage() {
 
       {/* Bottom Gradient */}
       <div className="fixed bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent pointer-events-none z-[2]"></div>
+    
+        {/* ========================================
+            MODAL PLIEGO DE DESCARGO
+            ======================================== */}
+        <AnimatePresence>
+          {showWaiver && !waiverAccepted && (
+            <>
+              {/* Overlay */}
+              <motion.div
+                className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[60]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              />
 
+              {/* Modal */}
+              <motion.div
+                className="fixed inset-0 z-[70] flex items-center justify-center p-4 overflow-y-auto"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+              >
+                <div className="w-full max-w-5xl">
+                  <WaiverAcceptance
+                    event={MISA_2026_WAIVER}
+                    participant={{
+                      fullName: formData.name,
+                      documentId: formData.dni,
+                      birthDateISO: undefined // Opcional
+                    }}
+                    onAccept={handleWaiverAccept}
+                    className="bg-zinc-900"
+                  />
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
     </div>
   );
 }
