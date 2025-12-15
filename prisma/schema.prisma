@@ -158,6 +158,7 @@ model Member {
   payments           Payment[]
   eventRegistrations EventRegistration[]
   orders             Order[]
+  waiverAcceptances WaiverAcceptance[]
 
   @@index([headquarters_id])
   @@index([email])
@@ -192,8 +193,10 @@ model Event {
   meta_description     String?       @db.Text
   created_at           DateTime      @default(now())
   updated_at           DateTime      @updatedAt
+  
 
   registrations EventRegistration[]
+  waiverAcceptances WaiverAcceptance[]
 
   @@index([slug])
   @@index([status])
@@ -231,6 +234,7 @@ model EventRegistration {
   updated_at        DateTime @updatedAt
 
   payment Payment?
+  waiverAcceptances WaiverAcceptance[]
 
   @@index([event_id])
   @@index([member_id])
@@ -357,4 +361,35 @@ model Payment {
   @@index([status])
   @@index([created_at(sort: Desc)])
   @@map("payments")
+}
+
+model WaiverAcceptance {
+  id                     String   @id @default(uuid())
+
+  event_id               String
+  event                  Event    @relation(fields: [event_id], references: [id], onDelete: Cascade)
+
+  waiver_version         String   @db.VarChar(50)  // v1.0, v2.0, etc
+  participant_full_name  String   @db.VarChar(255)
+  participant_document_id String  @db.VarChar(50)
+  participant_birth_date DateTime? @db.Date
+
+  waiver_text_hash       String   @db.VarChar(64)  // SHA-256
+  accepted_at            DateTime
+  created_at             DateTime @default(now())
+
+  // Relaciones opcionales
+  event_registration_id  String?
+  eventRegistration      EventRegistration? @relation(fields: [event_registration_id], references: [id], onDelete: SetNull)
+
+  member_id              String?
+  member                 Member?  @relation(fields: [member_id], references: [id], onDelete: SetNull)
+
+  @@index([event_id])
+  @@index([participant_document_id])
+  @@index([waiver_version])
+  @@index([event_registration_id])
+  @@index([member_id])
+
+  @@map("waiver_acceptances")
 }
