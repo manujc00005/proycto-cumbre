@@ -1044,6 +1044,7 @@ export default function MembershipPage() {
               whatsappContext="club"
               includeWhatsApp={true}
               whatsappRequired={true}
+              showFooterNote={false}
             />
 
 
