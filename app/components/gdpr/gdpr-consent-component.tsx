@@ -1,6 +1,6 @@
 // components/gdpr/gdpr-consent-component.tsx
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Info } from 'lucide-react';
 
 interface GDPRConsentProps {
@@ -30,10 +30,15 @@ export default function GDPRConsent({
     }));
   };
 
+  const onConsentChangeRef = useRef(onConsentChange);
 
   useEffect(() => {
-    onConsentChange?.(consents);
-  }, [consents, onConsentChange]);
+    onConsentChangeRef.current = onConsentChange;
+  }, [onConsentChange]);
+
+  useEffect(() => {
+    onConsentChangeRef.current?.(consents);
+  }, [consents]);
 
   // Textos según contexto
   const whatsappTexts = {

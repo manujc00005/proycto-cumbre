@@ -43,4 +43,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-/prisma/*.md
+/prisma/backup/*.md
+/prisma/backup/*.dump
+/prisma/backup/*.txt

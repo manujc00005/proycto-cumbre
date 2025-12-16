@@ -1,9 +1,3 @@
-// ========================================
-// PROYECTO CUMBRE - SCHEMA PRISMA V3.5
-// ✅ CORREGIDO: Relaciones WaiverAcceptance
-// ✅ AÑADIDO: Campos faltantes en WaiverAcceptance
-// ========================================
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,9 +8,291 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// ============================================
-// ENUMS
-// ============================================
+model Headquarters {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name              String   @db.VarChar(255)
+  code              String   @unique @db.VarChar(20)
+  city              String   @db.VarChar(100)
+  phone             String?  @db.VarChar(20)
+  email             String?  @db.VarChar(255)
+  membership_prices Json
+  status            String   @default("active") @db.VarChar(20)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @default(now()) @updatedAt
+  members           Member[]
+
+  @@index([code])
+  @@index([status])
+  @@map("headquarters")
+}
+
+model Member {
+  id                     String              @id @default(uuid()) @db.Uuid
+  headquarters_id        String?             @db.Uuid
+  member_number          String?             @unique @db.VarChar(50)
+  email                  String              @unique @db.VarChar(255)
+  first_name             String              @db.VarChar(100)
+  last_name              String              @db.VarChar(100)
+  nickname String? @db.VarChar(50)
+  birth_date             DateTime            @db.Date
+  dni                    String?             @db.VarChar(20)
+  sex                    Sex
+  phone                  String              @db.VarChar(20)
+  emergency_phone        String?             @db.VarChar(20)
+  emergency_contact_name String?             @db.VarChar(255)
+  province               String              @db.VarChar(100)
+  city                   String?             @db.VarChar(100)
+  address                String
+  postal_code            String?             @db.VarChar(10)
+  shirt_size             String?             @db.VarChar(10)
+  hoodie_size            String?             @db.VarChar(10)
+  pants_size             String?             @db.VarChar(10)
+  license_type           LicenseType
+  fedme_license_number   String?             @unique @db.VarChar(50)
+  fedme_status           FedmeStatus         @default(pending)
+  membership_status      MembershipStatus    @default(pending)
+  membership_start_date  DateTime?           @db.Date
+  membership_end_date    DateTime?           @db.Date
+  privacy_accepted       Boolean             @default(true)
+  privacy_accepted_at    DateTime?
+  privacy_accepted_ip    String?             @db.VarChar(45)
+  privacy_policy_version String?             @default("1.0") @db.VarChar(20)
+  marketing_consent      Boolean             @default(true)
+  marketing_consent_at   DateTime?
+  marketing_revoked_at   DateTime?
+  whatsapp_consent       Boolean             @default(true)
+  whatsapp_consent_at    DateTime?
+  whatsapp_revoked_at    DateTime?
+  deleted_at             DateTime?
+  admin_notes            String?
+  created_at             DateTime            @default(now())
+  updated_at             DateTime            @updatedAt
+  eventRegistrations     EventRegistration[]
+  headquarters           Headquarters?       @relation(fields: [headquarters_id], references: [id])
+  orders                 Order[]
+  payments               Payment[]
+  waiverAcceptances      WaiverAcceptance[]
+
+  @@index([headquarters_id])
+  @@index([email])
+  @@index([dni])
+  @@index([membership_status])
+  @@index([member_number])
+  @@index([created_at(sort: Desc)])
+  @@index([privacy_accepted])
+  @@index([marketing_consent])
+  @@index([deleted_at])
+  @@index([privacy_policy_version])
+  @@map("members")
+}
+
+model Event {
+  id                   String              @id @default(uuid()) @db.Uuid
+  slug                 String              @unique @db.VarChar(100)
+  name                 String              @db.VarChar(255)
+  description          String?
+  event_date           DateTime
+  location             String?             @db.VarChar(255)
+  max_participants     Int?
+  current_participants Int                 @default(0)
+  price                Int
+  currency             String              @default("eur") @db.VarChar(3)
+  requires_member      Boolean             @default(false)
+  member_discount      Int                 @default(0)
+  custom_fields        Json?
+  whatsapp_group       String?             @db.VarChar(500)
+  status               EventStatus         @default(draft)
+  image_url            String?             @db.VarChar(500)
+  meta_description     String?
+  created_at           DateTime            @default(now())
+  updated_at           DateTime            @updatedAt
+  registrations        EventRegistration[]
+  waiverAcceptances    WaiverAcceptance[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([event_date])
+  @@map("events")
+}
+
+model EventRegistration {
+  id                     String             @id @default(uuid()) @db.Uuid
+  event_id               String             @db.Uuid
+  member_id              String?            @db.Uuid
+  participant_name       String             @db.VarChar(255)
+  participant_email      String             @db.VarChar(255)
+  participant_phone      String             @db.VarChar(20)
+  custom_data            Json?
+  status                 String             @default("pending") @db.VarChar(20)
+  privacy_accepted       Boolean            @default(false)
+  privacy_accepted_at    DateTime?
+  privacy_policy_version String?            @default("1.0") @db.VarChar(20)
+  whatsapp_consent       Boolean            @default(false)
+  whatsapp_consent_at    DateTime?
+  marketing_consent      Boolean            @default(false)
+  marketing_consent_at   DateTime?
+  marketing_revoked_at   DateTime?
+  registered_at          DateTime           @default(now())
+  created_at             DateTime           @default(now())
+  updated_at             DateTime           @updatedAt
+  event                  Event              @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  member                 Member?            @relation(fields: [member_id], references: [id])
+  payment                Payment?
+  waiverAcceptances      WaiverAcceptance[]
+
+  @@index([event_id])
+  @@index([member_id])
+  @@index([participant_email])
+  @@index([status])
+  @@index([privacy_accepted])
+  @@index([privacy_policy_version])
+  @@index([marketing_consent])
+  @@map("event_registrations")
+}
+
+model Product {
+  id                  String      @id @default(uuid()) @db.Uuid
+  slug                String      @unique @db.VarChar(100)
+  name                String      @db.VarChar(255)
+  description         String?
+  price               Int
+  compare_at_price    Int?
+  currency            String      @default("eur") @db.VarChar(3)
+  stock               Int         @default(0)
+  low_stock_threshold Int         @default(5)
+  track_inventory     Boolean     @default(true)
+  has_variants        Boolean     @default(false)
+  variants            Json?
+  category            String?     @db.VarChar(100)
+  tags                String[]
+  images              Json?
+  meta_title          String?     @db.VarChar(255)
+  meta_description    String?
+  status              String      @default("draft") @db.VarChar(20)
+  featured            Boolean     @default(false)
+  created_at          DateTime    @default(now())
+  updated_at          DateTime    @updatedAt
+  orderItems          OrderItem[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([category])
+  @@index([featured])
+  @@map("products")
+}
+
+model Order {
+  id                     String      @id @default(uuid()) @db.Uuid
+  order_number           String      @unique @db.VarChar(50)
+  member_id              String?     @db.Uuid
+  customer_email         String      @db.VarChar(255)
+  customer_name          String      @db.VarChar(255)
+  customer_phone         String?     @db.VarChar(20)
+  shipping_address       Json
+  subtotal               Int
+  shipping_cost          Int         @default(0)
+  tax                    Int         @default(0)
+  discount               Int         @default(0)
+  total                  Int
+  currency               String      @default("eur") @db.VarChar(3)
+  status                 OrderStatus @default(pending)
+  tracking_number        String?     @db.VarChar(255)
+  shipped_at             DateTime?
+  delivered_at           DateTime?
+  customer_notes         String?
+  admin_notes            String?
+  privacy_policy_version String?     @default("1.0") @db.VarChar(20)
+  created_at             DateTime    @default(now())
+  updated_at             DateTime    @updatedAt
+  items                  OrderItem[]
+  member                 Member?     @relation(fields: [member_id], references: [id])
+  payments               Payment[]
+
+  @@index([order_number])
+  @@index([member_id])
+  @@index([customer_email])
+  @@index([status])
+  @@index([created_at(sort: Desc)])
+  @@index([privacy_policy_version])
+  @@map("orders")
+}
+
+model OrderItem {
+  id           String   @id @default(uuid()) @db.Uuid
+  order_id     String   @db.Uuid
+  product_id   String?  @db.Uuid
+  product_name String   @db.VarChar(255)
+  product_slug String?  @db.VarChar(100)
+  variant_data Json?
+  quantity     Int
+  unit_price   Int
+  total_price  Int
+  created_at   DateTime @default(now())
+  order        Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  product      Product? @relation(fields: [product_id], references: [id])
+
+  @@index([order_id])
+  @@index([product_id])
+  @@map("order_items")
+}
+
+model Payment {
+  id                    String             @id @default(uuid()) @db.Uuid
+  payment_type          PaymentType
+  member_id             String?            @db.Uuid
+  event_registration_id String?            @unique @db.Uuid
+  order_id              String?            @db.Uuid
+  stripe_session_id     String             @unique @db.VarChar(255)
+  stripe_payment_id     String?            @db.VarChar(255)
+  amount                Int
+  currency              String             @default("eur") @db.VarChar(3)
+  status                PaymentStatus      @default(pending)
+  description           String?
+  metadata              Json?
+  created_at            DateTime           @default(now())
+  updated_at            DateTime           @updatedAt
+  eventRegistration     EventRegistration? @relation(fields: [event_registration_id], references: [id])
+  member                Member?            @relation(fields: [member_id], references: [id])
+  order                 Order?             @relation(fields: [order_id], references: [id])
+
+  @@index([payment_type])
+  @@index([member_id])
+  @@index([event_registration_id])
+  @@index([order_id])
+  @@index([stripe_session_id])
+  @@index([status])
+  @@index([created_at(sort: Desc)])
+  @@map("payments")
+}
+
+model WaiverAcceptance {
+  id                      String             @id @default(uuid()) @db.Uuid
+  event_id                String             @db.Uuid
+  waiver_version          String             @db.VarChar(50)
+  participant_full_name   String             @db.VarChar(255)
+  participant_document_id String             @db.VarChar(50)
+  participant_birth_date  DateTime?          @db.Date
+  waiver_text_hash        String             @db.VarChar(64)
+  accepted_at             DateTime
+  ip_address              String?            @db.VarChar(45)
+  user_agent              String?
+  created_at              DateTime           @default(now())
+  updated_at              DateTime           @updatedAt
+  event_registration_id   String?            @db.Uuid
+  member_id               String?            @db.Uuid
+  event                   Event              @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  eventRegistration       EventRegistration? @relation(fields: [event_registration_id], references: [id])
+  member                  Member?            @relation(fields: [member_id], references: [id])
+
+  @@unique([event_id, participant_document_id, waiver_version])
+  @@index([event_id])
+  @@index([participant_document_id])
+  @@index([waiver_version])
+  @@index([event_registration_id])
+  @@index([member_id])
+  @@index([accepted_at(sort: Desc)])
+  @@map("waiver_acceptances")
+}
 
 enum Sex {
   M
@@ -82,332 +358,4 @@ enum OrderStatus {
   delivered
   cancelled
   refunded
-}
-
-// ============================================
-// MODELS
-// ============================================
-
-model Headquarters {
-  id                String   @id @default(uuid())
-  name              String   @db.VarChar(255)
-  code              String   @unique @db.VarChar(20)
-  city              String   @db.VarChar(100)
-  phone             String?  @db.VarChar(20)
-  email             String?  @db.VarChar(255)
-  membership_prices Json
-  status            String   @default("active") @db.VarChar(20)
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
-
-  members Member[]
-
-  @@index([code])
-  @@index([status])
-  @@map("headquarters")
-}
-
-model Member {
-  id                     String           @id @default(uuid())
-  headquarters_id        String?
-  headquarters           Headquarters?    @relation(fields: [headquarters_id], references: [id])
-  member_number          String?          @unique @db.VarChar(50)
-  email                  String           @unique @db.VarChar(255)
-  first_name             String           @db.VarChar(100)
-  last_name              String           @db.VarChar(100)
-  birth_date             DateTime         @db.Date
-  dni                    String?          @db.VarChar(20)
-  sex                    Sex
-  phone                  String           @db.VarChar(20)
-  emergency_phone        String?          @db.VarChar(20)
-  emergency_contact_name String?          @db.VarChar(255)
-  province               String           @db.VarChar(100)
-  city                   String?          @db.VarChar(100)
-  address                String           @db.Text
-  postal_code            String?          @db.VarChar(10)
-  shirt_size             String?          @db.VarChar(10)
-  hoodie_size            String?          @db.VarChar(10)
-  pants_size             String?          @db.VarChar(10)
-  license_type           LicenseType
-  fedme_license_number   String?          @unique @db.VarChar(50)
-  fedme_status           FedmeStatus      @default(pending)
-  membership_status      MembershipStatus @default(pending)
-  membership_start_date  DateTime?
-  membership_end_date    DateTime?
-  
-  // CONSENTIMIENTOS RGPD
-  privacy_accepted          Boolean   @default(true)
-  privacy_accepted_at       DateTime?
-  privacy_accepted_ip       String?   @db.VarChar(45)
-  privacy_policy_version    String?   @default("1.0") @db.VarChar(20)
-  
-  marketing_consent         Boolean   @default(true)
-  marketing_consent_at      DateTime?
-  marketing_revoked_at      DateTime?
-  
-  whatsapp_consent          Boolean   @default(true)
-  whatsapp_consent_at       DateTime?
-  whatsapp_revoked_at       DateTime?
-  
-  // SOFT DELETE
-  deleted_at                DateTime?
-  
-  admin_notes               String?   @db.Text
-  created_at                DateTime  @default(now())
-  updated_at                DateTime  @updatedAt
-
-  payments           Payment[]
-  eventRegistrations EventRegistration[]
-  orders             Order[]
-  waiverAcceptances WaiverAcceptance[]
-
-  @@index([headquarters_id])
-  @@index([email])
-  @@index([dni])
-  @@index([membership_status])
-  @@index([member_number])
-  @@index([created_at(sort: Desc)])
-  @@index([privacy_accepted])
-  @@index([marketing_consent])
-  @@index([deleted_at])
-  @@index([privacy_policy_version])
-  @@map("members")
-}
-
-model Event {
-  id                   String        @id @default(uuid())
-  slug                 String        @unique @db.VarChar(100)
-  name                 String        @db.VarChar(255)
-  description          String?       @db.Text
-  event_date           DateTime
-  location             String?       @db.VarChar(255)
-  max_participants     Int?
-  current_participants Int           @default(0)
-  price                Int
-  currency             String        @default("eur") @db.VarChar(3)
-  requires_member      Boolean       @default(false)
-  member_discount      Int           @default(0)
-  custom_fields        Json?
-  whatsapp_group       String?       @db.VarChar(500)
-  status               EventStatus   @default(draft)
-  image_url            String?       @db.VarChar(500)
-  meta_description     String?       @db.Text
-  created_at           DateTime      @default(now())
-  updated_at           DateTime      @updatedAt
-  
-
-  registrations EventRegistration[]
-  waiverAcceptances WaiverAcceptance[]
-
-  @@index([slug])
-  @@index([status])
-  @@index([event_date])
-  @@map("events")
-}
-
-model EventRegistration {
-  id                String   @id @default(uuid())
-  event_id          String
-  event             Event    @relation(fields: [event_id], references: [id], onDelete: Cascade)
-  member_id         String?
-  member            Member?  @relation(fields: [member_id], references: [id], onDelete: SetNull)
-  participant_name  String   @db.VarChar(255)
-  participant_email String   @db.VarChar(255)
-  participant_phone String   @db.VarChar(20)
-  custom_data       Json?
-  status            String   @default("pending") @db.VarChar(20)
-  
-  // CONSENTIMIENTOS RGPD
-  privacy_accepted        Boolean   @default(false)
-  privacy_accepted_at     DateTime?
-  privacy_policy_version  String?   @default("1.0") @db.VarChar(20)
-  
-  whatsapp_consent        Boolean   @default(false)
-  whatsapp_consent_at     DateTime?
-  
-  // 🆕 MARKETING CONSENT
-  marketing_consent       Boolean   @default(false)
-  marketing_consent_at    DateTime?
-  marketing_revoked_at    DateTime?
-  
-  registered_at     DateTime @default(now())
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
-
-  payment Payment?
-  waiverAcceptances WaiverAcceptance[]
-
-  @@index([event_id])
-  @@index([member_id])
-  @@index([participant_email])
-  @@index([status])
-  @@index([privacy_accepted])
-  @@index([privacy_policy_version])
-  @@index([marketing_consent]) // 🆕
-  @@map("event_registrations")
-}
-
-model Product {
-  id                  String   @id @default(uuid())
-  slug                String   @unique @db.VarChar(100)
-  name                String   @db.VarChar(255)
-  description         String?  @db.Text
-  price               Int
-  compare_at_price    Int?
-  currency            String   @default("eur") @db.VarChar(3)
-  stock               Int      @default(0)
-  low_stock_threshold Int      @default(5)
-  track_inventory     Boolean  @default(true)
-  has_variants        Boolean  @default(false)
-  variants            Json?
-  category            String?  @db.VarChar(100)
-  tags                String[]
-  images              Json?
-  meta_title          String?  @db.VarChar(255)
-  meta_description    String?  @db.Text
-  status              String   @default("draft") @db.VarChar(20)
-  featured            Boolean  @default(false)
-  created_at          DateTime @default(now())
-  updated_at          DateTime @updatedAt
-
-  orderItems OrderItem[]
-
-  @@index([slug])
-  @@index([status])
-  @@index([category])
-  @@index([featured])
-  @@map("products")
-}
-
-model Order {
-  id                     String      @id @default(uuid())
-  order_number           String      @unique @db.VarChar(50)
-  member_id              String?
-  member                 Member?     @relation(fields: [member_id], references: [id], onDelete: SetNull)
-  customer_email         String      @db.VarChar(255)
-  customer_name          String      @db.VarChar(255)
-  customer_phone         String?     @db.VarChar(20)
-  shipping_address       Json
-  subtotal               Int
-  shipping_cost          Int         @default(0)
-  tax                    Int         @default(0)
-  discount               Int         @default(0)
-  total                  Int
-  currency               String      @default("eur") @db.VarChar(3)
-  status                 OrderStatus @default(pending)
-  tracking_number        String?     @db.VarChar(255)
-  shipped_at             DateTime?
-  delivered_at           DateTime?
-  customer_notes         String?     @db.Text
-  admin_notes            String?     @db.Text
-  privacy_policy_version String?     @default("1.0") @db.VarChar(20)
-  created_at             DateTime    @default(now())
-  updated_at             DateTime    @updatedAt
-
-  items    OrderItem[]
-  payments Payment[]
-
-  @@index([order_number])
-  @@index([member_id])
-  @@index([customer_email])
-  @@index([status])
-  @@index([created_at(sort: Desc)])
-  @@index([privacy_policy_version])
-  @@map("orders")
-}
-
-model OrderItem {
-  id           String   @id @default(uuid())
-  order_id     String
-  order        Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
-  product_id   String?
-  product      Product? @relation(fields: [product_id], references: [id], onDelete: SetNull)
-  product_name String   @db.VarChar(255)
-  product_slug String?  @db.VarChar(100)
-  variant_data Json?
-  quantity     Int
-  unit_price   Int
-  total_price  Int
-  created_at   DateTime @default(now())
-
-  @@index([order_id])
-  @@index([product_id])
-  @@map("order_items")
-}
-
-model Payment {
-  id                    String        @id @default(uuid())
-  payment_type          PaymentType
-  member_id             String?
-  event_registration_id String?       @unique
-  order_id              String?
-  member                Member?            @relation(fields: [member_id], references: [id], onDelete: SetNull)
-  eventRegistration     EventRegistration? @relation(fields: [event_registration_id], references: [id], onDelete: SetNull)
-  order                 Order?             @relation(fields: [order_id], references: [id], onDelete: SetNull)
-  stripe_session_id     String        @unique @db.VarChar(255)
-  stripe_payment_id     String?       @db.VarChar(255)
-  amount                Int
-  currency              String        @default("eur") @db.VarChar(3)
-  status                PaymentStatus @default(pending)
-  description           String?       @db.Text
-  metadata              Json?
-  created_at            DateTime      @default(now())
-  updated_at            DateTime      @updatedAt
-
-  @@index([payment_type])
-  @@index([member_id])
-  @@index([event_registration_id])
-  @@index([order_id])
-  @@index([stripe_session_id])
-  @@index([status])
-  @@index([created_at(sort: Desc)])
-  @@map("payments")
-}
-
-model WaiverAcceptance {
-  id                      String    @id @default(uuid())
-
-  // Relación con evento (obligatorio)
-  event_id                String
-  event                   Event     @relation(fields: [event_id], references: [id], onDelete: Cascade)
-
-  // Versión del pliego (obligatorio)
-  waiver_version          String    @db.VarChar(50)  // v1.0, v2.0, etc
-
-  // Datos del participante (obligatorios)
-  participant_full_name   String    @db.VarChar(255)
-  participant_document_id String    @db.VarChar(50)
-  participant_birth_date  DateTime? @db.Date
-
-  // Hash SHA-256 del texto (obligatorio para verificación)
-  waiver_text_hash        String    @db.VarChar(64)
-
-  // Timestamp de aceptación (obligatorio)
-  accepted_at             DateTime
-
-  // 🆕 METADATA ADICIONAL (IMPORTANTE)
-  ip_address              String?   @db.VarChar(45)   // IP del cliente
-  user_agent              String?   @db.Text          // Navegador/dispositivo
-
-  // Timestamps automáticos
-  created_at              DateTime  @default(now())
-  updated_at              DateTime  @updatedAt        // 🆕 AÑADIDO
-
-  // ✅ RELACIONES OPCIONALES (se vinculan después de crear)
-  event_registration_id   String?
-  eventRegistration       EventRegistration? @relation(fields: [event_registration_id], references: [id], onDelete: SetNull)
-
-  member_id               String?
-  member                  Member?   @relation(fields: [member_id], references: [id], onDelete: SetNull)
-  
-  @@unique([event_id, participant_document_id, waiver_version])
-  // Índices para búsquedas eficientes
-  @@index([event_id])
-  @@index([participant_document_id])
-  @@index([waiver_version])
-  @@index([event_registration_id])
-  @@index([member_id])
-  @@index([accepted_at(sort: Desc)])
-
-  @@map("waiver_acceptances")
 }

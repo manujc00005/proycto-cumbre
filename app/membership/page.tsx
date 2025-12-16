@@ -8,6 +8,7 @@ import { AgeCategory, calculateAge, calculateAgeCategory, getCategoryLabel, getL
 import { logger } from '@/lib/logger';
 import styles from './page.module.css';
 import GDPRConsent from '../components/gdpr/gdpr-consent-component';
+import React from 'react';
 
 const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const PANTS_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -15,6 +16,10 @@ const PANTS_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 export default function MembershipPage() {
   const router = useRouter();
   const errorBannerRef = useRef<HTMLDivElement>(null);
+
+  const handleConsentChange = React.useCallback((next: ConsentState) => {
+    setConsents(next);
+  }, []);
   
   // Forzar que el body permita scroll cuando se monte este componente
   useEffect(() => {
@@ -1048,12 +1053,7 @@ export default function MembershipPage() {
               includeWhatsApp={true}
               whatsappRequired={true}
               whatsappContext="club"
-              onConsentChange={(next) =>
-                setConsents((prev) => ({
-                  ...prev,
-                  ...next,
-                }))
-              }
+              onConsentChange={handleConsentChange}
             />
 
             {/* Error de privacidad */}
