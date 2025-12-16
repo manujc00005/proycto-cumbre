@@ -8,8 +8,8 @@ export const MISA_2026_EVENT = {
   eventName: 'MISA - Ritual Furtivo',
   eventDateISO: '2026-01-23',
   eventLocation: 'Málaga, Andalucía',
-  modalityName: '21K Trail Nocturno',
-  rulesUrl: 'https://proyecto-cumbre.es/misa-reglamento.pdf', // Actualizar con URL real
+  modalityName: '11K Trail Nocturno',
+  rulesUrl: 'https://proyecto-cumbre.es/misa-reglamento.pdf',
   waiverVersion: 'v1.0',
   waiverText: `DESCARGO DE RESPONSABILIDAD Y ASUNCIÓN DE RIESGOS
 EVENTO: MISA - RITUAL FURTIVO 2026
@@ -30,18 +30,27 @@ Teléfono: 692 085 193
 
 2. DESCRIPCIÓN DEL EVENTO
 
-MISA - Ritual Furtivo es una prueba deportiva de trail running nocturno de aproximadamente 21 kilómetros con desnivel acumulado positivo superior a 1.000 metros, que se celebrará el 23 de enero de 2026 a las 19:00 horas en el entorno natural de la provincia de Málaga.
+MISA – Ritual Furtivo es una actividad deportiva privada de trail running nocturno, de carácter no competitivo, dirigida a deportistas con experiencia previa en montaña, que se celebrará el 23 de enero de 2026 a las 19:00 horas en entorno natural de la provincia de Málaga.
 
-La prueba se desarrolla íntegramente en montaña, por senderos, caminos y pistas forestales, en condiciones de baja o nula visibilidad (horario nocturno), con terreno técnico, desniveles pronunciados, posibles condiciones meteorológicas adversas (lluvia, frío, viento) y en zonas sin cobertura telefónica.
+La actividad se desarrolla en montaña, por senderos, caminos y pistas forestales, en horario nocturno, con baja o nula visibilidad, terreno irregular y técnico, desniveles, posibles condiciones meteorológicas adversas (lluvia, frío, viento) y en zonas con posible ausencia de cobertura telefónica.
 
-CARACTERÍSTICAS TÉCNICAS:
-- Distancia aproximada: 21 kilómetros
-- Desnivel acumulado positivo: >1.000 metros
-- Tipo de terreno: senderos de montaña, pistas forestales, terreno técnico
-- Horario: nocturno (salida 19:00h)
-- Altitud máxima: pendiente de confirmar
-- Ubicación exacta: se comunicará 2 horas antes del evento por motivos de seguridad
+CARACTERÍSTICAS TÉCNICAS APROXIMADAS:
 
+- Distancia: 11 km
+- Desnivel positivo aproximado: 200 m+
+- Tipo de terreno: senderos y pistas de montaña, terreno técnico
+- Horario: nocturno
+
+Ubicación exacta: se comunicará con antelación limitada por motivos de seguridad y control del entorno
+
+2 BIS. UBICACIÓN, TRACK Y COMUNICACIONES OFICIALES
+
+1. La ubicación exacta del punto de salida se comunicará aproximadamente 2 horas antes del inicio de la actividad.
+2. El track GPS del recorrido se facilitará aproximadamente 1 hora antes del inicio.
+3. Ambas comunicaciones se realizarán exclusivamente a través del canal oficial designado por el organizador, pudiendo ser un grupo de WhatsApp u otro medio equivalente.
+4. El participante declara disponer de un dispositivo adecuado, batería suficiente y acceso al canal oficial, comprometiéndose a revisar la información publicada.
+5. El organizador podrá modificar ubicación, recorrido u horarios incluso con escasa antelación por motivos de seguridad, meteorología, conservación del entorno o causas externas.
+6. La falta de recepción o lectura de dichas comunicaciones no genera responsabilidad alguna para el organizador.
 
 3. NATURALEZA VOLUNTARIA Y ASUNCIÓN DE RIESGOS
 
@@ -52,15 +61,10 @@ a) Participa en el evento MISA - Ritual Furtivo por decisión propia, sin coacci
 b) Es plenamente consciente de la NATURALEZA EXTREMA de la prueba y de los RIESGOS INHERENTES a la práctica del trail running nocturno en montaña, incluyendo pero sin limitarse a:
 
    - RIESGOS FÍSICOS: Caídas, tropiezos, resbalones, esguinces, fracturas, contusiones, rozaduras, ampollas, deshidratación, hipotermia, hipertermia, agotamiento físico extremo, calambres musculares, lesiones musculares, tendinosas o articulares.
-   
    - RIESGOS AMBIENTALES: Condiciones meteorológicas adversas (lluvia, viento, frío intenso, niebla), baja o nula visibilidad nocturna, terreno irregular y técnico, presencia de piedras sueltas, raíces, ramas, barrancos, desniveles pronunciados, zonas resbaladizas.
-   
    - RIESGOS DE ORIENTACIÓN: Pérdida de señalización, desvío del recorrido establecido, desorientación en zonas sin cobertura telefónica ni referencias visuales.
-   
    - RIESGOS MÉDICOS: Crisis de ansiedad, ataques de pánico, episodios cardiovasculares, crisis asmáticas, reacciones alérgicas, picaduras de insectos, contacto con plantas urticantes o tóxicas.
-   
    - RIESGOS DE FAUNA: Encuentro con animales salvajes (jabalíes, cabras montesas, serpientes, etc.).
-   
    - OTROS RIESGOS: Fallo del material personal (frontal, calzado, bastones), agotamiento de baterías, errores de navegación, aislamiento temporal en zonas sin cobertura, imposibilidad de evacuación inmediata en caso de emergencia.
 
 c) Ha sido advertido de que la práctica del trail running en montaña durante la noche conlleva RIESGOS GRAVES que pueden resultar en LESIONES PERMANENTES, DISCAPACIDAD O INCLUSO LA MUERTE.
@@ -70,91 +74,59 @@ d) ACEPTA Y ASUME VOLUNTARIAMENTE todos estos riesgos, relevando de toda respons
 
 4. DECLARACIÓN DE APTITUD FÍSICA Y MÉDICA
 
-El participante DECLARA BAJO SU RESPONSABILIDAD que:
+(Se mantiene, ajustando referencia técnica:)
 
-a) Goza de un estado de salud adecuado y de la condición física necesaria para completar una prueba de trail running nocturno de alta exigencia física (21km, >1.000m D+).
-
-b) NO padece ninguna enfermedad, lesión o condición médica que contraindique la práctica de deportes de resistencia en montaña.
-
-c) Se ha sometido a un reconocimiento médico deportivo reciente o ha consultado con un profesional sanitario sobre la idoneidad de participar en este tipo de pruebas.
-
-d) NO sufre de:
-   - Enfermedades cardiovasculares (cardiopatías, hipertensión no controlada, arritmias, etc.)
-   - Enfermedades respiratorias graves (asma severa no controlada, EPOC, etc.)
-   - Epilepsia u otros trastornos neurológicos
-   - Diabetes tipo 1 no controlada
-   - Lesiones músculo-esqueléticas que puedan agravarse
-   - Cualquier otra patología que pueda suponer un riesgo para su salud
-
-e) En caso de padecer alguna de las condiciones anteriores u otras similares, ha obtenido autorización médica expresa para participar en la prueba y es plenamente consciente de los riesgos adicionales que ello conlleva.
-
-f) NO se encuentra bajo los efectos del alcohol, drogas o sustancias que puedan alterar su capacidad de juicio, coordinación o rendimiento físico.
-
+a) Dispone de la condición física adecuada para una actividad nocturna de trail running de 11 km y 200 m+.
+b) No padece patologías que contraindiquen la práctica.
+c) No se encuentra bajo efectos de alcohol, drogas o sustancias que alteren sus capacidades.
 
 5. OBLIGACIONES DEL PARTICIPANTE
 
-El participante se COMPROMETE a:
+a) MATERIAL OBLIGATORIO
 
-a) MATERIAL OBLIGATORIO:
-   - Frontal con baterías de repuesto o frontal de emergencia
-   - Manta térmica
-   - Teléfono móvil con batería completa y datos de emergencia grabados
-   - Botiquín básico personal (tiritas, antiinflamatorio, analgésico)
-   - Hidratación suficiente (mínimo 1 litro)
-   - Alimentación energética adecuada
-   - Vestimenta técnica apropiada para condiciones meteorológicas adversas
-   - Silbato de emergencia
-   - Dispositivo de geolocalización (si lo tiene disponible)
+El participante deberá portar durante toda la actividad:
 
-b) MATERIAL RECOMENDADO:
-   - Bastones de trail running
-   - Chaqueta impermeable y cortavientos
-   - Guantes y gorro
-   - Mallas largas o piernas térmicas
-   - Calzado de trail con suela agresiva
+Frontal en funcionamiento con batería suficiente (y batería o frontal de reserva)
 
-c) COMPORTAMIENTO:
-   - Seguir las instrucciones del personal organizador y de seguridad
-   - Respetar la señalización del recorrido y no abandonar el trazado establecido
-   - Comunicar de inmediato cualquier incidencia, lesión o problema de salud
-   - Colaborar en las labores de rescate o asistencia si fuera necesario
-   - Respetar el entorno natural y no dejar residuos en el recorrido
-   - Mantener una actitud deportiva y solidaria con otros participantes
-   - Abandonar la prueba en caso de sentirse indispuesto o lesionado
-   - NO utilizar atajos ni rutas alternativas no autorizadas
+Manta térmica
 
-d) COMUNICACIÓN:
-   - Proporcionar datos de contacto de emergencia actualizados
-   - Mantener el teléfono móvil encendido durante toda la prueba (en modo ahorro de energía si es necesario)
-   - Informar al organizador de cualquier cambio en su estado de salud previo al evento
+Teléfono móvil con batería suficiente y contacto de emergencia
 
+Calzado específico de trail running en buen estado
+
+Prenda cortavientos o impermeable adecuada a la meteorología
+
+El organizador podrá impedir la salida o la continuidad a quien no disponga del material obligatorio, sin derecho a reclamación.
+
+b) MATERIAL RECOMENDADO
+
+(Se mantiene)
+
+c) COMPORTAMIENTO
+
+(Se mantiene, añadiendo:)
+
+Seguir el track facilitado, siendo el principal medio de orientación.
+
+Aceptar que la señalización puede ser parcial o puntual, no continua.
 
 6. LIMITACIONES DE RESPONSABILIDAD DEL ORGANIZADOR
 
-El participante RECONOCE Y ACEPTA que:
+a) El organizador adopta medidas razonables de seguridad, pero no garantiza la seguridad absoluta.
 
-a) El Club Deportivo Proyecto Cumbre organiza el evento MISA - Ritual Furtivo con la máxima diligencia posible, pero NO puede garantizar la seguridad absoluta de los participantes dada la naturaleza extrema de la actividad.
+b) El recorrido podrá contar con balizaje parcial, no existiendo señalización permanente en todo el trazado.
 
-b) El organizador:
-   - Señalizará el recorrido con las indicaciones disponibles (cintas reflectantes, flechas, etc.)
-   - Establecerá puntos de control o avituallamientos (si los hubiera)
-   - Contará con personal de apoyo estratégicamente ubicado (en la medida de lo posible)
-   - Compartirá el track GPS del recorrido 1 hora antes de la salida
-   - Comunicará la ubicación exacta del inicio 2 horas antes del evento
-   - Dispondrá de un protocolo de emergencia y evacuación
+c) El organizador no se responsabiliza de:
 
-c) SIN EMBARGO, el organizador NO se responsabiliza de:
-   - Accidentes, caídas, lesiones o percances sufridos por el participante durante el desarrollo de la prueba
-   - Pérdida, robo o deterioro del material personal del participante
-   - Condiciones meteorológicas adversas que puedan afectar al desarrollo del evento
-   - Desorientación o pérdida del participante fuera del recorrido señalizado
-   - Fallos técnicos del participante (agotamiento de baterías, rotura de material, etc.)
-   - Demoras en la asistencia médica debidas a la localización remota o condiciones de acceso
-   - Encuentros con fauna salvaje o elementos naturales peligrosos
-   - Cancelación o modificación del evento por causas de fuerza mayor (condiciones meteorológicas extremas, emergencias, etc.)
+Accidentes derivados de la actividad.
 
-d) El participante RENUNCIA expresamente a reclamar indemnización alguna al organizador, sus colaboradores, voluntarios, patrocinadores o cualquier persona o entidad vinculada al evento por daños y perjuicios derivados de su participación, salvo que se demuestre DOLO o NEGLIGENCIA GRAVE por parte del organizador.
+Desorientación o errores de navegación.
 
+Pérdida o deterioro de material.
+
+Demoras en asistencia o evacuación.
+
+Cambios de recorrido o cancelaciones por fuerza mayor.
 
 7. DERECHOS DE IMAGEN Y GRABACIÓN
 

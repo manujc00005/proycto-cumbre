@@ -5,7 +5,9 @@ import Image from 'next/image';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import GDPRConsentEvent from '../components/gdpr/gdpr-consent-event';
 import WaiverAcceptance from '../components/PliegoDescarga/WaiverAcceptances';
-import { MISA_2026_WAIVER } from './misa-waiver';
+import MISA_2026_EVENT from './misa-event-waiver';
+import StepPill from './stepsComponent';
+
 
 export default function MisaPage() {
   // ========================================
@@ -117,6 +119,22 @@ export default function MisaPage() {
     return () => clearTimeout(timeoutId);
   }, [formData.email]);
 
+  useEffect(() => {
+    const isAnyModalOpen = showForm || showWaiver || isSubmitting;
+
+    if (isAnyModalOpen) {
+      // bloquea scroll del fondo
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showForm, showWaiver, isSubmitting]);
+
+
   // ========================================
   // 4️⃣ ANIMATION VARIANTS
   // ========================================
@@ -171,7 +189,7 @@ export default function MisaPage() {
     const dniRegex = /^[0-9]{8}[A-Za-z]$/;
     const nieRegex = /^[XYZ][0-9]{7}[A-Za-z]$/;
     if (!dniRegex.test(formData.dni.toUpperCase()) && !nieRegex.test(formData.dni.toUpperCase())) {
-      setFormError('DNI/NIE inválido. Formato: 12345678A o X1234567A');
+      setFormError('DNI/NIE inválido. Formato: 12345678A');
       return;
     }
 
@@ -476,12 +494,13 @@ export default function MisaPage() {
 
             {/* Modal */}
             <motion.div
-              className="fixed inset-0 z-50 flex items-center justify-center p-6 overflow-y-auto"
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
             >
-              <div className="bg-zinc-900 border border-orange-500/30 rounded-2xl p-8 max-w-md w-full relative my-8">
+              <div className="bg-zinc-900 border border-orange-500/30 rounded-2xl p-6 sm:p-8 max-w-md w-full relative max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain">
+
                 
                 {/* Close button */}
                 <button
@@ -597,11 +616,11 @@ export default function MisaPage() {
                       value={formData.dni}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-orange-500 transition uppercase"
-                      placeholder="12345678A o X1234567A"
+                      placeholder="12345678A"
                       maxLength={9}
                     />
                     <p className="text-xs text-zinc-500 mt-1">
-                      Formato válido: 12345678A (DNI) o X1234567A (NIE)
+                      Formato válido: 12345678A (DNI)
                     </p>
                   </div>
 
@@ -658,7 +677,7 @@ export default function MisaPage() {
                       </>
                     ) : (
                       <>
-                        Aceptar pliego y continuar {/* 🆕 CAMBIAR TEXTO */}
+                        Leer descargo y continuar al pago
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
@@ -700,14 +719,14 @@ export default function MisaPage() {
 
               {/* Modal */}
               <motion.div
-                className="fixed inset-0 z-[70] flex items-center justify-center p-4 overflow-y-auto"
+                className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-4"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
               >
-                <div className="w-full max-w-5xl">
+               <div className="w-full max-w-5xl max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain rounded-2xl">
                   <WaiverAcceptance
-                    event={MISA_2026_WAIVER}
+                    event={MISA_2026_EVENT}
                     participant={{
                       fullName: formData.name,
                       documentId: formData.dni,

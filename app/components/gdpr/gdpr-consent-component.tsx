@@ -1,78 +1,74 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ConsentCheckbox } from './ConsentCheckbox';
-import { ClubCommsDisclosure } from './ClubCommsDisclosure';
 import { WhatsappConsent } from './WhatsappConsent';
 import { GdprFooterNote } from './GdprFooterNote';
 
-export interface ConsentState {
-  privacyPolicy: boolean;
-  whatsapp: boolean;
+interface GDPRConsentEventProps {
+  isMember?: boolean;
+  onConsentChange?: (consents: { privacyPolicy: boolean; whatsapp: boolean }) => void;
 }
 
-interface GDPRConsentProps {
-  required?: boolean;
-  includeWhatsApp?: boolean;
-  whatsappRequired?: boolean;
-  whatsappContext?: 'club' | 'event';
-  onConsentChange?: (consents: ConsentState) => void;
-}
-
-export default function GDPRConsent({
-  required = true,
-  includeWhatsApp = false,
-  whatsappRequired = false,
-  whatsappContext = 'club',
-  onConsentChange,
-}: GDPRConsentProps) {
-  const [consents, setConsents] = useState<ConsentState>({
-    privacyPolicy: false,
-    whatsapp: false,
-  });
-
-  const onConsentChangeRef = useRef(onConsentChange);
-  useEffect(() => {
-    onConsentChangeRef.current = onConsentChange;
-  }, [onConsentChange]);
+export default function GDPRConsentEvent({ isMember = false, onConsentChange }: GDPRConsentEventProps) {
+  const [privacyPolicy, setPrivacyPolicy] = useState(false);
+  const [whatsapp, setWhatsapp] = useState(false);
+  const [showWhatsappDetails, setShowWhatsappDetails] = useState(false);
 
   useEffect(() => {
-    onConsentChangeRef.current?.(consents);
-  }, [consents]);
-
-  const setConsent = (key: keyof ConsentState, value: boolean) => {
-    setConsents(prev => ({ ...prev, [key]: value }));
-  };
+    onConsentChange?.({ privacyPolicy, whatsapp });
+  }, [privacyPolicy, whatsapp, onConsentChange]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <ConsentCheckbox
         id="privacy-policy"
-        required={required}
-        checked={consents.privacyPolicy}
-        onChange={(v) => setConsent('privacyPolicy', v)}
+        required
+        checked={privacyPolicy}
+        onChange={setPrivacyPolicy}
+        className="cursor-pointer"
       >
         He leído y acepto la{' '}
-        <a href="/politica-privacidad" target="_blank" className="text-orange-500 hover:text-orange-400 underline">
+        <Link href="/politica-privacidad" target="_blank" className="text-orange-400 hover:text-orange-300 underline font-semibold">
           Política de Privacidad
-        </a>{' '}
+        </Link>{' '}
         y el{' '}
-        <a href="/aviso-legal" target="_blank" className="text-orange-500 hover:text-orange-400 underline">
+        <Link href="/aviso-legal" target="_blank" className="text-orange-400 hover:text-orange-300 underline font-semibold">
           Aviso Legal
-        </a>
-        {required && <span className="text-red-500 ml-1">*</span>}
+        </Link>
+        <span className="text-orange-400 ml-1">*</span>
       </ConsentCheckbox>
 
-      <ClubCommsDisclosure variant="club" />
+      <p className="text-xs text-white/60">
+        Usaremos tus datos para gestionar tu plaza y enviarte avisos del evento.
+      </p>
 
-      {includeWhatsApp && (
-        <WhatsappConsent
-          checked={consents.whatsapp}
-          onChange={(v) => setConsent('whatsapp', v)}
-          required={whatsappRequired}
-          context={whatsappContext}
-        />
+      <WhatsappConsent
+        checked={whatsapp}
+        onChange={setWhatsapp}
+        required
+        context="club"
+      />
+
+      <button
+        type="button"
+        onClick={() => setShowWhatsappDetails((v) => !v)}
+        className="text-left text-xs text-white/60 underline underline-offset-2 hover:text-white/80"
+      >
+        ¿Qué datos se comparten en WhatsApp?
+      </button>
+
+      {showWhatsappDetails && (
+        <div className="rounded-lg bg-black/30 border border-white/10 p-3 text-xs text-white/70 space-y-2">
+          <p>
+            Se compartirá tu <span className="text-white/90 font-medium">nombre</span> y{' '}
+            <span className="text-white/90 font-medium">teléfono</span> con el resto de participantes del grupo.
+          </p>
+          <p>
+            Finalidad: <span className="text-white/90 font-medium">coordinación logística</span> (coordenadas, track, avisos e incidencias).
+          </p>
+        </div>
       )}
 
       <GdprFooterNote />

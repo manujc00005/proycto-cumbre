@@ -3,9 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ConsentCheckbox } from './ConsentCheckbox';
-import { ClubCommsDisclosure } from './ClubCommsDisclosure';
 import { WhatsappConsent } from './WhatsappConsent';
-import { GdprFooterNote } from './GdprFooterNote';
 
 interface GDPRConsentEventProps {
   isMember?: boolean;
@@ -15,6 +13,7 @@ interface GDPRConsentEventProps {
 export default function GDPRConsentEvent({ isMember = false, onConsentChange }: GDPRConsentEventProps) {
   const [privacyPolicy, setPrivacyPolicy] = useState(false);
   const [whatsapp, setWhatsapp] = useState(false);
+  const [showWhatsappDetails, setShowWhatsappDetails] = useState(false);
 
   useEffect(() => {
     onConsentChange?.({ privacyPolicy, whatsapp });
@@ -40,17 +39,20 @@ export default function GDPRConsentEvent({ isMember = false, onConsentChange }: 
         <span className="text-orange-400 ml-1">*</span>
       </ConsentCheckbox>
 
-      <ClubCommsDisclosure variant="event" isMember={isMember} />
+      {/* <ClubCommsDisclosure variant="event" isMember={isMember} /> */}
+      <p className="text-xs text-white/60">
+        Usaremos tus datos para gestionar la inscripción y enviarte información logística del evento.
+      </p>
 
       <WhatsappConsent
         checked={whatsapp}
         onChange={setWhatsapp}
         required
-        context="club"
-        includeEmailInLabel
-      />
+        context="event"   // IMPORTANTÍSIMO para tu caso (evento)
+        compact
+/>
 
-      <GdprFooterNote />
+      {/* <GdprFooterNote /> */}
     </div>
   );
 }
