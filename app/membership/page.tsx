@@ -7,8 +7,8 @@ import LicenseConfigurator from './LicenseConfigurator';
 import { AgeCategory, calculateAge, calculateAgeCategory, getCategoryLabel, getLicensePrice, LICENSE_TYPES, MEMBERSHIP_FEE } from '@/lib/constants';
 import { logger } from '@/lib/logger';
 import styles from './page.module.css';
-import GDPRConsent from '../components/gdpr/gdpr-consent-component';
 import React from 'react';
+import GDPRConsentEvent from '../components/gdpr/gdpr-consent-event';
 
 const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const PANTS_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -20,18 +20,18 @@ export default function MembershipPage() {
   const handleConsentChange = React.useCallback((next: ConsentState) => {
     setConsents(next);
   }, []);
-  
+
   // Forzar que el body permita scroll cuando se monte este componente
   useEffect(() => {
     document.body.style.overflow = 'auto';
     document.body.style.height = 'auto';
-    
+
     return () => {
       document.body.style.overflow = '';
       document.body.style.height = '';
     };
   }, []);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     email: '',
@@ -42,7 +42,7 @@ export default function MembershipPage() {
     licenseType: '',
     sex: '',
     province: '',
-    city: '', 
+    city: '',
     address: '',
     postalCode: '',
     phone: '',
@@ -64,7 +64,7 @@ export default function MembershipPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showErrorBanner, setShowErrorBanner] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-  
+
   // Payment states
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -82,7 +82,7 @@ export default function MembershipPage() {
         const age = calculateAge(formData.birthDate);
         setAgeCategory(category);
         setUserAge(age);
-        
+
         // Si hay una licencia seleccionada que ya no está disponible, limpiarla
         if (formData.licenseType) {
           const selectedLicense = LICENSE_TYPES.find(l => l.id === formData.licenseType);
@@ -111,7 +111,7 @@ export default function MembershipPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    
+
     // Clear error when user types
     if (errors[name]) {
       setErrors(prev => {
@@ -170,7 +170,7 @@ export default function MembershipPage() {
         break;
       case 'dni':
         if (!value) error = 'El DNI/NIE es obligatorio';
-        else if (!/^[0-9]{8}[A-Z]$|^[XYZ][0-9]{7}[A-Z]$/i.test(value)) 
+        else if (!/^[0-9]{8}[A-Z]$|^[XYZ][0-9]{7}[A-Z]$/i.test(value))
           error = 'Formato inválido (Ej: 12345678A)';
         break;
       case 'licenseType':
@@ -190,7 +190,7 @@ export default function MembershipPage() {
         break;
       case 'phone':
         if (!value) error = 'El teléfono es obligatorio';
-        else if (!/^[0-9]{9}$/.test(value.replace(/\s/g, ''))) 
+        else if (!/^[0-9]{9}$/.test(value.replace(/\s/g, '')))
           error = 'Debe tener 9 dígitos';
         break;
     }
@@ -211,7 +211,7 @@ export default function MembershipPage() {
 
     if (!formData.email) newErrors.email = 'El correo es obligatorio';
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Correo inválido';
-    
+
     if (!formData.firstName) newErrors.firstName = 'El nombre es obligatorio';
     if (!formData.lastName) newErrors.lastName = 'Los apellidos son obligatorios';
     if (!formData.birthDate) {
@@ -233,18 +233,18 @@ export default function MembershipPage() {
         newErrors.birthDate = 'La edad no puede superar los 100 años';
       }
     }
-    
+
     if (!formData.dni) newErrors.dni = 'El DNI/NIE es obligatorio';
-    else if (!/^[0-9]{8}[A-Z]$|^[XYZ][0-9]{7}[A-Z]$/i.test(formData.dni)) 
+    else if (!/^[0-9]{8}[A-Z]$|^[XYZ][0-9]{7}[A-Z]$/i.test(formData.dni))
       newErrors.dni = 'Formato inválido (Ej: 12345678A)';
-    
+
     if (!formData.licenseType) newErrors.licenseType = 'Debes seleccionar una modalidad';
     if (!formData.sex) newErrors.sex = 'El sexo es obligatorio';
     if (!formData.province) newErrors.province = 'La provincia es obligatoria';
     if (!formData.address) newErrors.address = 'La dirección es obligatoria';
-    
+
     if (!formData.phone) newErrors.phone = 'El teléfono es obligatorio';
-    else if (!/^[0-9]{9}$/.test(formData.phone.replace(/\s/g, ''))) 
+    else if (!/^[0-9]{9}$/.test(formData.phone.replace(/\s/g, '')))
       newErrors.phone = 'Debe tener 9 dígitos';
 
     if (!formData.shirtSize) {
@@ -255,7 +255,7 @@ export default function MembershipPage() {
     if (!consents.privacyPolicy) {
       newErrors.privacy = 'Debes aceptar la Política de Privacidad';
     }
-    
+
     // 🚨 Validar WhatsApp obligatorio para socios
     if (!consents.whatsapp) {
       newErrors.whatsapp = 'Debes aceptar compartir tus datos en WhatsApp para formar parte del club';
@@ -279,7 +279,7 @@ export default function MembershipPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const allFields = Object.keys(formData);
     const touchedFields = allFields.reduce((acc, field) => ({ ...acc, [field]: true }), {});
     setTouched(touchedFields);
@@ -295,9 +295,9 @@ export default function MembershipPage() {
 
     try {
       logger.log('📤 Enviando datos a la API...');
-      
-      const response = await fetch('/api/members', { 
-        method: 'POST', 
+
+      const response = await fetch('/api/members', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -311,7 +311,7 @@ export default function MembershipPage() {
             whatsapp_consent: consents.whatsapp,
             whatsapp_consent_at: consents.whatsapp ? new Date().toISOString() : null,
           }
-        }) 
+        })
       });
 
       const data = await response.json();
@@ -327,21 +327,21 @@ export default function MembershipPage() {
       }
 
       logger.log('✅ Socio guardado exitosamente:', data);
-      
+
       if (data.member?.id) {
         setMemberId(data.member.id);
       }
-      
+
       setShowSuccess(true);
       setShowErrorBanner(false);
 
     } catch (error: any) {
       logger.error('❌ Error submitting form:', error);
-      
+
       setErrors({ submit: error.message || 'Error al procesar el formulario' });
       setShowErrorBanner(true);
       setTimeout(scrollToFirstError, 100);
-      
+
     } finally {
       setIsSubmitting(false);
     }
@@ -355,7 +355,7 @@ export default function MembershipPage() {
 
     const handlePayment = async () => {
       setPaymentProcessing(true);
-      
+
       try {
         logger.log('💳 Iniciando proceso de pago...');
 
@@ -406,15 +406,15 @@ export default function MembershipPage() {
               <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
                 <Check className="w-10 h-10 text-white" strokeWidth={3} />
               </div>
-              
+
               <h2 className="text-3xl font-bold text-white mb-3">
                 ¡Pago Realizado con Éxito!
               </h2>
-              
+
               <p className="text-zinc-400 mb-2">
                 Tu membresía ha sido activada
               </p>
-              
+
               <div className="bg-zinc-800 rounded-lg p-4 my-6">
                 <p className="text-zinc-500 text-sm mb-1">Monto pagado</p>
                 <p className="text-orange-500 text-4xl font-bold">{total}€</p>
@@ -461,7 +461,7 @@ export default function MembershipPage() {
             <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <Check className="w-8 h-8 text-white" strokeWidth={3} />
             </div>
-            
+
             <h2 className="text-2xl font-bold text-white mb-2 text-center">
               ¡Datos Guardados Exitosamente!
             </h2>
@@ -473,7 +473,7 @@ export default function MembershipPage() {
 
             <div className="space-y-4">
               <h3 className="text-white font-bold text-lg mb-4">Resumen de tu membresía</h3>
-              
+
               <div className="space-y-3">
                 <div className="flex justify-between items-center text-sm">
                   <div>
@@ -564,7 +564,7 @@ export default function MembershipPage() {
                 <strong className="text-white">Importante:</strong> Tu membresía se activará tras confirmar el pago.
               </p>
               <p className="text-zinc-500 text-xs">
-                {hasNoLicense 
+                {hasNoLicense
                   ? 'Recuerda que necesitarás seguro propio para actividades técnicas.'
                   : 'Recibirás un email con los detalles de tu licencia federativa.'
                 }
@@ -590,10 +590,10 @@ export default function MembershipPage() {
             Únete a <span className="text-orange-500">Proyecto Cumbre</span>
           </h1>
           <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
-            Completa este formulario para darte de alta como socio. 
+            Completa este formulario para darte de alta como socio.
             Necesitamos estos datos para tramitar tu licencia federativa y mantenerte informado.
           </p>
-          
+
           <div className="mt-6 inline-flex items-center gap-3 bg-orange-500/10 border border-orange-500/30 rounded-full px-6 py-3">
             <span className="text-zinc-300 font-medium">Cuota anual de socio:</span>
             <span className="text-orange-500 text-2xl font-bold">{MEMBERSHIP_FEE}€</span>
@@ -602,7 +602,7 @@ export default function MembershipPage() {
 
         {/* Error Banner */}
         {showErrorBanner && errorCount > 0 && (
-          <div 
+          <div
             ref={errorBannerRef}
             className="sticky top-4 z-50 mb-6 bg-red-500/10 border-2 border-red-500 rounded-xl p-4 backdrop-blur-sm animate-in slide-in-from-top duration-300"
           >
@@ -611,8 +611,8 @@ export default function MembershipPage() {
               <div className="flex-1">
                 <h3 className="text-red-400 font-bold mb-2 flex items-center justify-between">
                   <span>
-                    {errorCount === 1 
-                      ? '1 campo requiere tu atención' 
+                    {errorCount === 1
+                      ? '1 campo requiere tu atención'
                       : `${errorCount} campos requieren tu atención`}
                   </span>
                   <button
@@ -665,9 +665,8 @@ export default function MembershipPage() {
                   value={formData.email}
                   onChange={handleChange}
                   onBlur={() => handleBlur('email')}
-                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${
-                    errors.email ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
-                  } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
+                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${errors.email ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
+                    } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
                   placeholder="tu@email.com"
                 />
                 {errors.email && (
@@ -689,9 +688,8 @@ export default function MembershipPage() {
                   value={formData.firstName}
                   onChange={handleChange}
                   onBlur={() => handleBlur('firstName')}
-                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${
-                    errors.firstName ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
-                  } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
+                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${errors.firstName ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
+                    } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
                   placeholder="Juan"
                 />
                 {errors.firstName && (
@@ -713,9 +711,8 @@ export default function MembershipPage() {
                   value={formData.lastName}
                   onChange={handleChange}
                   onBlur={() => handleBlur('lastName')}
-                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${
-                    errors.lastName ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
-                  } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
+                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${errors.lastName ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
+                    } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
                   placeholder="García López"
                 />
                 {errors.lastName && (
@@ -747,9 +744,8 @@ export default function MembershipPage() {
                     const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
                     return minDate.toISOString().split('T')[0];
                   })()}
-                  className={`${styles.dateInput} w-full px-4 py-3 bg-zinc-800 border-2 ${
-                    errors.birthDate ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
-                  } rounded-lg text-white focus:outline-none transition-all`}
+                  className={`${styles.dateInput} w-full px-4 py-3 bg-zinc-800 border-2 ${errors.birthDate ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
+                    } rounded-lg text-white focus:outline-none transition-all`}
                 />
                 {errors.birthDate && (
                   <p className="mt-2 text-sm text-red-400 flex items-center gap-1">
@@ -770,9 +766,8 @@ export default function MembershipPage() {
                   value={formData.dni}
                   onChange={handleChange}
                   onBlur={() => handleBlur('dni')}
-                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${
-                    errors.dni ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
-                  } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
+                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${errors.dni ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
+                    } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
                   placeholder="12345678A"
                 />
                 {errors.dni && (
@@ -793,9 +788,8 @@ export default function MembershipPage() {
                   value={formData.sex}
                   onChange={handleChange}
                   onBlur={() => handleBlur('sex')}
-                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${
-                    errors.sex ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
-                  } rounded-lg text-white focus:outline-none transition-all`}
+                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${errors.sex ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
+                    } rounded-lg text-white focus:outline-none transition-all`}
                 >
                   <option value="">Selecciona...</option>
                   <option value="M">Masculino</option>
@@ -865,9 +859,8 @@ export default function MembershipPage() {
                   value={formData.phone}
                   onChange={handleChange}
                   onBlur={() => handleBlur('phone')}
-                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${
-                    errors.phone ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
-                  } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
+                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${errors.phone ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
+                    } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
                   placeholder="611435267"
                 />
                 {errors.phone && (
@@ -922,9 +915,8 @@ export default function MembershipPage() {
                   value={formData.address}
                   onChange={handleChange}
                   onBlur={() => handleBlur('address')}
-                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${
-                    errors.address ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
-                  } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
+                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${errors.address ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
+                    } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
                   placeholder="Calle Mayor, 123, 2ºA"
                 />
                 {errors.address && (
@@ -977,9 +969,8 @@ export default function MembershipPage() {
                   value={formData.province}
                   onChange={handleChange}
                   onBlur={() => handleBlur('province')}
-                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${
-                    errors.province ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
-                  } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
+                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${errors.province ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
+                    } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
                   placeholder="Granada"
                 />
                 {errors.province && (
@@ -993,12 +984,12 @@ export default function MembershipPage() {
           </section>
 
           {/* Tallas */}
-                    <section className="bg-zinc-900 rounded-xl p-6 md:p-8 border border-zinc-800">
+          <section className="bg-zinc-900 rounded-xl p-6 md:p-8 border border-zinc-800">
             <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
               <span className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">4</span>
               Tallas de Ropa
             </h2>
-            
+
             <p className="text-zinc-400 text-sm mb-6">
               Para que puedas ir fronteando con estilo CUMBRE
             </p>
@@ -1031,7 +1022,7 @@ export default function MembershipPage() {
                     <option key={size} value={size}>{size}</option>
                   ))}
                 </select>
-              
+
               </div>
             </div>
           </section>
@@ -1048,13 +1039,13 @@ export default function MembershipPage() {
             </p>
 
             {/* Componente RGPD */}
-            <GDPRConsent
-              required={true}
+            <GDPRConsentEvent
+              onConsentChange={handleConsentChange}
+              whatsappContext="club"
               includeWhatsApp={true}
               whatsappRequired={true}
-              whatsappContext="club"
-              onConsentChange={handleConsentChange}
             />
+
 
             {/* Error de privacidad */}
             {errors.privacy && (

@@ -650,8 +650,13 @@ export default function MisaPage() {
                   {/* COMPONENTE RGPD */}
                   <div className="pt-4 border-t border-white/10">
                     <GDPRConsentEvent
-                      isMember={isMember}
                       onConsentChange={setConsents}
+                      whatsappContext="event"
+                      includeWhatsApp={true}
+                      whatsappRequired={true}
+                      compactWhatsApp={true}
+                      showFooterNote={false}
+                      showWhatsAppDetails={false}
                     />
                   </div>
 
