@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Check, ChevronRight, Mountain, Shield, Bike, Info, AlertTriangle, Sparkles } from 'lucide-react';
-import { 
+import {
   TERRITORIES,
   LICENSE_TYPES,
   type TerritoryScope,
@@ -23,11 +23,11 @@ interface LicenseConfiguratorProps {
 
 type Step = 'territory' | 'extras' | 'result';
 
-export default function LicenseConfigurator({ 
-  selectedLicense, 
-  onSelectLicense, 
+export default function LicenseConfigurator({
+  selectedLicense,
+  onSelectLicense,
   ageCategory,
-  hasError 
+  hasError
 }: LicenseConfiguratorProps) {
   const [currentStep, setCurrentStep] = useState<Step>('territory');
   const [selectedTerritory, setSelectedTerritory] = useState<TerritoryScope | null>(null);
@@ -56,7 +56,7 @@ export default function LicenseConfigurator({
 
   const handleTerritorySelect = (territory: TerritoryScope) => {
     setSelectedTerritory(territory);
-    
+
     // Si selecciona "Sin Licencia", saltar directo al resultado
     if (territory === 'none') {
       setWantsExtras(false);
@@ -75,7 +75,7 @@ export default function LicenseConfigurator({
   const handleExtrasSelect = (wants: boolean) => {
     setWantsExtras(wants);
     setCurrentStep('result');
-    
+
     // Auto-seleccionar licencia recomendada
     if (selectedTerritory && ageCategory) {
       const recommended = getRecommendedLicense(selectedTerritory, wants, ageCategory);
@@ -140,7 +140,7 @@ export default function LicenseConfigurator({
         <div className="grid gap-4">
           {TERRITORIES.map((territory) => {
             const isNone = territory.id === 'none';
-            
+
             return (
               <button
                 key={territory.id}
@@ -189,9 +189,11 @@ export default function LicenseConfigurator({
                   </div>
 
                   {/* Arrow */}
-                  <ChevronRight className={`w-6 h-6 transition-transform group-hover:translate-x-1 ${
-                    isNone ? 'text-yellow-400' : 'text-orange-400'
-                  }`} />
+                  <ChevronRight
+                    className={`w-6 h-6 transition-transform group-hover:translate-x-1 ${
+                      isNone ? 'text-yellow-400' : 'text-orange-400'
+                    }`}
+                  />
                 </div>
               </button>
             );
@@ -239,7 +241,11 @@ export default function LicenseConfigurator({
             </div>
           </div>
           <p className="text-xs text-zinc-500 italic">
-            <strong> NO válida para competiciones, actividades o formaciones FEDME ni para descuentos en refugios del convenio de reciprocidad.</strong>
+            <strong>
+              {' '}
+              NO válida para competiciones, actividades o formaciones FEDME ni para descuentos en refugios del convenio de
+              reciprocidad.
+            </strong>
           </p>
         </div>
 
@@ -328,10 +334,7 @@ export default function LicenseConfigurator({
               </a>
             </div>
             <p className="text-zinc-400 text-sm mt-1">
-              {isNone 
-                ? 'Solo membresía del club'
-                : `${territory?.name} ${wantsExtras ? '+ Actividades extras' : ''}`
-              }
+              {isNone ? 'Solo membresía del club' : `${territory?.name} ${wantsExtras ? '+ Actividades extras' : ''}`}
             </p>
           </div>
         </div>
@@ -367,95 +370,106 @@ export default function LicenseConfigurator({
                     : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
                 }`}
               >
-                <div className="flex items-start justify-between gap-4">
-                  {/* Content */}
-                  <div className="flex-1 space-y-3">
-                    {/* Header con badges */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className={`font-bold text-lg ${
-                        isSelected 
-                          ? isNone ? 'text-yellow-300' : 'text-orange-400'
-                          : 'text-white'
-                      }`}>
-                        {license.name}
-                      </h4>
-                      
-                      {isRecommended && (
-                        <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-1 bg-orange-500 text-white rounded-full">
-                          <Sparkles className="w-3 h-3" />
-                          Recomendada
-                        </span>
-                      )}
-                      
-                      {isNone && (
-                        <span className="text-xs font-bold px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-full border border-yellow-500/30">
-                          ⚠️ Sin seguro
-                        </span>
-                      )}
+                {/* ✅ NUEVO LAYOUT: fila superior (titulo+precio+tick) + cuerpo flexible */}
+                <div className="space-y-3">
+                  {/* FILA SUPERIOR */}
+                  <div className="flex items-start justify-between gap-4">
+                    {/* IZQ: Título + badges */}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4
+                          className={`font-bold text-lg ${
+                            isSelected
+                              ? isNone
+                                ? 'text-yellow-300'
+                                : 'text-orange-400'
+                              : 'text-white'
+                          }`}
+                        >
+                          {license.name}
+                        </h4>
+
+                        {isRecommended && (
+                          <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-1 bg-orange-500 text-white rounded-full">
+                            <Sparkles className="w-3 h-3" />
+                            Recomendada
+                          </span>
+                        )}
+
+                        {isNone && (
+                          <span className="text-xs font-bold px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-full border border-yellow-500/30">
+                            ⚠️ Sin seguro
+                          </span>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Territorio */}
-                    {!isNone && (
-                      <div className="flex items-center gap-2 text-sm text-zinc-400">
-                        <Mountain className="w-4 h-4" />
-                        <span>{territory?.coverage}</span>
-                      </div>
-                    )}
-
-                    {/* Cobertura */}
-                    <p className={`text-sm ${isSelected ? 'text-zinc-300' : 'text-zinc-500'}`}>
-                      {license.coverage}
-                    </p>
-
-                    {/* Extras badge */}
-                    {license.includesExtras && !isNone && (
-                      <div className="flex items-start gap-2 p-2 bg-orange-500/10 border border-orange-500/30 rounded-lg">
-                        <Shield className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" />
-                        <p className="text-xs text-orange-300">
-                          + BTT, Espeleología y Esquí Nórdico (no competitivos)
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Warning para sin licencia */}
-                    {isNone && (
-                      <div className="flex items-start gap-2 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                        <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0" />
-                        <div className="text-xs text-yellow-300">
-                          <p className="font-semibold mb-1">Importante:</p>
-                          <p>Sin licencia FEDME no tendrás cobertura de seguro en actividades de montaña.</p>
+                    {/* DER: Precio + Tick */}
+                    <div className="flex items-start gap-3 flex-shrink-0">
+                      <div className="text-right">
+                        <div
+                          className={`text-2xl font-bold ${
+                            isSelected
+                              ? isNone
+                                ? 'text-yellow-400'
+                                : 'text-orange-400'
+                              : 'text-white'
+                          }`}
+                        >
+                          {price > 0 ? `${price}€` : 'Gratis'}
+                        </div>
+                        <div className="text-xs text-zinc-500 mt-1">
+                          {getCategoryLabel(ageCategory).split('(')[0].trim()}
                         </div>
                       </div>
-                    )}
-                  </div>
 
-                  {/* Precio y checkbox */}
-                  <div className="flex flex-col items-end gap-3 min-w-[100px]">
-                    {/* Precio */}
-                    <div className="text-right">
-                      <div className={`text-2xl font-bold ${
-                        isSelected 
-                          ? isNone ? 'text-yellow-400' : 'text-orange-400'
-                          : 'text-white'
-                      }`}>
-                        {price > 0 ? `${price}€` : 'Gratis'}
-                      </div>
-                      <div className="text-xs text-zinc-500 mt-1">
-                        {getCategoryLabel(ageCategory).split('(')[0].trim()}
+                      <div
+                        className={`w-7 h-7 rounded-full flex items-center justify-center transition-all flex-shrink-0 ${
+                          isSelected ? 'bg-green-500' : 'bg-zinc-700'
+                        }`}
+                      >
+                        {isSelected && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
                       </div>
                     </div>
-
-                    {/* Checkmark */}
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
-                      isSelected
-                        ? isNone
-                          ? 'bg-yellow-500'
-                          : 'bg-orange-500'
-                        : 'bg-zinc-700'
-                    }`}>
-                      {isSelected && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
-                    </div>
                   </div>
+
+                  {/* CUERPO (flexible al container) */}
+
+                  {/* Territorio */}
+                  {!isNone && (
+                    <div className="flex items-start gap-2 text-sm text-zinc-400">
+                      <Mountain className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <span className="whitespace-normal break-words">
+                        {territory?.coverage}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Cobertura */}
+                  <p className={`text-sm ${isSelected ? 'text-zinc-300' : 'text-zinc-500'}`}>
+                    {license.coverage}
+                  </p>
+
+                  {/* Extras badge */}
+                  {license.includesExtras && !isNone && (
+                    <div className="flex items-start gap-2 p-2 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+                      <Shield className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" />
+                      <p className="text-xs text-orange-300 whitespace-normal break-words">
+                        + BTT, Espeleología y Esquí Nórdico (no competitivos)
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Warning para sin licencia */}
+                  {isNone && (
+                    <div className="flex items-start gap-2 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                      <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                      <div className="text-xs text-yellow-300">
+                        <p className="font-semibold mb-1">Importante:</p>
+                        <p>Sin licencia FEDME no tendrás cobertura de seguro en actividades de montaña.</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </button>
             );
