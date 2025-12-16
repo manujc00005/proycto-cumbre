@@ -296,7 +296,7 @@ export class EmailService {
                     <li><strong>Número de Socio:</strong> ${memberData.memberNumber}</li>
                     <li><strong>Nombre:</strong> ${memberData.firstName} ${memberData.lastName}</li>
                     <li><strong>Estado:</strong> <span style="color: #10b981; font-weight: 600;">ACTIVO</span></li>
-                    ${hasLicense ? `<li><strong>Licencia FEDME:</strong> <span class="badge">${memberData.licenseType.toUpperCase()}</span></li>` : '<li><strong>Licencia FEDME:</strong> Sin licencia</li>'}
+                    ${hasLicense ? `<li><strong>Licencia FEDME:</strong> <span class="badge">${formatShortLicenseType(memberData.licenseType)}</span></li>` : '<li><strong>Licencia FEDME:</strong> Sin licencia</li>'}
                   </ul>
                 </div>
 

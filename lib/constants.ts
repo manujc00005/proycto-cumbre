@@ -181,7 +181,7 @@ export const LICENSE_TYPES: LicenseType[] = [
   },
   {
     id: 'a_plus',
-    name: 'A+ (Autonómica +)',
+    name: 'A+ (Autonómica)',
     shortName: 'A+',
     territory: 'regional',
     includesExtras: true,
@@ -214,7 +214,7 @@ export const LICENSE_TYPES: LicenseType[] = [
   },
   {
     id: 'a_nac_plus',
-    name: 'A NAC+ (Autonómica Nacional +)',
+    name: 'A NAC+ (Autonómica Nacional)',
     shortName: 'A NAC+',
     territory: 'regional_national',
     includesExtras: true,
@@ -246,7 +246,7 @@ export const LICENSE_TYPES: LicenseType[] = [
   },
   {
     id: 'b_plus',
-    name: 'B+ (Nacional +)',
+    name: 'B+ (Nacional)',
     shortName: 'B+',
     territory: 'national',
     includesExtras: true,
@@ -345,11 +345,11 @@ export function formatLicenseType(licenseType: string): string {
   const licenseMap: Record<string, string> = {
     'none': 'Sin Licencia',
     'a': 'A (Autonómica)',
-    'a_plus': 'A+ (Autonómica Plus)',
+    'a_plus': 'A+ (Autonómica)',
     'a_nac': 'A NAC (Autonómica Nacional)',
-    'a_nac_plus': 'A NAC+ (Autonómica Nacional Plus)',
+    'a_nac_plus': 'A NAC+ (Autonómica Nacional)',
     'b': 'B (Nacional)',
-    'b_plus': 'B+ (Nacional Plus)',
+    'b_plus': 'B+ (Nacional)',
     'c': 'C (Europea)',
   };
 

@@ -41,11 +41,22 @@ export async function POST(request: NextRequest) {
         }
       }
     }
-    
-    // Calcular fechas
     const membershipStartDate = new Date();
-    // 🔥 FIX: new Date(año, mes, día) - mes 11 = diciembre (0-indexed)
-    const membershipEndDate = new Date(year, 11, 31, 23, 59, 59, 999); // 31 dic a las 23:59:59
+
+    const currentYear = membershipStartDate.getFullYear();
+    const currentMonth = membershipStartDate.getMonth();
+    const endYear = currentMonth === 11
+        ? currentYear + 1
+        : currentYear;
+    const membershipEndDate = new Date(
+        endYear,
+        11, // diciembre
+        31,
+        23,
+        59,
+        59,
+        999
+      );
 
     logger.log('📅 Inicio:', membershipStartDate.toISOString());
     logger.log('📅 Fin:', membershipEndDate.toISOString());
