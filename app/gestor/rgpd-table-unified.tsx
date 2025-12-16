@@ -79,7 +79,7 @@ export default function RGPDTableUnified() {
     if (!confirm(`¿Revocar ${label} de ${email}?`)) return;
 
     try {
-      const response = await fetch('/api/gestor/rgpd/revoke-consent', {
+      const response = await fetch('/api/gestor/revoke-consent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, consentType })

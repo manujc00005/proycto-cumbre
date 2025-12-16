@@ -1,7 +1,7 @@
 // ========================================
 // API UNIFICADA: Revocar Consentimientos
 // Maneja WhatsApp y Marketing
-// app/api/gestor/rgpd/revoke-consent/route.ts
+// app/api/gestor/revoke-consent/route.ts
 // ========================================
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    logger.log('📥 POST /api/gestor/rgpd/revoke-consent', { userId, consentType });
+    logger.log('📥 POST /api/gestor/revoke-consent', { userId, consentType });
 
     // ========================================
     // INTENTAR COMO MEMBER PRIMERO
