@@ -1,37 +1,34 @@
+// ========================================
+// API CHECKOUT CORREGIDO
+// ✅ NO crea EventRegistration hasta pago exitoso
+// ✅ Crea Payment pending con metadata
+// ✅ Webhook completa el registro
+// app/api/events/checkout/route.ts
+// ========================================
+
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import {
-  EventStatus,
-  MembershipStatus,
-  PaymentStatus,
-  PaymentType,
-} from "@prisma/client";
+import { EventStatus, MembershipStatus, PaymentStatus, PaymentType } from "@prisma/client";
 import { z } from "zod";
 
 export const runtime = "nodejs";
 
 const BodySchema = z.object({
   eventId: z.string().uuid(),
-
   name: z.string().min(2),
   email: z.string().email(),
   phone: z.string().min(6),
-  dni: z.string().min(5), // en tu schema es obligatorio
-
+  dni: z.string().min(5),
   shirtSize: z.enum(["XS", "S", "M", "L", "XL", "XXL"]).optional(),
-
   consents: z.object({
     privacy_accepted: z.boolean(),
     whatsapp_consent: z.boolean(),
     marketing_consent: z.boolean().optional(),
-
-    // opcionales, si quieres guardar timestamps
     privacy_accepted_at: z.string().datetime().optional(),
     whatsapp_consent_at: z.string().datetime().optional(),
   }),
-
   waiver_acceptance_id: z.string().uuid().optional(),
   custom_fields: z.record(z.string(), z.unknown()).optional(),
 });
@@ -74,8 +71,9 @@ export async function POST(request: NextRequest) {
 
     const normalizedEmail = email.toLowerCase().trim();
     const normalizedPhone = normalizePhone(phone);
+    const normalizedDni = dni.trim().toUpperCase();
 
-    // Validación teléfono (simple, evita false positives)
+    // Validación teléfono
     const phoneRegex = /^(\+?[1-9]\d{0,2})?\d{9}$/;
     if (!phoneRegex.test(normalizedPhone)) {
       return NextResponse.json(
@@ -86,7 +84,9 @@ export async function POST(request: NextRequest) {
 
     logger.apiStart("POST", "/api/events/checkout", { eventId, email: normalizedEmail });
 
-    // RGPD
+    // ========================================
+    // ✅ VALIDACIÓN RGPD
+    // ========================================
     if (!consents.privacy_accepted) {
       return NextResponse.json(
         { error: "Debes aceptar la Política de Privacidad" },
@@ -95,14 +95,16 @@ export async function POST(request: NextRequest) {
     }
     if (!consents.whatsapp_consent) {
       return NextResponse.json(
-        { error: "Debes aceptar compartir tus datos en WhatsApp para participar" },
+        { error: "Debes aceptar compartir tus datos en WhatsApp" },
         { status: 400 }
       );
     }
 
     const clientIp = getClientIp(request);
 
-    // 1) Cargar evento
+    // ========================================
+    // 1) CARGAR EVENTO
+    // ========================================
     const event = await prisma.event.findUnique({
       where: { id: eventId },
       select: {
@@ -124,19 +126,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Estado evento (según tu enum)
-    if (
-      event.status !== EventStatus.published &&
-      event.status !== EventStatus.draft
-    ) {
+    if (event.status !== EventStatus.published && event.status !== EventStatus.draft) {
       return NextResponse.json(
         { error: "Este evento no está disponible para inscripciones" },
         { status: 400 }
       );
     }
 
-    // Plazas (esto NO es 100% seguro sin transacción + update condicional,
-    // pero al menos bloquea el caso evidente)
     if (event.max_participants && event.current_participants >= event.max_participants) {
       return NextResponse.json(
         { error: "El evento está completo (plazas agotadas)" },
@@ -144,7 +140,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2) Miembro
+    // ========================================
+    // 2) VERIFICAR SI YA TIENE INSCRIPCIÓN
+    // ========================================
+    const existingRegistration = await prisma.eventRegistration.findFirst({
+      where: {
+        event_id: eventId,
+        participant_dni: normalizedDni,
+        status: { in: ['pending', 'confirmed'] }
+      },
+      select: { id: true, status: true }
+    });
+
+    if (existingRegistration) {
+      return NextResponse.json(
+        { error: "Ya existe una inscripción para este evento con ese DNI" },
+        { status: 409 }
+      );
+    }
+
+    // ========================================
+    // 3) BUSCAR MIEMBRO
+    // ========================================
     const existingMember = await prisma.member.findUnique({
       where: { email: normalizedEmail },
       select: {
@@ -159,12 +176,20 @@ export async function POST(request: NextRequest) {
     const memberId = existingMember?.id ?? null;
     const isMember = existingMember?.membership_status === MembershipStatus.active;
 
-    // 3) Custom data
+    if (isMember) {
+      logger.log("✅ Usuario es socio activo:", existingMember.member_number);
+    }
+
+    // ========================================
+    // 4) PREPARAR METADATA
+    // ========================================
     const customData: Record<string, any> = {};
     if (shirtSize) customData.shirt_size = shirtSize;
     if (custom_fields) Object.assign(customData, custom_fields);
 
-    // 4) Stripe session primero (para tener sessionId en Payment)
+    // ========================================
+    // 5) CREAR SESIÓN STRIPE
+    // ========================================
     const stripe = getStripe();
 
     const descriptionParts = [`Inscripción para ${name}`];
@@ -180,123 +205,106 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 5) DB: registration + (optional) waiver link + payment
-    // Transacción para dejar el sistema consistente
-    const result = await prisma.$transaction(async (tx) => {
-      // Crear inscripción (ojo: dni obligatorio en schema)
-      const registration = await tx.eventRegistration.create({
-        data: {
-          event_id: event.id,
-          member_id: memberId,
-          participant_name: name.trim(),
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      customer_email: normalizedEmail,
+      line_items: [
+        {
+          price_data: {
+            currency: event.currency ?? "eur",
+            product_data: {
+              name: event.name,
+              description: productDescription,
+            },
+            unit_amount: event.price,
+          },
+          quantity: 1,
+        },
+      ],
+      success_url: `${publicUrl}/pago-exito?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${publicUrl}/pago-cancelado?session_id={CHECKOUT_SESSION_ID}`,
+      metadata: {
+        type: "event",
+        event_id: eventId,
+        event_slug: event.slug,
+        member_id: memberId ?? "",
+        is_member: isMember ? "true" : "false",
+        
+        // ✅ GUARDAR DATOS PARA EL WEBHOOK
+        participant_name: name,
+        participant_email: normalizedEmail,
+        participant_phone: normalizedPhone,
+        participant_dni: normalizedDni,
+        shirt_size: shirtSize,
+        custom_data: JSON.stringify(customData),
+        
+        // ✅ CONSENTIMIENTOS
+        privacy_accepted: true,
+        privacy_accepted_at: consents.privacy_accepted_at || new Date().toISOString(),
+        whatsapp_consent: true,
+        whatsapp_consent_at: consents.whatsapp_consent_at || new Date().toISOString(),
+        marketing_consent: true,
+        
+        // ✅ WAIVER ACCEPTANCE ID
+        waiver_acceptance_id: waiver_acceptance_id ?? "",
+      },
+    });
+
+    logger.log("✅ Sesión de Stripe creada:", session.id);
+
+    // ========================================
+    // 6) CREAR PAYMENT PENDING
+    // ========================================
+    await prisma.payment.create({
+      data: {
+        payment_type: PaymentType.event,
+        member_id: memberId,
+        stripe_session_id: session.id,
+        amount: event.price,
+        currency: event.currency ?? "eur",
+        status: PaymentStatus.pending,
+        description: `${event.name} - ${name}${isMember ? " (Socio)" : ""}`,
+        metadata: {
+          event_id: eventId,
+          event_slug: event.slug,
+          participant_name: name,
           participant_email: normalizedEmail,
           participant_phone: normalizedPhone,
-          participant_dni: dni.trim(), // obligatorio
+          participant_dni: normalizedDni,
+          shirt_size: shirtSize,
           custom_data: customData,
-          status: "pending",
-
+          ip_address: clientIp,
+          is_member: isMember,
+          waiver_acceptance_id: waiver_acceptance_id,
+          
+          // ✅ Consentimientos en metadata
           privacy_accepted: true,
-          privacy_accepted_at: consents.privacy_accepted_at
-            ? new Date(consents.privacy_accepted_at)
-            : new Date(),
-          privacy_policy_version: "1.0",
-
+          privacy_accepted_at: consents.privacy_accepted_at || new Date().toISOString(),
           whatsapp_consent: true,
-          whatsapp_consent_at: consents.whatsapp_consent_at
-            ? new Date(consents.whatsapp_consent_at)
-            : new Date(),
-
-          // BUG FIX: marketing_consent || true => siempre true
+          whatsapp_consent_at: consents.whatsapp_consent_at || new Date().toISOString(),
           marketing_consent: true,
-          marketing_consent_at: consents.marketing_consent ? new Date() : null,
         },
-        select: { id: true },
-      });
-
-      // Vincular waiver (si existe)
-      if (waiver_acceptance_id) {
-        await tx.waiverAcceptance.update({
-          where: { id: waiver_acceptance_id },
-          data: {
-            event_registration_id: registration.id,
-            member_id: memberId,
-          },
-        });
-      }
-
-      // Crear sesión Stripe (depende de registration.id)
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
-        mode: "payment",
-        customer_email: normalizedEmail,
-        line_items: [
-          {
-            price_data: {
-              currency: event.currency ?? "eur",
-              product_data: {
-                name: event.name,
-                description: productDescription,
-                // Si no tienes un asset real, mejor no enviar images
-                // images: [`${publicUrl}/events/${event.slug}/cover.jpg`],
-              },
-              unit_amount: event.price,
-            },
-            quantity: 1,
-          },
-        ],
-        success_url: `${process.env.NEXT_PUBLIC_URL}/pago-exito?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.NEXT_PUBLIC_URL}/pago-cancelado?session_id={CHECKOUT_SESSION_ID}`,
-        metadata: {
-          type: "event",
-          event_registration_id: registration.id,
-          event_id: event.id,
-          event_slug: event.slug,
-          member_id: memberId ?? "",
-          is_member: isMember ? "true" : "false",
-        },
-      });
-
-      // Crear Payment
-      await tx.payment.create({
-        data: {
-          payment_type: PaymentType.event,
-          member_id: memberId,
-          event_registration_id: registration.id,
-          stripe_session_id: session.id,
-          amount: event.price,
-          currency: event.currency ?? "eur",
-          status: PaymentStatus.pending,
-          description: `${event.name} - ${name}${isMember ? " (Socio)" : ""}`,
-          metadata: {
-            ...(shirtSize ? { shirt_size: shirtSize } : {}),
-            phone: normalizedPhone,
-            ip_address: clientIp,
-            is_member: isMember,
-            event_slug: event.slug,
-          },
-        },
-      });
-
-      return { registrationId: registration.id, sessionUrl: session.url, sessionId: session.id };
+      },
     });
+
+    logger.log("✅ Payment creado (pending)");
 
     logger.apiSuccess("Checkout completado", {
       eventSlug: event.slug,
-      registration_id: result.registrationId,
-      session_id: result.sessionId,
+      session_id: session.id,
       is_member: isMember,
     });
 
     return NextResponse.json({
       success: true,
-      sessionId: result.sessionId,
-      url: result.sessionUrl,
+      sessionId: session.id,
+      url: session.url,
     });
+    
   } catch (error: any) {
     logger.apiError("Error en checkout", error);
 
-    // Tu unique real en EventRegistration es: @@unique([event_id, participant_dni])
-    // así que este conflicto es por DNI duplicado en el mismo evento
     if (error?.code === "P2002") {
       return NextResponse.json(
         { error: "Ya existe una inscripción para este evento con ese DNI" },

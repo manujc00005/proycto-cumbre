@@ -1,4 +1,8 @@
-// app/api/webhooks/stripe/route.ts - VERSIÓN CON EVENTOS INFORMATIVOS COMPLETOS
+// ========================================
+// WEBHOOK STRIPE - 100% GENÉRICO
+// Procesa: membership, event, shop
+// app/api/webhooks/stripe/route.ts
+// ========================================
 
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
@@ -31,30 +35,19 @@ export async function POST(request: NextRequest) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         
+        // ========================================
+        // DETECTAR TIPO Y PROCESAR
+        // ========================================
+        const paymentType = session.metadata?.type || 'membership';
+
         logger.stripe('Pago completado', {
           sessionId: session.id,
-          type: session.metadata?.type || 'member',
-          memberId: session.metadata?.memberId,
+          type: paymentType,
           amount: session.amount_total
         });
 
-        // 🎯 DETECTAR TIPO DE PAGO
-        const paymentType = session.metadata?.type || 'membership';
-
-        if (paymentType === 'event' || paymentType === 'misa') {
-          // ✅ Procesar pago de MISA
-          await processMisaPayment(session);
-        } else {
-          // ✅ Procesar pago de membresía
-          const memberId = session.metadata?.memberId;
-
-          if (!memberId) {
-            logger.apiError('No se encontró memberId en metadatos');
-            return NextResponse.json({ error: 'No memberId found' }, { status: 400 });
-          }
-
-          await processCompletedPayment(session, memberId);
-        }
+        // ✅ ROUTER GENÉRICO
+        await processPayment(session, paymentType);
 
         break;
       }
@@ -67,7 +60,7 @@ export async function POST(request: NextRequest) {
           await prisma.payment.updateMany({
             where: { stripe_payment_id: paymentIntent.id },
             data: { 
-              status: 'completed' as PaymentStatus,
+              status: PaymentStatus.completed,
               updated_at: new Date()
             }
           });
@@ -81,23 +74,22 @@ export async function POST(request: NextRequest) {
         logger.apiError('PaymentIntent failed', paymentIntent.id);
         
         if (paymentIntent.id) {
-          // Actualizar payment a failed
           await prisma.payment.updateMany({
             where: { stripe_payment_id: paymentIntent.id },
             data: { 
-              status: 'failed' as PaymentStatus,
+              status: PaymentStatus.failed,
               updated_at: new Date()
             }
           });
         }
 
-        // Si es un pago de member, actualizar el member también
+        // Si es membership, actualizar member
         const memberId = paymentIntent.metadata?.memberId;
         if (memberId) {
           await prisma.member.update({
             where: { id: memberId },
             data: { 
-              membership_status: 'failed' as MembershipStatus,
+              membership_status: MembershipStatus.failed,
               admin_notes: `Pago fallido el ${new Date().toISOString()}`,
               updated_at: new Date()
             }
@@ -109,12 +101,11 @@ export async function POST(request: NextRequest) {
         break;
       }
 
-      // 🆕 Eventos informativos que se ignoran (NO son errores)
       case 'charge.succeeded':
       case 'charge.updated':
-      case 'payment_intent.created':        // 🆕 AÑADIDO
-      case 'payment_intent.processing':     // 🆕 AÑADIDO (por si acaso)
-      case 'charge.pending':                // 🆕 AÑADIDO (por si acaso)
+      case 'payment_intent.created':
+      case 'payment_intent.processing':
+      case 'charge.pending':
         logger.log(`ℹ️ Evento informativo: ${event.type}`);
         break;
 
@@ -131,314 +122,274 @@ export async function POST(request: NextRequest) {
 }
 
 // ========================================
-// 🎯 PROCESAR PAGO DE MISA
+// PROCESADOR GENÉRICO DE PAGOS
 // ========================================
-async function processMisaPayment(
+async function processPayment(
   session: Stripe.Checkout.Session,
+  paymentType: string,
   maxRetries = 3
 ) {
-  const eventRegistrationId = session.metadata?.event_registration_id;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      logger.log(`🔄 [${paymentType.toUpperCase()}] Intento ${attempt}/${maxRetries}`);
+
+      switch (paymentType) {
+        case 'membership':
+          await processMembershipPayment(session);
+          break;
+        
+        case 'event':
+          await processEventPayment(session);
+          break;
+        
+        case 'shop':
+          await processShopPayment(session);
+          break;
+        
+        default:
+          throw new Error(`Tipo de pago desconocido: ${paymentType}`);
+      }
+
+      logger.log(`✅ [${paymentType.toUpperCase()}] Pago procesado exitosamente`);
+      return;
+      
+    } catch (error: any) {
+      logger.apiError(`[${paymentType.toUpperCase()}] Error en intento ${attempt}`, error.message);
+      
+      if (attempt === maxRetries) {
+        logger.error(`❌ [${paymentType.toUpperCase()}] Máximo de reintentos alcanzado`);
+        throw error;
+      }
+      
+      // Backoff exponencial
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+    }
+  }
+}
+
+// ========================================
+// MEMBERSHIP
+// ========================================
+async function processMembershipPayment(session: Stripe.Checkout.Session) {
+  const memberId = session.metadata?.memberId;
   
-  logger.log('🎉 [MISA] Iniciando procesamiento de pago', {
-    sessionId: session.id,
-    eventRegistrationId: eventRegistrationId,
-    metadata: session.metadata
+  if (!memberId) {
+    throw new Error('Falta memberId en metadata');
+  }
+
+  logger.log('🧑‍🤝‍🧑 [MEMBERSHIP] Procesando pago', { memberId });
+
+  // 1. Buscar payment
+  const payment = await prisma.payment.findUnique({
+    where: { stripe_session_id: session.id }
   });
 
-  // Validar que existe el event_registration_id
-  if (!eventRegistrationId) {
-    logger.apiError('[MISA] Falta event_registration_id en metadata', session.metadata);
-    throw new Error('MISA metadata incompleta: falta event_registration_id');
+  if (!payment) {
+    throw new Error('Payment not found');
   }
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      logger.log(`🔄 [MISA] Procesando - Intento ${attempt} de ${maxRetries}`);
-
-      // 1. Buscar el payment existente
-      const payment = await prisma.payment.findUnique({
-        where: { stripe_session_id: session.id },
-        include: {
-          eventRegistration: {
-            include: {
-              event: true
-            }
-          }
-        }
-      });
-
-      if (!payment) {
-        logger.apiError('[MISA] Payment no encontrado en BD', session.id);
-        throw new Error('Payment not found');
-      }
-
-      if (!payment.eventRegistration) {
-        logger.apiError('[MISA] EventRegistration no encontrado', payment.id);
-        throw new Error('EventRegistration not found');
-      }
-
-      logger.db('[MISA] Payment encontrado', {
-        id: payment.id,
-        currentStatus: payment.status,
-        registrationId: payment.eventRegistration.id,
-        eventName: payment.eventRegistration.event.name
-      });
-
-      // 2. Actualizar payment a completed
-      const updatedPayment = await prisma.payment.update({
-        where: { id: payment.id },
-        data: { 
-          stripe_payment_id: session.payment_intent as string,
-          status: 'completed' as PaymentStatus,
-          updated_at: new Date()
-        }
-      });
-
-      logger.apiSuccess('[MISA] Payment actualizado a completed', {
-        id: updatedPayment.id,
-        status: updatedPayment.status
-      });
-
-      // 3. Actualizar el event_registration a confirmed
-      await prisma.eventRegistration.update({
-        where: { id: payment.eventRegistration.id },
-        data: {
-          status: 'confirmed',
-          updated_at: new Date()
-        }
-      });
-
-      logger.apiSuccess('[MISA] EventRegistration actualizado a confirmed');
-
-      // 4. Incrementar contador de participantes del evento
-      await prisma.event.update({
-        where: { id: payment.eventRegistration.event.id },
-        data: {
-          current_participants: {
-            increment: 1
-          }
-        }
-      });
-
-      logger.apiSuccess('[MISA] Contador de participantes incrementado');
-
-      // 5. Enviar email de confirmación
-      try {
-        const reg = payment.eventRegistration;
-        const shirtSize = (reg.custom_data as any)?.shirt_size || 'N/A';
-        
-        await EmailService.sendMisaConfirmation({
-          email: reg.participant_email,
-          name: reg.participant_name,
-          phone: reg.participant_phone,
-          shirtSize: shirtSize,
-          amount: updatedPayment.amount,
-        });
-        
-        logger.apiSuccess('[MISA] Email de confirmación enviado', { 
-          email: reg.participant_email 
-        });
-      } catch (emailError: any) {
-        // ⚠️ NO fallar el webhook si falla el email
-        logger.apiError('[MISA] Error enviando email (no crítico)', {
-          error: emailError.message,
-          email: payment.eventRegistration.participant_email
-        });
-        
-        // Registrar el fallo en la descripción del payment
-        await prisma.payment.update({
-          where: { id: payment.id },
-          data: {
-            description: `${payment.description}\n[ERROR EMAIL] No enviado: ${emailError.message}`,
-            updated_at: new Date()
-          }
-        }).catch(err => logger.error('[MISA] Error actualizando descripción', err));
-      }
-
-      logger.log('✅ [MISA] Pago procesado exitosamente');
-      return; // ✅ Éxito
-      
-    } catch (error: any) {
-      logger.apiError(`[MISA] Error en intento ${attempt}`, {
-        error: error.message,
-        sessionId: session.id
-      });
-      
-      if (attempt === maxRetries) {
-        logger.error('❌ [MISA] Máximo de reintentos alcanzado');
-        
-        // Registrar fallo crítico
-        try {
-          await prisma.payment.updateMany({
-            where: { stripe_session_id: session.id },
-            data: {
-              description: `ERROR CRÍTICO: No se pudo procesar el pago después de ${maxRetries} intentos`,
-              updated_at: new Date()
-            }
-          });
-        } catch (dbError) {
-          logger.error('[MISA] Error registrando fallo en BD', dbError);
-        }
-        
-        throw error;
-      }
-      
-      // Esperar antes del siguiente intento (backoff exponencial)
-      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-    }
-  }
-}
-
-// ========================================
-// 🧑‍🤝‍🧑 PROCESAR PAGO DE MEMBRESÍA
-// ========================================
-async function processCompletedPayment(
-  session: Stripe.Checkout.Session, 
-  memberId: string,
-  maxRetries = 3
-) {
-  logger.log('🧑‍🤝‍🧑 [MEMBER] Iniciando procesamiento de pago', {
-    sessionId: session.id,
-    memberId
-  });
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      logger.log(`🔄 [MEMBER] Procesando - Intento ${attempt} de ${maxRetries}`);
-
-      // 1. Buscar el payment existente
-      const payment = await prisma.payment.findUnique({
-        where: { stripe_session_id: session.id }
-      });
-
-      if (!payment) {
-        logger.apiError('[MEMBER] Payment no encontrado', session.id);
-        throw new Error('Payment not found');
-      }
-
-      logger.db('[MEMBER] Payment encontrado', {
-        id: payment.id,
-        status: payment.status
-      });
-
-      // 2. Actualizar member a ACTIVE
-      const updatedMember = await updateMemberToActive(memberId, session);
-      
-      // 3. Actualizar payment a COMPLETED
-      await prisma.payment.update({
-        where: { id: payment.id },
-        data: { 
-          status: 'completed' as PaymentStatus,
-          stripe_payment_id: session.payment_intent as string || payment.stripe_payment_id,
-          updated_at: new Date()
-        }
-      });
-
-      logger.apiSuccess('[MEMBER] Pago procesado exitosamente');
-
-      // 4. Enviar email unificado
-      await sendMemberEmail(updatedMember, session);
-      
-      return; // ✅ Éxito
-      
-    } catch (error: any) {
-      logger.apiError(`[MEMBER] Error en intento ${attempt}`, {
-        message: error.message,
-        stack: error.stack?.split('\n').slice(0, 3).join('\n')
-      });
-      
-      if (attempt === maxRetries) {
-        logger.error('❌ [MEMBER] Máximo de reintentos alcanzado');
-        throw error;
-      }
-      
-      // Esperar antes del siguiente intento (backoff exponencial)
-      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-    }
-  }
-}
-
-// ========================================
-// ACTUALIZAR MEMBER A ACTIVE
-// ========================================
-async function updateMemberToActive(memberId: string, session: Stripe.Checkout.Session) {
-  logger.db('[MEMBER] Actualizando member a ACTIVE', memberId);
-
+  // 2. Actualizar member a active
   const now = new Date();
   const oneYearFromNow = new Date();
   oneYearFromNow.setFullYear(now.getFullYear() + 1);
 
-  try {
-    // Verificar que existe
-    const existingMember = await prisma.member.findUnique({
-      where: { id: memberId }
-    });
+  const updatedMember = await prisma.member.update({
+    where: { id: memberId },
+    data: {
+      membership_status: MembershipStatus.active,
+      membership_start_date: now,
+      membership_end_date: oneYearFromNow,
+      admin_notes: `Pago completado el ${now.toISOString()}. Session: ${session.id}`,
+      updated_at: now,
+    },
+  });
 
-    if (!existingMember) {
-      throw new Error(`Member ${memberId} not found`);
+  logger.log('✅ [MEMBERSHIP] Member actualizado a active');
+
+  // 3. Actualizar payment a completed
+  await prisma.payment.update({
+    where: { id: payment.id },
+    data: { 
+      status: PaymentStatus.completed,
+      stripe_payment_id: session.payment_intent as string || payment.stripe_payment_id,
+      updated_at: new Date()
     }
+  });
 
-    // Actualizar
-    const updatedMember = await prisma.member.update({
-      where: { id: memberId },
-      data: {
-        membership_status: 'active' as MembershipStatus,
-        membership_start_date: now,
-        membership_end_date: oneYearFromNow,
-        admin_notes: `Pago completado el ${now.toISOString()}. Stripe Session: ${session.id}`,
-        updated_at: now,
-      },
-    });
+  logger.log('✅ [MEMBERSHIP] Payment actualizado');
 
-    logger.apiSuccess('[MEMBER] Member actualizado a ACTIVE', {
-      id: updatedMember.id,
-      status: updatedMember.membership_status,
-      start: updatedMember.membership_start_date?.toISOString()
-    });
-
-    return updatedMember;
-    
-  } catch (error: any) {
-    logger.apiError('[MEMBER] Error actualizando member', error);
-    throw error;
-  }
-}
-
-// ========================================
-// ENVIAR EMAIL A MIEMBRO
-// ========================================
-async function sendMemberEmail(
-  member: any,
-  session: Stripe.Checkout.Session
-) {
+  // 4. Enviar email
   try {
-    logger.log('📧 [MEMBER] Iniciando envío de email unificado...');
-
-    // Email unificado de bienvenida + confirmación de pago
     await EmailService.sendWelcomeWithPaymentStatus({
-      email: member.email,
-      firstName: member.first_name,
-      lastName: member.last_name,
-      memberNumber: member.member_number,
-      licenseType: member.license_type || 'none',
+      email: updatedMember.email,
+      firstName: updatedMember.first_name,
+      lastName: updatedMember.last_name,
+      memberNumber: updatedMember.member_number,
+      licenseType: updatedMember.license_type || 'none',
       paymentStatus: 'success',
       amount: session.amount_total || 0,
       currency: session.currency || 'eur',
     });
-
-    logger.apiSuccess('✅ [MEMBER] Email de bienvenida con confirmación de pago enviado');
-
-  } catch (emailError: any) {
-    // ⚠️ NO fallar el webhook si falla el email
-    logger.apiError('❌ [MEMBER] Error enviando email (no crítico)', emailError.message);
     
-    // Registrar en admin_notes que faltó enviar el email
-    await prisma.member.update({
-      where: { id: member.id },
-      data: {
-        admin_notes: `${member.admin_notes}\n[ERROR] Email no enviado: ${emailError.message}`,
-        updated_at: new Date()
-      }
-    }).catch(err => logger.error('[MEMBER] Error actualizando admin_notes', err));
+    logger.log('✅ [MEMBERSHIP] Email enviado');
+  } catch (emailError: any) {
+    logger.apiError('[MEMBERSHIP] Error enviando email (no crítico)', emailError.message);
   }
+}
+
+// ========================================
+// EVENT
+// ========================================
+async function processEventPayment(session: Stripe.Checkout.Session) {
+  const eventId = session.metadata?.event_id;
+  const participantName = session.metadata?.participant_name;
+  const participantEmail = session.metadata?.participant_email;
+  const participantPhone = session.metadata?.participant_phone;
+  const participantDni = session.metadata?.participant_dni;
+  
+  if (!eventId || !participantName || !participantEmail || !participantPhone || !participantDni) {
+    throw new Error('EVENT metadata incompleta');
+  }
+
+  logger.log('🎉 [EVENT] Procesando pago', { eventId, participantName });
+
+  // 1. Parsear custom_data
+  let customData: Record<string, any> = {};
+  const customDataStr = session.metadata?.custom_data;
+  if (customDataStr && customDataStr !== '{}') {
+    try {
+      customData = JSON.parse(customDataStr);
+    } catch (e) {
+      logger.error('[EVENT] Error parseando custom_data');
+    }
+  }
+
+  if (session.metadata?.shirt_size) {
+    customData.shirt_size = session.metadata.shirt_size;
+  }
+
+  // 2. TRANSACCIÓN: Payment + EventRegistration + WaiverAcceptance
+  await prisma.$transaction(async (tx) => {
+    // A) Actualizar Payment a completed
+    const payment = await tx.payment.update({
+      where: { stripe_session_id: session.id },
+      data: {
+        status: PaymentStatus.completed,
+        stripe_payment_id: session.payment_intent as string || null,
+        updated_at: new Date(),
+      },
+      select: { id: true }
+    });
+
+    logger.log('✅ [EVENT] Payment actualizado');
+
+    // B) Crear EventRegistration
+    const registration = await tx.eventRegistration.create({
+      data: {
+        event_id: eventId,
+        member_id: session.metadata?.member_id || null,
+        participant_name: participantName,
+        participant_email: participantEmail,
+        participant_phone: participantPhone,
+        participant_dni: participantDni,
+        custom_data: customData,
+        status: 'confirmed',
+        
+        // RGPD desde metadata
+        privacy_accepted: session.metadata?.privacy_accepted === 'true',
+        privacy_accepted_at: session.metadata?.privacy_accepted_at 
+          ? new Date(session.metadata.privacy_accepted_at)
+          : new Date(),
+        privacy_policy_version: '1.0',
+        
+        whatsapp_consent: session.metadata?.whatsapp_consent === 'true',
+        whatsapp_consent_at: session.metadata?.whatsapp_consent_at
+          ? new Date(session.metadata.whatsapp_consent_at)
+          : new Date(),
+        
+        marketing_consent: true,
+        marketing_consent_at: session.metadata?.marketing_consent === 'true'
+          ? new Date()
+          : null,
+      },
+      select: { id: true, event: { select: { name: true, slug: true } } }
+    });
+
+    logger.log('✅ [EVENT] EventRegistration creado');
+
+    // C) Vincular Payment a Registration
+    await tx.payment.update({
+      where: { id: payment.id },
+      data: { event_registration_id: registration.id },
+    });
+
+    // D) Vincular WaiverAcceptance si existe
+    const waiverAcceptanceId = session.metadata?.waiver_acceptance_id;
+    if (waiverAcceptanceId && waiverAcceptanceId !== '') {
+      await tx.waiverAcceptance.update({
+        where: { id: waiverAcceptanceId },
+        data: {
+          event_registration_id: registration.id,
+          member_id: session.metadata?.member_id || null,
+        },
+      });
+
+      logger.log('✅ [EVENT] WaiverAcceptance vinculado');
+    }
+
+    // E) Incrementar current_participants
+    await tx.event.update({
+      where: { id: eventId },
+      data: { current_participants: { increment: 1 } },
+    });
+
+    logger.log('✅ [EVENT] current_participants incrementado');
+
+    // F) Enviar email (dentro de transacción para tener eventSlug)
+    try {
+      const eventSlug = registration.event.slug;
+      const shirtSize = customData.shirt_size || 'N/A';
+      
+      // TODO: Crear EmailService.sendEventConfirmation genérico
+      // Por ahora, detectar evento específico
+      if (eventSlug === 'misa') {
+        await EmailService.sendMisaConfirmation({
+          email: participantEmail,
+          name: participantName,
+          phone: participantPhone,
+          shirtSize: shirtSize,
+          amount: session.amount_total || 0,
+        });
+      } else {
+        // Email genérico para otros eventos
+        logger.log(`⚠️ [EVENT] Email genérico no implementado para: ${eventSlug}`);
+        // TODO: await EmailService.sendEventConfirmation(...)
+      }
+      
+      logger.log('✅ [EVENT] Email enviado');
+    } catch (emailError: any) {
+      logger.apiError('[EVENT] Error enviando email (no crítico)', emailError.message);
+    }
+  });
+}
+
+// ========================================
+// SHOP (preparado para futuro)
+// ========================================
+async function processShopPayment(session: Stripe.Checkout.Session) {
+  const orderId = session.metadata?.order_id;
+  
+  if (!orderId) {
+    throw new Error('Falta order_id en metadata');
+  }
+
+  logger.log('🛒 [SHOP] Procesando pago', { orderId });
+
+  // TODO: Implementar cuando tengas modelo de Shop/Order
+  // 1. Actualizar Payment
+  // 2. Actualizar Order status
+  // 3. Enviar email
+  
+  logger.log('⚠️ [SHOP] Implementación pendiente');
+  throw new Error('Shop payment not implemented yet');
 }

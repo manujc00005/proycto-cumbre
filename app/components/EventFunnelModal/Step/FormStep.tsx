@@ -1,6 +1,7 @@
 // ========================================
-// COMPONENTE: FormStep
-// Renderiza campos dinámicos con validación
+// COMPONENTE: FormStep (MEJORADO)
+// ❌ NO guarda en BD hasta completar pago
+// ✅ Solo guarda en localStorage (borrador)
 // components/EventFunnelModal/steps/FormStep.tsx
 // ========================================
 
@@ -29,7 +30,6 @@ export default function FormStep({ fields, data, onChange, gdpr, attemptedNext: 
   const [consents, setConsents] = useState({ privacyPolicy: false, whatsapp: false });
   const [attemptedNext, setAttemptedNext] = useState(false);
   
-  // Usar refs para evitar loops infinitos
   const prevConsentsRef = useRef({ privacyPolicy: false, whatsapp: false });
   const isUpdatingRef = useRef(false);
   
@@ -42,55 +42,50 @@ export default function FormStep({ fields, data, onChange, gdpr, attemptedNext: 
     }
   }, [attemptedNextProp, attemptedNext]);
 
-  // Actualizar consentimientos en formData (optimizado para evitar loops)
+  // ========================================
+  // ✅ CORRECCIÓN LEGAL: Solo guardar timestamps cuando aceptan
+  // ========================================
   useEffect(() => {
-    // Evitar loops si ya estamos actualizando
-    if (isUpdatingRef.current) {
-      return;
-    }
+    if (isUpdatingRef.current) return;
 
-    // Solo actualizar si los valores booleanos cambiaron
     const privacyChanged = prevConsentsRef.current.privacyPolicy !== consents.privacyPolicy;
     const whatsappChanged = prevConsentsRef.current.whatsapp !== consents.whatsapp;
 
-    if (!privacyChanged && !whatsappChanged) {
-      return; // No hay cambios reales
-    }
+    if (!privacyChanged && !whatsappChanged) return;
 
-    // Marcar que estamos actualizando
     isUpdatingRef.current = true;
     prevConsentsRef.current = { ...consents };
 
     const prev = data.consents || {};
-    const privacyAccepted = consents.privacyPolicy;
-    const whatsappAccepted = consents.whatsapp;
-
+    
+    // ✅ Solo guardar timestamp si está aceptado
     const nextConsents = {
-      privacy_accepted: privacyAccepted,
-      privacy_accepted_at: privacyAccepted 
+      privacy_accepted: consents.privacyPolicy,
+      privacy_accepted_at: consents.privacyPolicy 
         ? (prev.privacy_accepted_at || new Date().toISOString()) 
         : null,
-      whatsapp_consent: whatsappAccepted,
-      whatsapp_consent_at: whatsappAccepted 
+      whatsapp_consent: consents.whatsapp,
+      whatsapp_consent_at: consents.whatsapp 
         ? (prev.whatsapp_consent_at || new Date().toISOString()) 
         : null,
+      // ❌ Marketing NO es obligatorio
+      marketing_consent: false,
+      marketing_consent_at: null,
     };
 
     onChange({ ...data, consents: nextConsents });
     
-    // Limpiar flag después de actualizar
     setTimeout(() => {
       isUpdatingRef.current = false;
     }, 0);
-  }, [consents.privacyPolicy, consents.whatsapp]); // Solo depender de los valores booleanos
+  }, [consents.privacyPolicy, consents.whatsapp]);
 
-  // Validar cuando el usuario intenta avanzar
+  // Validar cuando intenta avanzar
   useEffect(() => {
     if (attemptedNext) {
       const newErrors = validateAll(data);
       setErrors(newErrors);
       
-      // Marcar todos los campos como tocados
       const allTouched: Record<string, boolean> = {};
       fields.forEach(field => {
         allTouched[field.id] = true;
@@ -224,15 +219,16 @@ export default function FormStep({ fields, data, onChange, gdpr, attemptedNext: 
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
+        {/* ✅ Copy más emocional */}
         <h3 className="text-2xl font-bold text-white mb-2">
-          Completa tus datos
+          👉 Estás a un paso de participar
         </h3>
         <p className="text-sm text-white/60">
-          Necesitamos esta información para gestionar tu inscripción
+          Completa tus datos para reservar tu plaza
         </p>
       </div>
 
-      {/* Banner de error de consentimientos */}
+      {/* Banner de error */}
       {attemptedNext && (!consents.privacyPolicy || !consents.whatsapp) && (
         <div className="mb-6 bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-lg text-sm flex items-start gap-2">
           <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -264,12 +260,12 @@ export default function FormStep({ fields, data, onChange, gdpr, attemptedNext: 
           />
         </div>
 
-        {/* Indicador de guardado automático */}
+        {/* Indicador de guardado */}
         <div className="flex items-center gap-2 text-xs text-zinc-500">
           <svg className="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
-          <span>Guardado automático activado</span>
+          <span>Tus datos se guardan automáticamente en este dispositivo</span>
         </div>
       </div>
     </div>

@@ -71,9 +71,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 4) Construir respuesta tipada (sin any)
+    const uiType =
+      payment.payment_type === PaymentType.order ? "shop" : payment.payment_type;
     const baseResponse = {
       sessionId,
-      type: payment.payment_type,
+      type: uiType,
       amount: payment.amount,
       currency: payment.currency,
       status: stripeMappedStatus,
@@ -81,7 +83,7 @@ export async function POST(request: NextRequest) {
         status: session.status,
         payment_status: session.payment_status,
       },
-      metadata: payment.metadata, // opcional, lo devuelves si te interesa
+      metadata: payment.metadata,
     };
 
     // MEMBERSHIP
@@ -101,6 +103,12 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         ...baseResponse,
+        type: PaymentType.membership, 
+        firstName: member?.first_name ?? null,
+        lastName: member?.last_name ?? null,
+        email: member?.email ?? null,
+        memberNumber: member?.member_number ?? null,
+        licenseType: member?.license_type ?? null,
         member: member
           ? {
               id: member.id,
@@ -138,7 +146,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         ...baseResponse,
-        type: "event",                 // <-- tu UI usa 'event'
+        type: PaymentType.event,                
         participantName: registration?.participant_name ?? null,
         participantEmail: registration?.participant_email ?? null,
         eventName: registration?.event?.name ?? null,
@@ -146,6 +154,21 @@ export async function POST(request: NextRequest) {
         eventDate: registration?.event?.event_date ?? null,
         eventLocation: registration?.event?.location ?? null,
         registrationId: registration?.id ?? null,
+        registration: registration
+          ? {
+              id: registration.id,
+              participantName: registration.participant_name,
+              participantEmail: registration.participant_email,
+              event: {
+                id: registration.event.id,
+                name: registration.event.name,
+                slug: registration.event.slug,
+                date: registration.event.event_date,
+                location: registration.event.location,
+                status: registration.event.status,
+              },
+            }
+          : null,
       });
     }
     
@@ -156,6 +179,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         ...baseResponse,
+        type: PaymentType.order,
         order: {
           orderId: payment.order_id ?? null,
           items,

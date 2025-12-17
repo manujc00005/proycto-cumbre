@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     if (consents) {
       logger.log('📋 Consentimientos RGPD recibidos:', {
         privacy: consents.privacy_accepted,
-        marketing: consents.marketing_consent || false,
+        marketing: consents.marketing_consent || true,
         whatsapp: consents.whatsapp_consent || false
       });
     }

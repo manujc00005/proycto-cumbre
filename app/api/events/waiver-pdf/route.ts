@@ -4,7 +4,7 @@ import PDFDocument from 'pdfkit';
 import path from 'path';
 import fs from 'fs';
 
-export const runtime = 'nodejs'; // importante (PDFKit no va en edge)
+export const runtime = 'nodejs';
 
 function bufferFromPdf(doc: PDFKit.PDFDocument): Promise<Buffer> {
   return new Promise((resolve, reject) => {
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Registro no encontrado' }, { status: 404 });
     }
 
-    // 2) acceptance (sin participant_email porque no existe en tu schema)
+    // 2) acceptance
     const acceptance = await prisma.waiverAcceptance.findFirst({
       where: {
         event_id: registration.event_id,
@@ -68,29 +68,45 @@ export async function GET(req: NextRequest) {
     const waiverText = acceptance.waiver_text ?? '';
     const acceptedAtStr = acceptance.accepted_at.toISOString();
 
-    // 3) PDF
-    const doc = new PDFDocument({
-      size: 'A4',
-      margins: { top: 48, left: 48, right: 48, bottom: 48 },
-      autoFirstPage: true,
-    });
-
-    // ✅ Registrar TTF para evitar Helvetica.afm
+    // ========================================
+    // 3) VERIFICAR FUENTES ANTES DE CREAR PDF
+    // ========================================
     const fontRegular = path.join(process.cwd(), 'assets', 'fonts', 'DejaVuSans.ttf');
     const fontBold = path.join(process.cwd(), 'assets', 'fonts', 'DejaVuSans-Bold.ttf');
 
     if (!fs.existsSync(fontRegular) || !fs.existsSync(fontBold)) {
       return NextResponse.json(
-        { error: 'Faltan fuentes TTF en /assets/fonts (DejaVuSans.ttf y DejaVuSans-Bold.ttf)' },
+        { 
+          error: 'Faltan fuentes TTF en /assets/fonts',
+          details: 'Descarga DejaVuSans.ttf y DejaVuSans-Bold.ttf y colócalos en /assets/fonts/',
+          paths: { fontRegular, fontBold }
+        },
         { status: 500 }
       );
     }
 
+    // ========================================
+    // 4) CREAR PDF CON FUENTES CUSTOM DESDE EL INICIO
+    // ========================================
+    const doc = new PDFDocument({
+      size: 'A4',
+      margins: { top: 48, left: 48, right: 48, bottom: 48 },
+      autoFirstPage: false, // ✅ NO crear página automática aún
+    });
+
+    // ✅ REGISTRAR FUENTES ANTES DE AÑADIR CONTENIDO
     doc.registerFont('Regular', fontRegular);
     doc.registerFont('Bold', fontBold);
 
+    // ✅ AHORA SÍ, CREAR PRIMERA PÁGINA
+    doc.addPage();
+
+    // ========================================
+    // 5) CONTENIDO DEL PDF
+    // ========================================
+    
     // Header
-    doc.font('Bold').fontSize(16).text('Pliego de descargo aceptado', { align: 'left' });
+    doc.font('Bold').fontSize(16).fillColor('#000').text('Pliego de descargo aceptado', { align: 'left' });
     doc.moveDown(0.5);
 
     doc.font('Regular').fontSize(10).fillColor('#444');
@@ -102,20 +118,26 @@ export async function GET(req: NextRequest) {
     doc.text(`Hash (SHA-256): ${acceptance.waiver_text_hash}`);
     doc.moveDown();
 
+    // Título del pliego
     doc.fillColor('#111');
     doc.font('Bold').fontSize(12).text('Texto del pliego', { underline: false });
     doc.moveDown(0.5);
 
-    // Body (multi-page)
-    doc.font('Regular').fontSize(10).text(waiverText, {
+    // Body (multi-page automático)
+    doc.font('Regular').fontSize(10).fillColor('#000').text(waiverText, {
       align: 'left',
       lineGap: 2,
     });
 
+    // ========================================
+    // 6) GENERAR BUFFER
+    // ========================================
     const pdfBuffer: Buffer = await bufferFromPdf(doc);
     const body = new Uint8Array(pdfBuffer);
 
-    // 4) Responder (en NextResponse, pasa ArrayBuffer para evitar el error BodyInit/Buffer)
+    // ========================================
+    // 7) RESPONDER
+    // ========================================
     return new NextResponse(body, {
       status: 200,
       headers: {
@@ -124,7 +146,16 @@ export async function GET(req: NextRequest) {
         'Cache-Control': 'no-store',
       },
     });
+    
   } catch (e: any) {
-    return NextResponse.json({ error: 'Error generando PDF', details: e?.message }, { status: 500 });
+    console.error('❌ Error generando PDF:', e);
+    return NextResponse.json(
+      { 
+        error: 'Error generando PDF', 
+        details: e?.message,
+        stack: process.env.NODE_ENV === 'development' ? e?.stack : undefined
+      }, 
+      { status: 500 }
+    );
   }
 }

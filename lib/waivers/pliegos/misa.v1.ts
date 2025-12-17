@@ -27,57 +27,170 @@ export const MISA_WAIVER_V1: WaiverDefinition = {
   title: 'Descargo de responsabilidad y normativa',
   version: 'v1.0',
   effectiveFromISO: '2024-12-13',
-  text: `DESCARGO DE RESPONSABILIDAD Y ASUNCIÓN DE RIESGOS
-EVENTO: MISA - RITUAL FURTIVO 2026
+  text: `DESCARGO DE RESPONSABILIDAD, ASUNCIÓN DE RIESGOS
+
+Y DECLARACIÓN DE FEDERACIÓN OBLIGATORIA
+
+EVENTO: MISA – RITUAL FURTIVO 2026
 
 ÚLTIMA ACTUALIZACIÓN: 13 de diciembre de 2024
 VERSIÓN: 1.0
-
 
 1. IDENTIFICACIÓN DEL ORGANIZADOR
 
 Organizador: CLUB DEPORTIVO PROYECTO CUMBRE
 NIF: G75790246
-Domicilio social: PS De los Tilos n. 67, planta/piso 2 puerta 2, 29006 – MÁLAGA (MÁLAGA)
+Domicilio social: PS De los Tilos n.º 67, planta/piso 2 puerta 2, 29006 – Málaga (Málaga)
 Email de contacto: info@proyecto-cumbre.es
+
 Email de privacidad: privacidad@proyecto-cumbre.es
+
 Teléfono: 692 085 193
 
+2. NATURALEZA JURÍDICA DEL EVENTO
 
-2. DESCRIPCIÓN DEL EVENTO
+MISA – Ritual Furtivo es una actividad deportiva privada, no lucrativa, no competitiva y fuera del calendario oficial de competiciones, organizada por un club deportivo sin ánimo de lucro.
 
-MISA – Ritual Furtivo es una actividad deportiva privada de trail running nocturno, de carácter no competitivo, dirigida a deportistas con experiencia previa en montaña, que se celebrará el 23 de enero de 2026 a las 19:00 horas en entorno natural de la provincia de Málaga.
+La actividad no constituye un servicio deportivo profesional, ni una actividad mercantil, ni una prueba abierta al público general, estando dirigida exclusivamente a personas con experiencia previa acreditable en montaña.
 
-La actividad se desarrolla en montaña, por senderos, caminos y pistas forestales, en horario nocturno, con baja o nula visibilidad, terreno irregular y técnico, desniveles, posibles condiciones meteorológicas adversas (lluvia, frío, viento) y en zonas con posible ausencia de cobertura telefónica.
+3. DESCRIPCIÓN DEL EVENTO Y ENTORNO
 
-CARACTERÍSTICAS TÉCNICAS APROXIMADAS:
+La actividad consiste en una salida de trail running nocturno en entorno natural, que se celebrará el 23 de enero de 2026 a las 19:00 horas, en la provincia de Málaga.
 
-- Distancia: 11 km
-- Desnivel positivo aproximado: 200 m+
-- Tipo de terreno: senderos y pistas de montaña, terreno técnico
-- Horario: nocturno
+El participante declara conocer y aceptar que la actividad se desarrolla en:
 
-Ubicación exacta: se comunicará con antelación limitada por motivos de seguridad y control del entorno
+Medio natural no controlado
 
-2 BIS. UBICACIÓN, TRACK Y COMUNICACIONES OFICIALES
+Terreno irregular, técnico y cambiante
 
-1. La ubicación exacta del punto de salida se comunicará aproximadamente 2 horas antes del inicio de la actividad.
-2. El track GPS del recorrido se facilitará aproximadamente 1 hora antes del inicio.
-3. Ambas comunicaciones se realizarán exclusivamente a través del canal oficial designado por el organizador, pudiendo ser un grupo de WhatsApp u otro medio equivalente.
-4. El participante declara disponer de un dispositivo adecuado, batería suficiente y acceso al canal oficial, comprometiéndose a revisar la información publicada.
-5. El organizador podrá modificar ubicación, recorrido u horarios incluso con escasa antelación por motivos de seguridad, meteorología, conservación del entorno o causas externas.
-6. La falta de recepción o lectura de dichas comunicaciones no genera responsabilidad alguna para el organizador.
+Horario nocturno con baja o nula visibilidad
 
-[... resto del texto del descargo igual que antes ...]
+Posibles condiciones meteorológicas adversas
 
----
+Zonas con cobertura telefónica limitada o inexistente
 
-VERSIÓN DEL DESCARGO: v1.0
-FECHA DE VIGENCIA: A partir del 13 de diciembre de 2024
+Características técnicas aproximadas:
 
-Para cualquier consulta sobre este descargo de responsabilidad:
-Email: info@proyecto-cumbre.es
-Teléfono: 692 085 193
+Distancia: 11 km
+
+Desnivel positivo: ~200 m+
+
+Terreno: senderos y pistas forestales
+
+Horario: nocturno
+
+La ubicación exacta se comunicará con antelación limitada por razones de seguridad y conservación del entorno.
+
+4. FEDERACIÓN OBLIGATORIA Y SEGURO
+REQUISITO ESENCIAL E INDISPENSABLE
+
+El participante DECLARA EXPRESAMENTE que:
+
+Se encuentra debidamente federado/a en montaña en una federación reconocida a nivel autonómico o nacional (FEDME u homóloga).
+
+Su licencia federativa se encuentra en vigor en la fecha del evento.
+
+Dicha licencia incluye cobertura de accidentes deportivos y rescate en montaña adecuada a la actividad.
+
+La falta de federación válida implicará:
+
+La exclusión automática del evento.
+
+La asunción íntegra de toda responsabilidad por parte del participante en caso de ocultación, falsedad o caducidad de la licencia.
+
+La exoneración total del organizador frente a cualquier daño, accidente o reclamación derivada.
+
+El organizador no actúa como asegurador, ni asume obligación alguna de cobertura individual del participante.
+
+5. PARTICIPACIÓN VOLUNTARIA Y ASUNCIÓN DE RIESGOS
+
+El participante declara que:
+
+Participa libre, voluntaria y conscientemente, sin coacción ni obligación.
+
+Conoce que el trail running nocturno en montaña implica riesgos objetivos graves, previsibles e imprevisibles.
+
+Acepta expresamente que dichos riesgos pueden derivar en lesiones graves, permanentes o incluso la muerte.
+
+El participante ASUME ÍNTEGRAMENTE todos los riesgos derivados directa o indirectamente de su participación.
+
+6. EXONERACIÓN Y LIMITACIÓN DE RESPONSABILIDAD
+
+El participante RENUNCIA EXPRESAMENTE, en la máxima medida permitida por la ley, a ejercitar cualquier acción judicial o extrajudicial contra:
+
+El Club Deportivo Proyecto Cumbre
+
+Sus responsables, miembros, colaboradores y voluntarios
+
+El resto de participantes
+
+por daños físicos, psíquicos o materiales sufridos con ocasión de la actividad, incluyendo, entre otros:
+
+Accidentes deportivos
+
+Caídas, desorientación o errores de navegación
+
+Condiciones del terreno o climatología
+
+Fallos de material personal
+
+Retrasos o imposibilidad de asistencia o rescate inmediato
+
+Esta exoneración alcanza tanto a la responsabilidad contractual como extracontractual, salvo los supuestos legalmente indisponibles.
+
+7. APTITUD FÍSICA, MÉDICA Y CONDUCTA
+
+El participante declara que:
+
+Dispone de la condición física y mental adecuada.
+
+No padece patología que contraindique la actividad.
+
+No se encuentra bajo los efectos de alcohol, drogas o sustancias que alteren sus capacidades.
+
+Se compromete a abandonar la actividad si su estado lo aconseja.
+
+Seguirá en todo momento las indicaciones del organizador por motivos de seguridad.
+
+8. MATERIAL OBLIGATORIO
+
+El participante se compromete a portar durante toda la actividad:
+
+Frontal en funcionamiento con batería suficiente y repuesto
+
+Teléfono móvil operativo
+
+Manta térmica
+
+Calzado adecuado de trail running
+
+Prenda cortavientos o impermeable
+
+El organizador podrá impedir la salida o continuidad sin derecho a reclamación.
+
+9. DERECHOS DE IMAGEN
+
+El participante autoriza al organizador a la captación y uso de su imagen con fines informativos y promocionales, sin compensación económica, conforme a la normativa vigente.
+
+10. PROTECCIÓN DE DATOS
+
+Los datos personales serán tratados conforme al RGPD y la LOPDGDD.
+Derechos: privacidad@proyecto-cumbre.es
+
+11. ACEPTACIÓN EXPRESA
+
+La inscripción y/o participación implica que el participante:
+
+Ha leído íntegramente este documento
+
+Lo comprende
+
+Lo acepta de forma expresa y voluntaria
+
+No siendo necesaria firma manuscrita.
+
+VERSIÓN: v1.0
+FECHA DE VIGENCIA: Desde el 13 de diciembre de 2024
 
 CLUB DEPORTIVO PROYECTO CUMBRE
 NIF: G75790246`

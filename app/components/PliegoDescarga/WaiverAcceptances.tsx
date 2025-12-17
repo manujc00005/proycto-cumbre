@@ -44,6 +44,7 @@ export default function WaiverAcceptance({
   const ui = { ...DEFAULT_WAIVER_UI, ...uiOverrides };
   const [accepted, setAccepted] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showRulesModal, setShowRulesModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const rulesMissingButRequired = ui.requireRules && !event.rulesUrl;
   // ========================================
@@ -98,7 +99,25 @@ export default function WaiverAcceptance({
       document.removeEventListener('keydown', handleEsc);
       document.body.style.overflow = 'unset';
     };
-  }, [showModal]);
+    }, [showModal]);
+    useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showModal) setShowModal(false);
+        if (showRulesModal) setShowRulesModal(false);
+      }
+    };
+
+    if (showModal || showRulesModal) {
+      document.addEventListener('keydown', handleEsc);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+      document.body.style.overflow = 'unset';
+    };
+  }, [showModal, showRulesModal]);
 
   // ========================================
   // FORMAT DATE
@@ -209,17 +228,16 @@ export default function WaiverAcceptance({
 
           {/* Enlace al reglamento */}
           {ui.showRulesButton && event.rulesUrl ? (
-             <a
-              href={event.rulesUrl}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={() => setShowRulesModal(true)}
               className="flex items-center justify-center gap-2 px-6 py-3 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 text-purple-400 rounded-lg transition font-medium"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
               Ver reglamento del evento
-            </a>
+            </button>
           ) : null}
 
           <div className="text-xs text-zinc-500 text-center">
@@ -315,9 +333,8 @@ export default function WaiverAcceptance({
 
 
       {/* ========================================
-          MODAL CON TEXTO COMPLETO
+          MODALES CON TEXTO COMPLETO
           ======================================== */}
-
       {showModal && (
         <>
           {/* Overlay */}
@@ -389,6 +406,70 @@ export default function WaiverAcceptance({
           </div>
         </>
       )}
+      {showRulesModal && event.rulesUrl && (
+        <>
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
+            onClick={() => setShowRulesModal(false)}
+            aria-hidden="true"
+          />
+
+          {/* Modal */}
+          <div
+            role="dialog"
+            aria-labelledby="rules-modal-title"
+            aria-modal="true"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+          >
+            <div className="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col my-8">
+              
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+                <h3 id="rules-modal-title" className="text-2xl font-bold text-white">
+                  Reglamento del evento
+                </h3>
+                <button
+                  onClick={() => setShowRulesModal(false)}
+                  className="p-2 hover:bg-zinc-800 rounded-lg transition text-zinc-400 hover:text-white"
+                  aria-label="Cerrar modal"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="bg-zinc-800/30 border border-zinc-700 rounded-lg p-3 mb-4 text-sm text-zinc-300">
+                  Si no se carga aquí, ábrelo en una pestaña:
+                  {" "}
+                  <a className="text-purple-300 underline" href={event.rulesUrl} target="_blank" rel="noreferrer">
+                    abrir reglamento
+                  </a>
+                </div>
+
+                <iframe
+                  src={event.rulesUrl}
+                  className="w-full h-[65vh] rounded-xl border border-zinc-700 bg-black"
+                />
+              </div>
+
+              {/* Footer */}
+              <div className="p-6 border-t border-zinc-800">
+                <button
+                  onClick={() => setShowRulesModal(false)}
+                  className="w-full px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
     </div>
   );
 }
