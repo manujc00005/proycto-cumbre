@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Shield, ArrowLeft, Mail, MapPin, Phone } from 'lucide-react';
+import { DEFAULT_ORGANIZER } from '@/lib/organizer';
 
 export const metadata: Metadata = {
   title: 'Política de Privacidad | Proyecto Cumbre',
@@ -50,11 +51,11 @@ export default function PoliticaPrivacidadPage() {
               </p>
 
               <div className="bg-zinc-800/50 rounded-lg p-6 space-y-2">
-                <p><strong className="text-white">Responsable:</strong> CLUB DEPORTIVO PROYECTO CUMBRE</p>
-                <p><strong className="text-white">NIF:</strong> G75790246</p>
+                <p><strong className="text-white">Responsable:</strong> {DEFAULT_ORGANIZER.name.toUpperCase()}</p>
+                <p><strong className="text-white">NIF:</strong> {DEFAULT_ORGANIZER.nif}</p>
                 <p className="flex items-start gap-2">
                   <MapPin className="w-4 h-4 text-orange-500 mt-1 flex-shrink-0" />
-                  <span><strong className="text-white">Dirección:</strong> PS De los Tilos n. 67 planta/piso 2 puerta 2, 29006 – MÁLAGA (MÁLAGA)</span>
+                  <span><strong className="text-white">Dirección:</strong> {DEFAULT_ORGANIZER.address}</span>
                 </p>
                 <p className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-orange-500" />
@@ -65,7 +66,7 @@ export default function PoliticaPrivacidadPage() {
                 </p>
                 <p className="flex items-center gap-2">
                   <Phone className="w-4 h-4 text-orange-500" />
-                  <strong className="text-white">Teléfono:</strong> 692 085 193
+                  <strong className="text-white">Teléfono:</strong> {DEFAULT_ORGANIZER.phone}
                 </p>
               </div>
             </div>

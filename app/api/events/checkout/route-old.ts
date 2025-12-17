@@ -1,4 +1,4 @@
-// app/api/misa/checkout/route.ts
+// app/api/events/checkout/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getStripe } from '@/lib/stripe';
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     const { name, email, phone, dni, shirtSize, consents, waiver_acceptance_id } = body; // 🆕 Añadir dni y waiver_acceptance_id
 
 
-    logger.apiStart('POST', '/api/misa/checkout', { email, shirtSize });
+    logger.apiStart('POST', '/api/events/checkout', { email, shirtSize });
 
     // ========================================
     // VALIDACIONES
@@ -135,6 +135,7 @@ export async function POST(request: NextRequest) {
         participant_name: name,
         participant_email: email.toLowerCase(),
         participant_phone: phone,
+        participant_dni: dni,
         custom_data: { shirt_size: shirtSize },
         status: 'pending',
         
@@ -197,8 +198,8 @@ export async function POST(request: NextRequest) {
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_URL}/misa/confirmacion?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_URL}/misa?cancelled=true`,
+      success_url: `${process.env.NEXT_PUBLIC_URL}/pago-exito?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_URL}/pago-cancelado?session_id={CHECKOUT_SESSION_ID}`,
       customer_email: email,
       metadata: {
         type: 'event',

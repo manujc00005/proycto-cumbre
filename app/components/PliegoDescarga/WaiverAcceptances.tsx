@@ -7,49 +7,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { DEFAULT_ORGANIZER } from '@/lib/organizer';
+import { DEFAULT_WAIVER_UI } from '@/lib/waivers/default-ui';
+import { WaiverAcceptancePayload, WaiverAcceptanceProps } from '@/lib/waivers/types';
 
-// ========================================
-// TYPES
-// ========================================
-
-export interface WaiverEvent {
-  eventId: string;
-  eventName: string;
-  eventDateISO: string; // YYYY-MM-DD
-  eventLocation: string; // municipio/provincia
-  modalityName: string; // ej. "21K"
-  rulesUrl: string; // URL del reglamento
-  waiverVersion: string; // ej. "v1.0"
-  waiverText: string; // texto completo del descargo
-}
-
-export interface WaiverParticipant {
-  fullName: string;
-  documentId: string; // DNI/NIE/Pasaporte
-  birthDateISO?: string; // YYYY-MM-DD (opcional)
-}
-
-export interface WaiverAcceptancePayload {
-  eventId: string;
-  waiverVersion: string;
-  acceptedAtISO: string;
-  participantFullName: string;
-  participantDocumentId: string;
-  participantBirthDateISO?: string;
-  waiverTextHash: string; // SHA-256 hex
-}
-
-interface WaiverAcceptanceProps {
-  event: WaiverEvent;
-  participant: WaiverParticipant;
-  onAccept: (payload: WaiverAcceptancePayload) => void | Promise<void>;
-  className?: string;
-  clubName?: string; // Nombre del club organizador
-  clubNif?: string; // NIF del club
-  clubAddress?: string; // Dirección del club
-  clubEmail?: string; // Email de privacidad
-  clubPhone?: string; // Teléfono de contacto
-}
 
 // ========================================
 // HELPER: Calculate SHA-256 hash
@@ -73,21 +34,18 @@ export default function WaiverAcceptance({
   participant,
   onAccept,
   className = '',
-  clubName = 'Club Deportivo Proyecto Cumbre',
-  clubNif = 'G75790246',
-  clubAddress = 'PS De los Tilos n. 67, 2º-2, 29006 Málaga',
-  clubEmail = 'privacidad@proyecto-cumbre.es',
-  clubPhone = '692 085 193'
+  organizer = DEFAULT_ORGANIZER,
+  ui: uiOverrides,
 }: WaiverAcceptanceProps) {
   
   // ========================================
   // STATE
   // ========================================
-  
+  const ui = { ...DEFAULT_WAIVER_UI, ...uiOverrides };
   const [accepted, setAccepted] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-
+  const rulesMissingButRequired = ui.requireRules && !event.rulesUrl;
   // ========================================
   // HANDLERS
   // ========================================
@@ -250,19 +208,20 @@ export default function WaiverAcceptance({
           </button>
 
           {/* Enlace al reglamento */}
-          <a
-            href={event.rulesUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 text-purple-400 rounded-lg transition font-medium"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-            Ver reglamento del evento
-          </a>
+          {ui.showRulesButton && event.rulesUrl ? (
+             <a
+              href={event.rulesUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 text-purple-400 rounded-lg transition font-medium"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              Ver reglamento del evento
+            </a>
+          ) : null}
 
-          {/* Info versión */}
           <div className="text-xs text-zinc-500 text-center">
             Versión del descargo: <span className="font-mono text-zinc-400">{event.waiverVersion}</span>
           </div>
@@ -299,7 +258,7 @@ export default function WaiverAcceptance({
       <button
         type="button"
         onClick={handleAccept}
-        disabled={!accepted || isProcessing}
+        disabled={!accepted || isProcessing || rulesMissingButRequired}
         className="w-full flex items-center justify-center gap-3 px-8 py-4 bg-orange-500 hover:bg-orange-600 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-orange-500/50 disabled:shadow-none"
       >
         {isProcessing ? (
@@ -321,15 +280,39 @@ export default function WaiverAcceptance({
       </button>
 
       {/* Info legal */}
-      <div className="mt-4 text-center text-xs text-zinc-500">
-        <p>
-          Organizador: <strong className="text-zinc-400">{clubName}</strong> (NIF: {clubNif})
-        </p>
-        <p className="mt-1">{clubAddress}</p>
-        <p className="mt-1">
-          Contacto: <a href={`mailto:${clubEmail}`} className="text-orange-400 hover:text-orange-300 underline">{clubEmail}</a> · {clubPhone}
-        </p>
-      </div>
+      {organizer && (
+        <div className="mt-4 text-center text-xs text-zinc-500">
+          <p>
+            Organizador:{' '}
+            <strong className="text-zinc-400">{organizer.name}</strong>
+            {organizer.nif && ` (NIF: ${organizer.nif})`}
+          </p>
+
+          {organizer.address && (
+            <p className="mt-1">{organizer.address}</p>
+          )}
+
+          {(organizer.privacyEmail || organizer.phone) && (
+            <p className="mt-1">
+              Contacto:{' '}
+              {organizer.privacyEmail && (
+                <a
+                  href={`mailto:${organizer.privacyEmail}`}
+                  className="text-orange-400 hover:text-orange-300 underline"
+                >
+                  {organizer.privacyEmail}
+                </a>
+              )}
+              {organizer.phone && (
+                <>
+                  {' '}· {organizer.phone}
+                </>
+              )}
+            </p>
+          )}
+        </div>
+      )}
+
 
       {/* ========================================
           MODAL CON TEXTO COMPLETO
@@ -409,64 +392,3 @@ export default function WaiverAcceptance({
     </div>
   );
 }
-
-// ========================================
-// EJEMPLO DE USO
-// ========================================
-
-/*
-
-import WaiverAcceptance from '@/components/WaiverAcceptance';
-
-// En tu componente de checkout:
-
-const event = {
-  eventId: 'misa-2026',
-  eventName: 'MISA - Ritual Furtivo',
-  eventDateISO: '2026-01-23',
-  eventLocation: 'Málaga, Andalucía',
-  modalityName: '21K Trail Nocturno',
-  rulesUrl: 'https://proyecto-cumbre.es/events/misa-2026/reglamento',
-  waiverVersion: 'v2.0',
-  waiverText: `DESCARGO DE RESPONSABILIDAD
-
-1. NATURALEZA DE LA ACTIVIDAD
-[... texto completo del descargo ...]
-
-2. RIESGOS INHERENTES
-[... más texto ...]
-
-[etc...]`
-};
-
-const participant = {
-  fullName: 'Juan Pérez García',
-  documentId: '12345678A',
-  birthDateISO: '1990-03-15'
-};
-
-const handleWaiverAccept = async (payload) => {
-  console.log('Payload de aceptación:', payload);
-  
-  // Guardar en base de datos
-  const response = await fetch('/api/events/waiver-acceptance', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-
-  if (response.ok) {
-    // Continuar al pago
-    window.location.href = '/checkout/payment';
-  }
-};
-
-// Render:
-<WaiverAcceptance
-  event={event}
-  participant={participant}
-  onAccept={handleWaiverAccept}
-  className="max-w-4xl mx-auto"
-/>
-
-*/

@@ -116,6 +116,12 @@ interface RGPDStats {
   };
 }
 
+const downloadWaiverPdf = (registration: MisaRegistration) => {
+  // Recomendación: por id de inscripción + slug fijo "misa-2026"
+  const url = `/api/events/waiver-pdf?registrationId=${encodeURIComponent(registration.id)}`;
+  window.open(url, '_blank', 'noopener,noreferrer');
+};
+
 export default function GestorPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -853,6 +859,7 @@ export default function GestorPage() {
                       <th className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase">Pago</th>
                       <th className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase">Monto</th>
                       <th className="px-6 py-4 text-left text-xs font-medium text-zinc-400 uppercase">Fecha</th>
+                      <th className="px-6 py-4 text-right text-xs font-medium text-zinc-400 uppercase">Docs</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-800">
@@ -911,6 +918,20 @@ export default function GestorPage() {
                               minute: '2-digit'
                             })}
                           </div>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <button
+                            type="button"
+                            onClick={() => downloadWaiverPdf(registration)}
+                            className="inline-flex items-center justify-center w-9 h-9 rounded-lg
+                                      bg-zinc-800/60 hover:bg-zinc-700/60
+                                      border border-zinc-700 hover:border-zinc-600
+                                      text-zinc-300 hover:text-white transition"
+                            title="Descargar pliego (PDF)"
+                            aria-label="Descargar pliego (PDF)"
+                          >
+                            <FileText className="w-4 h-4" />
+                          </button>
                         </td>
                       </tr>
                     ))}

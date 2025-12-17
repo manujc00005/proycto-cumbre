@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Scale, ArrowLeft, Mail, MapPin, Phone, Building } from 'lucide-react';
+import { DEFAULT_ORGANIZER } from '@/lib/organizer';
 
 export const metadata: Metadata = {
   title: 'Aviso Legal | Proyecto Cumbre',
@@ -52,22 +53,22 @@ export default function AvisoLegalPage() {
               <div className="bg-zinc-800/50 rounded-lg p-6 space-y-3">
                 <p className="flex items-start gap-3">
                   <Building className="w-5 h-5 text-orange-500 mt-1 flex-shrink-0" />
-                  <span><strong className="text-white">Denominación social:</strong> CLUB DEPORTIVO PROYECTO CUMBRE</span>
+                  <span><strong className="text-white">Denominación social:</strong> {DEFAULT_ORGANIZER.name.toUpperCase()}</span>
                 </p>
-                <p><strong className="text-white">NIF:</strong> G75790246</p>
+                <p><strong className="text-white">NIF:</strong>{DEFAULT_ORGANIZER.nif}</p>
                 <p className="flex items-start gap-3">
                   <MapPin className="w-5 h-5 text-orange-500 mt-1 flex-shrink-0" />
-                  <span><strong className="text-white">Domicilio social:</strong> PS De los Tilos n. 67 planta/piso 2 puerta 2, 29006 – MÁLAGA (MÁLAGA)</span>
+                  <span><strong className="text-white">Domicilio social:</strong> {DEFAULT_ORGANIZER.address}</span>
                 </p>
                 <p className="flex items-center gap-3">
                   <Mail className="w-5 h-5 text-orange-500 flex-shrink-0" />
-                  <span><strong className="text-white">Email:</strong> <a href="mailto:info@proyecto-cumbre.es" className="text-orange-500 hover:text-orange-400">info@proyecto-cumbre.es</a></span>
+                  <span><strong className="text-white">Email:</strong> <a href="mailto:info@proyecto-cumbre.es" className="text-orange-500 hover:text-orange-400">{DEFAULT_ORGANIZER.email}</a></span>
                 </p>
                 <p className="flex items-center gap-3">
                   <Phone className="w-5 h-5 text-orange-500 flex-shrink-0" />
-                  <span><strong className="text-white">Teléfono:</strong> 692 085 193</span>
+                  <span><strong className="text-white">Teléfono:</strong> {DEFAULT_ORGANIZER.phone}</span>
                 </p>
-                <p><strong className="text-white">Sitio web:</strong> <a href="https://proyecto-cumbre.es" className="text-orange-500 hover:text-orange-400">https://proyecto-cumbre.es</a></p>
+                <p><strong className="text-white">Sitio web:</strong> <a href="https://proyecto-cumbre.es" className="text-orange-500 hover:text-orange-400">{DEFAULT_ORGANIZER.web}</a></p>
               </div>
             </div>
           </section>

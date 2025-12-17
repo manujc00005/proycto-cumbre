@@ -122,6 +122,7 @@ model EventRegistration {
   participant_name       String             @db.VarChar(255)
   participant_email      String             @db.VarChar(255)
   participant_phone      String             @db.VarChar(20)
+  participant_dni        String             @db.VarChar(50)
   custom_data            Json?
   status                 String             @default("pending") @db.VarChar(20)
   privacy_accepted       Boolean            @default(false)
@@ -147,6 +148,8 @@ model EventRegistration {
   @@index([privacy_accepted])
   @@index([privacy_policy_version])
   @@index([marketing_consent])
+  @@index([participant_dni]) 
+  @@unique([event_id, participant_dni])
   @@map("event_registrations")
 }
 
@@ -273,6 +276,8 @@ model WaiverAcceptance {
   participant_document_id String             @db.VarChar(50)
   participant_birth_date  DateTime?          @db.Date
   waiver_text_hash        String             @db.VarChar(64)
+  waiver_text             String?            @db.Text
+  waiver_text_canonical   String?            @db.Text
   accepted_at             DateTime
   ip_address              String?            @db.VarChar(45)
   user_agent              String?
