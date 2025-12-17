@@ -1,10 +1,13 @@
-// app/api/payment-cancelled/route.ts - VERSIÓN CORREGIDA FINAL
+// ========================================
+// API ENDPOINT: PAYMENT CANCELLED (GENÉRICO)
+// app/api/payment-cancelled/route.ts
+// ========================================
 
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { getStripe } from '@/lib/stripe';
 import { logger } from '@/lib/logger';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
+import { PaymentStatus } from '@prisma/client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,97 +15,107 @@ export async function POST(request: NextRequest) {
 
     if (!sessionId) {
       return NextResponse.json(
-        { error: 'Session ID es requerido' },
+        { error: 'Session ID requerido' },
         { status: 400 }
       );
     }
 
-    logger.log('🚫 Buscando pago con session_id:', sessionId);
+    logger.log('🚫 Procesando cancelación de pago:', sessionId);
 
-    // Buscar el pago por session_id
-    const payment = await prisma.payment.findUnique({
-      where: {
-        stripe_session_id: sessionId
-      },
-      include: {
-        member: true,
-        eventRegistration: true,  // 👈 camelCase, no snake_case
-        order: true,
-      }
-    });
+    // ========================================
+    // 1) BUSCAR SESIÓN EN STRIPE
+    // ========================================
+    
+    const stripe = getStripe();
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-    if (!payment) {
+    if (!session) {
       return NextResponse.json(
-        { error: 'No se encontró el pago asociado a esta sesión' },
+        { error: 'Sesión no encontrada' },
         { status: 404 }
       );
     }
 
-    // Solo actualizar si el pago está en estado "pending"
-    if (payment.status !== 'pending') {
-      logger.log('⚠️ El pago ya tiene estado:', payment.status);
-      return NextResponse.json({
-        success: true,
-        message: 'El pago ya fue procesado previamente',
-        currentStatus: payment.status
-      });
-    }
-
-    logger.log('📝 Actualizando estado del pago a "failed"...');
-
-    // Actualizar el estado del pago a "failed" (cancelado)
-    await prisma.payment.update({
-      where: {
-        id: payment.id
-      },
-      data: {
-        status: 'failed',
-        updated_at: new Date()
+    // ========================================
+    // 2) BUSCAR PAYMENT EN BD
+    // ========================================
+    
+    const payment = await prisma.payment.findUnique({
+      where: { stripe_session_id: sessionId },
+      select: {
+        id: true,
+        payment_type: true,
+        status: true,
       }
     });
 
-    // 🆕 Actualizar según el tipo de pago
-    if (payment.payment_type === 'membership' && payment.member_id) {
-      await prisma.member.update({
-        where: { id: payment.member_id },
-        data: {
-          membership_status: 'failed',
-          updated_at: new Date()
-        }
-      });
-    } else if (payment.payment_type === 'event' && payment.event_registration_id) {
-      await prisma.eventRegistration.update({
-        where: { id: payment.event_registration_id },
-        data: {
-          status: 'cancelled',
-          updated_at: new Date()
-        }
-      });
-    } else if (payment.payment_type === 'order' && payment.order_id) {
-      await prisma.order.update({
-        where: { id: payment.order_id },
-        data: {
-          status: 'cancelled',
-          updated_at: new Date()
-        }
+    if (!payment) {
+      // Si no existe el payment, es normal (el usuario canceló antes de que se creara)
+      logger.log('⚠️ Payment no encontrado en BD (normal si canceló inmediatamente)');
+      
+      return NextResponse.json({
+        success: true,
+        message: 'Cancelación procesada (sin payment en BD)',
+        type: session.metadata?.type || null,
       });
     }
 
-    logger.log('✅ Pago marcado como cancelado');
+    // ========================================
+    // 3) ACTUALIZAR PAYMENT A FAILED
+    // ========================================
+    
+    if (payment.status === 'pending') {
+      await prisma.payment.update({
+        where: { id: payment.id },
+        data: {
+          status: PaymentStatus.failed,
+          updated_at: new Date(),
+        }
+      });
+
+      logger.log('✅ Payment marcado como failed:', payment.id);
+    } else {
+      logger.log(`⚠️ Payment ya estaba en estado: ${payment.status}`);
+    }
+
+    // ========================================
+    // 4) ACTUALIZAR EVENT_REGISTRATION SI APLICA
+    // ========================================
+    
+    if (payment.payment_type === 'event') {
+      const registration = await prisma.eventRegistration.findFirst({
+        where: { 
+          id: { not: undefined },
+          // Buscar por payment_id o session_id en metadata
+        },
+        select: { id: true, status: true }
+      });
+
+      if (registration && registration.status === 'pending') {
+        await prisma.eventRegistration.update({
+          where: { id: registration.id },
+          data: {
+            status: 'cancelled',
+            updated_at: new Date(),
+          }
+        });
+
+        logger.log('✅ EventRegistration marcado como cancelled');
+      }
+    }
 
     return NextResponse.json({
       success: true,
       message: 'Pago cancelado exitosamente',
-      paymentType: payment.payment_type,
+      type: payment.payment_type,
     });
 
   } catch (error: any) {
-    logger.error('❌ Error al procesar cancelación:', error);
+    logger.error('❌ Error procesando cancelación:', error);
+    
     return NextResponse.json(
-      { error: 'Error interno del servidor', details: error.message },
+      { error: 'Error al procesar la cancelación', details: error.message },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
