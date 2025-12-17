@@ -3,8 +3,8 @@
 // lib/waivers/registry.ts
 // ========================================
 
-import { MISA_2026_EVENT_ID, MISA_2026_SLUG } from "../funnels/configs/misa-2026";
-import { MISA_2026_META, MISA_2026_TERMS_V1, MISA_2026_WAIVER_V1 } from "../waivers/pliegos/misa-2026.v1";
+import { MISA_EVENT_ID, MISA_SLUG } from "../funnels/configs/misa";
+import { MISA_META, MISA_TERMS_V1, MISA_WAIVER_V1 } from "../waivers/pliegos/misa.v1";
 import { WaiverRegistryItem } from "../waivers/types";
 
 
@@ -14,11 +14,11 @@ import { WaiverRegistryItem } from "../waivers/types";
 // ========================================
 export const WAIVER_REGISTRY: Array<WaiverRegistryItem & { eventId: string; slug: string }> = [
   {
-    eventId: MISA_2026_EVENT_ID,
-    slug: MISA_2026_SLUG,
-    meta: MISA_2026_META,
-    waiver: MISA_2026_WAIVER_V1,
-    terms: MISA_2026_TERMS_V1,
+    eventId: MISA_EVENT_ID,
+    slug: MISA_SLUG,
+    meta: MISA_META,
+    waiver: MISA_WAIVER_V1,
+    terms: MISA_TERMS_V1,
   },
   // Añadir más eventos aquí...
   // {

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef  } from 'react';
 import Image from 'next/image';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { MISA_2026_FUNNEL } from '@/lib/funnels/configs/misa-2026';
+import { MISA_FUNNEL } from '@/lib/funnels/configs/misa';
 import EventFunnelModal from '../components/EventFunnelModal/EventFunnelModal';
 
 export default function MisaPage() {
@@ -313,7 +313,7 @@ export default function MisaPage() {
           MODAL FUNNEL STEPPER
           ======================================== */}
       <EventFunnelModal
-        config={MISA_2026_FUNNEL}
+        config={MISA_FUNNEL}
         isOpen={showFunnelModal}
         onClose={() => setShowFunnelModal(false)}
       />

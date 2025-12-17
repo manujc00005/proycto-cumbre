@@ -3,12 +3,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
+import { MISA_SLUG } from '@/lib/funnels/configs/misa';
 
 export async function GET() {
   try {
     // Buscar el evento MISA
     const misaEvent = await prisma.event.findUnique({
-      where: { slug: 'misa-2026' }
+      where: { slug: MISA_SLUG }
     });
 
     if (!misaEvent) {

@@ -18,11 +18,11 @@ export {
 
 // 3️⃣ EVENTOS ESPECÍFICOS
 export {
-  MISA_2026_META,
-  MISA_2026_WAIVER_V1,
-  MISA_2026_TERMS_V1,
-  MISA_2026_EVENT_v1,
-} from './pliegos/misa-2026.v1';
+  MISA_META,
+  MISA_WAIVER_V1,
+  MISA_TERMS_V1,
+  MISA_EVENT_v1,
+} from './pliegos/misa.v1';
 
 // 4️⃣ HELPERS ADICIONALES (arreglados)
 export function getWaiverOrThrow(eventId: string, version?: string) {

@@ -1,20 +1,19 @@
 // ========================================
 // CONFIGURACIÓN FUNNEL PARA MISA 2026
-// lib/funnels/configs/misa-2026.ts
 // ========================================
 
 import { EventFunnelConfig } from '../types';
-import { MISA_2026_EVENT_v1 } from '@/lib/waivers/pliegos/misa-2026.v1';
+import { MISA_EVENT_v1 } from '@/lib/waivers/pliegos/misa.v1';
 
 
-export const MISA_2026_EVENT_ID = 'ba063181-9a20-466d-9400-246842b547a0';
-export const MISA_2026_SLUG = 'misa-2026';
-export const MISA_2026_NAME = 'MISA - Ritual Furtivo';
+export const MISA_EVENT_ID = 'ba063181-9a20-466d-9400-246842b547a0';
+export const MISA_SLUG = 'misa';
+export const MISA_NAME = 'MISA - Ritual Furtivo';
 
-export const MISA_2026_FUNNEL: EventFunnelConfig = {
-  eventId: MISA_2026_EVENT_ID,
-  eventSlug: MISA_2026_SLUG,
-  eventName: MISA_2026_NAME,
+export const MISA_FUNNEL: EventFunnelConfig = {
+  eventId: MISA_EVENT_ID,
+  eventSlug: MISA_SLUG,
+  eventName: MISA_NAME,
   
   // ========================================
   // PASO 1: FORMULARIO
@@ -85,7 +84,7 @@ export const MISA_2026_FUNNEL: EventFunnelConfig = {
   // PASO 2: PLIEGO (OBLIGATORIO)
   // ========================================
   waiver: {
-    event: MISA_2026_EVENT_v1,
+    event: MISA_EVENT_v1,
     required: true,
   },
   

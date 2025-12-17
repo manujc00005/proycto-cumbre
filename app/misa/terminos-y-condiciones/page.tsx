@@ -109,7 +109,7 @@ export default function TermsAndConditionsPage() {
               </Link>
 
               <Link
-                href="/misa-2026/descargo"
+                href="/misa/descargo"
                 className="inline-flex items-center justify-between gap-3 rounded-xl bg-zinc-950/40 border border-zinc-800 px-4 py-3 text-sm text-zinc-200 hover:border-orange-500/40 hover:text-white transition"
               >
                 Ver descargo

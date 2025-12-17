@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     // ========================================
     
     const misaEvent = await prisma.event.findUnique({
-      where: { slug: 'misa-2026' }
+      where: { slug: 'misa' }
     });
 
     if (!misaEvent) {

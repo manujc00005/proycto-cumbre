@@ -117,7 +117,7 @@ interface RGPDStats {
 }
 
 const downloadWaiverPdf = (registration: MisaRegistration) => {
-  // Recomendación: por id de inscripción + slug fijo "misa-2026"
+  // Recomendación: por id de inscripción + slug fijo "misa"
   const url = `/api/events/waiver-pdf?registrationId=${encodeURIComponent(registration.id)}`;
   window.open(url, '_blank', 'noopener,noreferrer');
 };

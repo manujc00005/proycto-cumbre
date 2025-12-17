@@ -1,7 +1,6 @@
 // ========================================
 // EVENTO: MISA 2026
 // Descargo de responsabilidad + Términos y Condiciones
-// lib/waivers/pliegos/misa-2026.v1.ts
 // ========================================
 
 import type { EventMeta, WaiverDefinition, TermsDefinition, WaiverEvent } from "../types";
@@ -10,7 +9,7 @@ import type { EventMeta, WaiverDefinition, TermsDefinition, WaiverEvent } from "
 // META INFORMACIÓN DEL EVENTO
 // ========================================
 
-export const MISA_2026_META: EventMeta = {
+export const MISA_META: EventMeta = {
   eventId: 'ba063181-9a20-466d-9400-246842b547a0',
   eventName: 'MISA - Ritual Furtivo',
   eventDateISO: '2026-01-23',
@@ -23,8 +22,8 @@ export const MISA_2026_META: EventMeta = {
 // DESCARGO DE RESPONSABILIDAD
 // ========================================
 
-export const MISA_2026_WAIVER_V1: WaiverDefinition = {
-  id: 'misa-2026',
+export const MISA_WAIVER_V1: WaiverDefinition = {
+  id: 'misa',
   title: 'Descargo de responsabilidad y normativa',
   version: 'v1.0',
   effectiveFromISO: '2024-12-13',
@@ -88,8 +87,8 @@ NIF: G75790246`
 // TÉRMINOS Y CONDICIONES
 // ========================================
 
-export const MISA_2026_TERMS_V1: TermsDefinition = {
-  id: 'misa-2026',
+export const MISA_TERMS_V1: TermsDefinition = {
+  id: 'misa',
   title: 'Términos y condiciones del evento',
   version: 'v1.0',
   effectiveFromISO: '2024-12-13',
@@ -189,8 +188,8 @@ La inscripción en el evento implica la aceptación expresa de estos Términos y
 // WAIVER EVENT (para componente WaiverAcceptance)
 // ========================================
 
-export const MISA_2026_EVENT_v1: WaiverEvent = {
-  ...MISA_2026_META,
-  waiverVersion: MISA_2026_WAIVER_V1.version,
-  waiverText: MISA_2026_WAIVER_V1.text,
+export const MISA_EVENT_v1: WaiverEvent = {
+  ...MISA_META,
+  waiverVersion: MISA_WAIVER_V1.version,
+  waiverText: MISA_WAIVER_V1.text,
 };
