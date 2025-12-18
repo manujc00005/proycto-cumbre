@@ -204,23 +204,21 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const session = await stripe.checkout.sessions.create(
-      {
-        payment_method_types: ['card'],
-        line_items: lineItems,
-        success_url: `${process.env.NEXT_PUBLIC_URL}/pago-exito?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.NEXT_PUBLIC_URL}/pago-cancelado?session_id={CHECKOUT_SESSION_ID}`,
-        metadata: {
-          type: 'membership', 
-          memberId: memberId,
-          email: memberData.email,
-          licenseType: memberData.licenseType,
-          ageCategory: memberData.ageCategory || 'unknown',
-        },
-        customer_email: memberData.email,
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment', // ✅ OBLIGATORIO con line_items
+      payment_method_types: ['card'],
+      line_items: lineItems,
+      success_url: `${process.env.NEXT_PUBLIC_URL}/pago-exito?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_URL}/pago-cancelado?session_id={CHECKOUT_SESSION_ID}`,
+      metadata: {
+        type: 'membership', 
+        memberId: memberId,
+        email: memberData.email,
+        licenseType: memberData.licenseType,
+        ageCategory: memberData.ageCategory || 'unknown',
       },
-      { apiVersion: "2023-10-16" }
-    );
+      customer_email: memberData.email,
+    });
 
     logger.log('✅ Sesión de Stripe creada:', session.id);
 
