@@ -1,4 +1,4 @@
-import { EmailService } from '@/lib/email-service';
+import { EmailService } from '@/lib/mail/email-service';
 import { NextResponse } from 'next/server';
 
 export async function GET() {

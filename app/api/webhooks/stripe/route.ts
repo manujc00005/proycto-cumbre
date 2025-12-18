@@ -9,7 +9,7 @@ import Stripe from 'stripe';
 import { MembershipStatus, PaymentStatus } from '@prisma/client';
 import { logger } from '@/lib/logger';
 import { getStripe } from '@/lib/stripe';
-import { EmailService } from '@/lib/email-service';
+import { EmailService } from '@/lib/mail/email-service';
 import { prisma } from '@/lib/prisma';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;

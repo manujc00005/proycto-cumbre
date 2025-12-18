@@ -13,7 +13,7 @@ import { logger } from '@/lib/logger';
 import { getStripe } from '@/lib/stripe';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
-import { EmailService } from '@/lib/email-service';
+import { EmailService } from '@/lib/mail/email-service';
 import { isTestUserEmail } from '../helpers';
 
 // ========================================

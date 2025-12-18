@@ -13,7 +13,7 @@ import { EventStatus, MembershipStatus, PaymentStatus, PaymentType, Registration
 import { z } from "zod";
 import crypto from "crypto";
 import { isTestUserEmail } from "../../helpers";
-import { EmailService } from "@/lib/email-service";
+import { EmailService } from "@/lib/mail/email-service";
 
 export const runtime = "nodejs";
 
