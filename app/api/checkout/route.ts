@@ -1,8 +1,7 @@
 // ========================================
-// API CHECKOUT MEMBRESÍAS - CON BYPASS STRIPE
-// ✅ Detecta emails en allowlist
-// ✅ Crea Payment completed + Activa Member directamente
-// ✅ Devuelve redirect a /pago-exito
+// API CHECKOUT MEMBRESÍAS - CON EMAILS TEST
+// ✅ Envía emails inmediatamente para test users
+// ✅ Usuarios normales esperan al webhook
 // app/api/checkout/route.ts
 // ========================================
 
@@ -14,6 +13,7 @@ import { logger } from '@/lib/logger';
 import { getStripe } from '@/lib/stripe';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
+import { EmailService } from '@/lib/email-service';
 import { isTestUserEmail } from '../helpers';
 
 // ========================================
@@ -37,9 +37,7 @@ async function activateMembershipDirectly(params: {
   const oneYearFromNow = new Date();
   oneYearFromNow.setFullYear(now.getFullYear() + 1);
 
-  // Transacción: Payment + Member update
   const result = await prisma.$transaction(async (tx) => {
-    // 1) Crear Payment COMPLETED
     const payment = await tx.payment.create({
       data: {
         payment_type: 'membership',
@@ -57,7 +55,6 @@ async function activateMembershipDirectly(params: {
       },
     });
 
-    // 2) Actualizar Member a ACTIVE
     const updatedMember = await tx.member.update({
       where: { id: memberId },
       data: {
@@ -76,6 +73,29 @@ async function activateMembershipDirectly(params: {
   logger.log('   Payment ID:', result.payment.id);
   logger.log('   Member status:', result.member.membership_status);
 
+  // ========================================
+  // 📧 ENVIAR EMAIL INMEDIATAMENTE (TEST USER)
+  // ========================================
+  try {
+    logger.log('📧 Enviando email de bienvenida (test user)...');
+    
+    await EmailService.sendWelcomeWithPaymentStatus({
+      email: result.member.email,
+      firstName: result.member.first_name,
+      lastName: result.member.last_name,
+      memberNumber: result.member.member_number || 'none',
+      licenseType: result.member.license_type || 'none',
+      paymentStatus: 'success',
+      amount: testAmount,
+      currency: 'eur',
+    });
+    
+    logger.log('✅ Email enviado correctamente');
+  } catch (emailError: any) {
+    // No es crítico, pero logueamos el error
+    logger.error('[TEST] Error enviando email:', emailError.message);
+  }
+
   return result;
 }
 
@@ -93,7 +113,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verificar que el member existe
     const member = await prisma.member.findUnique({
       where: { id: memberId }
     });
@@ -112,7 +131,7 @@ export async function POST(req: NextRequest) {
 
     if (isTestUser) {
       // ========================================
-      // 🧪 FLUJO TEST: Sin Stripe
+      // 🧪 FLUJO TEST: Sin Stripe + Email inmediato
       // ========================================
       const result = await activateMembershipDirectly({
         memberId,
@@ -144,7 +163,6 @@ export async function POST(req: NextRequest) {
     // ========================================
     const stripe = getStripe();
 
-    // Buscar información de la licencia
     const selectedLicense = LICENSE_TYPES.find(l => l.id === memberData.licenseType);
     
     if (!selectedLicense) {
@@ -154,12 +172,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Calcular el precio de la licencia según la categoría
     const licensePrice = memberData.ageCategory 
       ? getLicensePrice(selectedLicense, memberData.ageCategory)
       : 0;
 
-    // Crear line items (modo normal)
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
       {
         price_data: {
@@ -188,26 +204,26 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // ✅ CREAR SESIÓN DE STRIPE
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: lineItems,
-      mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_URL}/pago-exito?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_URL}/pago-cancelado?session_id={CHECKOUT_SESSION_ID}`,
-      metadata: {
-        type: 'membership', 
-        memberId: memberId,
-        email: memberData.email,
-        licenseType: memberData.licenseType,
-        ageCategory: memberData.ageCategory || 'unknown',
+    const session = await stripe.checkout.sessions.create(
+      {
+        payment_method_types: ['card'],
+        line_items: lineItems,
+        success_url: `${process.env.NEXT_PUBLIC_URL}/pago-exito?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.NEXT_PUBLIC_URL}/pago-cancelado?session_id={CHECKOUT_SESSION_ID}`,
+        metadata: {
+          type: 'membership', 
+          memberId: memberId,
+          email: memberData.email,
+          licenseType: memberData.licenseType,
+          ageCategory: memberData.ageCategory || 'unknown',
+        },
+        customer_email: memberData.email,
       },
-      customer_email: memberData.email,
-    });
+      { apiVersion: "2023-10-16" }
+    );
 
     logger.log('✅ Sesión de Stripe creada:', session.id);
 
-    // ✅ CREAR PAYMENT EN BD
     try {
       const payment = await prisma.payment.create({
         data: {

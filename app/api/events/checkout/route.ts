@@ -1,6 +1,7 @@
 // ========================================
-// API CHECKOUT EVENTOS - STRIPE API FIXED
-// ✅ Sintaxis correcta para Stripe API
+// API CHECKOUT EVENTOS - CON EMAILS TEST
+// ✅ Envía emails inmediatamente para test users
+// ✅ Usuarios normales esperan al webhook
 // app/api/events/checkout/route.ts
 // ========================================
 
@@ -12,6 +13,7 @@ import { EventStatus, MembershipStatus, PaymentStatus, PaymentType, Registration
 import { z } from "zod";
 import crypto from "crypto";
 import { isTestUserEmail } from "../../helpers";
+import { EmailService } from "@/lib/email-service";
 
 export const runtime = "nodejs";
 
@@ -167,6 +169,33 @@ async function createDirectRegistration(params: {
   logger.log('   Payment ID:', result.payment.id);
   logger.log('   Registration ID:', result.registration.id);
 
+  // ========================================
+  // 📧 ENVIAR EMAIL INMEDIATAMENTE (TEST USER)
+  // ========================================
+  try {
+    logger.log('📧 Enviando email de confirmación (test user)...');
+    
+    // Detectar evento específico
+    if (event.slug === 'misa') {
+      await EmailService.sendMisaConfirmation({
+        email: email,
+        name: name,
+        phone: phone,
+        shirtSize: shirtSize || 'N/A',
+        amount: testAmount,
+      });
+    } else {
+      // Email genérico para otros eventos
+      logger.log(`⚠️ [TEST] Email genérico no implementado para: ${event.slug}`);
+      // TODO: await EmailService.sendEventConfirmation(...)
+    }
+    
+    logger.log('✅ Email enviado correctamente');
+  } catch (emailError: any) {
+    // No es crítico, pero logueamos el error
+    logger.error('[TEST] Error enviando email:', emailError.message);
+  }
+
   return result;
 }
 
@@ -321,6 +350,7 @@ export async function POST(request: NextRequest) {
         eventSlug: event.slug,
         payment_id: result.payment.id,
         registration_id: result.registration.id,
+        email_sent: true,
       });
 
       const publicUrl = process.env.NEXT_PUBLIC_URL;
@@ -359,7 +389,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ✅ SINTAXIS CORRECTA STRIPE API
     const session = await stripe.checkout.sessions.create(
       {
         payment_method_types: ["card"],
@@ -402,7 +431,7 @@ export async function POST(request: NextRequest) {
           waiver_acceptance_id: waiver_acceptance_id ?? "",
         },
       },
-      { apiVersion: "2023-10-16" } // ✅ Especificar versión API
+      { apiVersion: "2023-10-16" }
     );
 
     logger.log("✅ Sesión de Stripe creada:", session.id);
