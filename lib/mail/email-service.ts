@@ -1,24 +1,27 @@
 // ========================================
-// EMAIL SERVICE - ARQUITECTURA GENÉRICA
-// ✅ Sistema de templates modular
-// ✅ Separation of concerns
-// ✅ Type-safe
-// ✅ Extensible para cualquier evento/pedido
-// lib/email-service.ts
+// EMAIL SERVICE - CON REGISTRO DE EVENTOS
+// ✅ Un solo método para todos los eventos
+// ✅ Configuración automática por slug
+// lib/email/email-service.ts
 // ========================================
 
 import { Resend } from 'resend';
 import { logger } from '@/lib/logger';
 import EmailTemplates from './email-templates';
-import { BaseEventEmailData, ContactFormData, EmailOptions, LicenseActivatedData, MembershipEmailData, OrderEmailData } from './types';
+import { buildEventEmail } from './event-email-template';
+import { getEventEmailConfig } from './event-email-configs';
+import {
+  BaseEventEmailData,
+  ContactFormData,
+  EmailOptions,
+  LicenseActivatedData,
+  MembershipEmailData,
+  OrderEmailData,
+} from './types';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// ========================================
-// EMAIL SERVICE (MAIN CLASS)
-// ========================================
-
-export class EmailService {
+export default class EmailService {
   private static from = process.env.EMAIL_FROM || 'info@proyecto-cumbre.es';
   private static adminEmail = process.env.EMAIL_ADMIN || 'info@proyecto-cumbre.es';
   private static isDevelopment = process.env.NODE_ENV === 'development';
@@ -30,7 +33,7 @@ export class EmailService {
     const recipients = Array.isArray(options.to) ? options.to : [options.to];
     const fromAddress = options.from || this.from;
 
-    const finalRecipients = this.isDevelopment 
+    const finalRecipients = this.isDevelopment
       ? [process.env.DEV_TEST_EMAIL || 'mjc00005@gmail.com']
       : recipients;
 
@@ -70,14 +73,14 @@ export class EmailService {
 
   static async sendWelcomeWithPaymentStatus(data: MembershipEmailData) {
     const isSuccess = data.paymentStatus === 'success';
-    const html = isSuccess 
+    const html = isSuccess
       ? EmailTemplates.membershipSuccess(data)
-      : EmailTemplates.membershipSuccess(data); // TODO: Crear template de fallo
+      : EmailTemplates.membershipFailed(data);
 
     return this.send({
       to: data.email,
-      subject: isSuccess 
-        ? '¡Bienvenido a Proyecto Cumbre! 🏔️' 
+      subject: isSuccess
+        ? '¡Bienvenido a Proyecto Cumbre! 🏔️'
         : '⚠️ Problema con tu pago - Proyecto Cumbre',
       html,
     });
@@ -92,50 +95,35 @@ export class EmailService {
   }
 
   // ========================================
-  // EVENT EMAILS (GENÉRICO + ESPECÍFICOS)
+  // EVENT EMAILS - MÉTODO ÚNICO
   // ========================================
 
   /**
-   * Email genérico para cualquier evento
+   * Enviar email de confirmación de evento
+   * ✅ Automáticamente usa la config correcta según el slug
+   * 
+   * @param eventSlug - Slug del evento ('misa', 'trail-nocturno', etc.)
+   * @param data - Datos del participante
    */
   static async sendEventConfirmation(
-    data: BaseEventEmailData,
-    config?: {
-      whatsappLink?: string;
-      features?: string[];
-      customMessage?: string;
-    }
+    eventSlug: string,
+    data: BaseEventEmailData
   ) {
-    return this.send({
-      to: data.email,
-      subject: `✅ Plaza confirmada - ${data.eventName}`,
-      html: EmailTemplates.eventConfirmation(data, config),
+    // ✅ Obtener config automáticamente por slug
+    const config = getEventEmailConfig(eventSlug, {
+      shirtSize: data.shirtSize,
+      eventDate: data.eventDate,
+      eventName: data.eventName,
     });
-  }
 
-  /**
-   * Email especializado para MISA
-   */
-  static async sendMisaConfirmation(data: {
-    email: string;
-    name: string;
-    phone: string;
-    shirtSize: string;
-    amount: number;
-  }) {
-    const whatsappLink = process.env.MISA_WHATSAPP_GROUP || 'https://chat.whatsapp.com/tu-grupo';
-    
+    // ✅ Generar HTML
+    const html = buildEventEmail(data, config);
+
+    // ✅ Enviar
     return this.send({
       to: data.email,
-      subject: '✅ Plaza confirmada - MISA 23 Enero 2026',
-      html: EmailTemplates.misaConfirmation(
-        {
-          ...data,
-          eventName: 'MISA',
-          eventDate: new Date('2026-01-23'),
-        },
-        whatsappLink
-      ),
+      subject: `✅ Plaza confirmada - ${config.eventName}`,
+      html,
     });
   }
 
@@ -178,3 +166,5 @@ export class EmailService {
     });
   }
 }
+
+export { EmailService };

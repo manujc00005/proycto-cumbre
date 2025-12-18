@@ -1,5 +1,6 @@
 // ========================================
 // BASE EMAIL STYLES (DRY)
+// lib\mailemail-base-styles.ts
 // ========================================
 
 export const BASE_STYLES = `

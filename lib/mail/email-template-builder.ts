@@ -1,3 +1,7 @@
+// ========================================
+// EMAIL TEMPLATE BUILDER - 
+// lib/email/email-service.ts
+// ========================================
 import { BASE_STYLES } from "./email-base-styles";
 
 export default class EmailTemplateBuilder {

@@ -1,7 +1,7 @@
 // ========================================
-// API CHECKOUT EVENTOS - CON EMAILS TEST
-// ✅ Envía emails inmediatamente para test users
-// ✅ Usuarios normales esperan al webhook
+// API CHECKOUT EVENTOS - CON MÉTODO GENÉRICO
+// ✅ Un solo método para TODOS los eventos
+// ✅ Config automática por slug
 // app/api/events/checkout/route.ts
 // ========================================
 
@@ -13,7 +13,7 @@ import { EventStatus, MembershipStatus, PaymentStatus, PaymentType, Registration
 import { z } from "zod";
 import crypto from "crypto";
 import { isTestUserEmail } from "../../helpers";
-import { EmailService } from "@/lib/mail/email-service";
+import EmailService from "@/lib/mail/email-service";
 
 export const runtime = "nodejs";
 
@@ -84,7 +84,7 @@ async function createDirectRegistration(params: {
 
   logger.log('🧪 MODO TEST - Creando registro directo');
   logger.log(`   Email: ${email}`);
-  logger.log(`   Evento: ${event.name}`);
+  logger.log(`   Evento: ${event.name} (${event.slug})`);
   logger.log(`   Monto: ${testAmount / 100}€`);
 
   const result = await prisma.$transaction(async (tx) => {
@@ -175,20 +175,17 @@ async function createDirectRegistration(params: {
   try {
     logger.log('📧 Enviando email de confirmación (test user)...');
     
-    // Detectar evento específico
-    if (event.slug === 'misa') {
-      await EmailService.sendMisaConfirmation({
-        email: email,
-        name: name,
-        phone: phone,
-        shirtSize: shirtSize || 'N/A',
-        amount: testAmount,
-      });
-    } else {
-      // Email genérico para otros eventos
-      logger.log(`⚠️ [TEST] Email genérico no implementado para: ${event.slug}`);
-      // TODO: await EmailService.sendEventConfirmation(...)
-    }
+    // ✅ Método genérico único para TODOS los eventos
+    await EmailService.sendEventConfirmation(event.slug, {
+      email: email,
+      name: name,
+      phone: phone,
+      dni: dni,
+      shirtSize: shirtSize,
+      amount: testAmount,
+      eventName: event.name,
+      eventDate: event.date, // Pasar la fecha del evento si existe
+    });
     
     logger.log('✅ Email enviado correctamente');
   } catch (emailError: any) {
@@ -261,6 +258,7 @@ export async function POST(request: NextRequest) {
         id: true,
         slug: true,
         name: true,
+        event_date: true,
         price: true,
         currency: true,
         max_participants: true,
@@ -391,7 +389,7 @@ export async function POST(request: NextRequest) {
 
     const session = await stripe.checkout.sessions.create(
       {
-        mode: 'payment', // ✅ OBLIGATORIO
+        mode: 'payment',
         payment_method_types: ["card"],
         customer_email: normalizedEmail,
         line_items: [

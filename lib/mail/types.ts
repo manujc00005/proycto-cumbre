@@ -1,3 +1,8 @@
+// ========================================
+// EMAIL TYPES - CENTRALIZED
+// lib/email/types.ts
+// ========================================
+
 export interface EmailOptions {
   to: string | string[];
   subject: string;
@@ -61,4 +66,45 @@ export interface OrderEmailData {
     province: string;
     postalCode: string;
   };
+}
+
+export interface EventEmailConfig {
+  eventName: string;
+  eventDate?: Date;
+  eventLocation?: string;
+  heroColor?: string;
+  whatsappLink?: string;
+  whatsappMessage?: string;
+  
+  // ✅ NUEVO: Detalles del evento
+  eventDetails?: {
+    meetingPoint?: string;      // Punto de encuentro
+    duration?: string;           // Duración estimada
+    difficulty?: string;         // Nivel/dificultad
+    requiredEquipment?: string;  // Material obligatorio
+  };
+  
+  // Detalles personalizados
+  customDetails?: Array<{
+    label: string;
+    value: string;
+  }>;
+  
+  features?: Array<{
+    icon: string;
+    title: string;
+    description?: string;
+  }>;
+  
+  importantNote?: {
+    icon?: string;
+    title: string;
+    message: string;
+  };
+  
+  ctaButtons?: Array<{
+    text: string;
+    url: string;
+    style?: 'primary' | 'secondary';
+  }>;
 }
