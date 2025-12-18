@@ -30,3 +30,12 @@ const testEmails = (process.env.TEST_USER_EMAILS ?? '')
 
 export const isTestUserEmail = (email?: string | null) =>
   !!email && testEmails.includes(normalizeEmail(email));
+
+export function toStripeMetadata(input: Record<string, unknown>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(input)) {
+    if (v === undefined || v === null) continue;
+    out[k] = typeof v === "string" ? v : JSON.stringify(v);
+  }
+  return out;
+}
