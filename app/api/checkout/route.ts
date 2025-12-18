@@ -1,16 +1,86 @@
-// app/api/checkout/route.ts - VERSIÓN CON SINGLETON PRISMA
+// ========================================
+// API CHECKOUT MEMBRESÍAS - CON BYPASS STRIPE
+// ✅ Detecta emails en allowlist
+// ✅ Crea Payment completed + Activa Member directamente
+// ✅ Devuelve redirect a /pago-exito
+// app/api/checkout/route.ts
+// ========================================
 
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { PaymentStatus } from '@prisma/client';
+import { PaymentStatus, MembershipStatus } from '@prisma/client';
 import { getLicensePrice, LICENSE_TYPES, MEMBERSHIP_FEE } from '@/lib/constants';
 import { logger } from '@/lib/logger';
 import { getStripe } from '@/lib/stripe';
 import { prisma } from '@/lib/prisma';
+import crypto from 'crypto';
+import { isTestUserEmail } from '../helpers';
+
+// ========================================
+// FUNCIÓN: Activar membresía sin Stripe
+// ========================================
+async function activateMembershipDirectly(params: {
+  memberId: string;
+  memberData: any;
+  total: number;
+}) {
+  const { memberId, memberData, total } = params;
+  const testAmount = parseInt(process.env.TEST_PAYMENT_AMOUNT || '500');
+  const fakeSessionId = `test_${crypto.randomBytes(16).toString('hex')}`;
+
+  logger.log('🧪 MODO TEST - Activando membresía directamente');
+  logger.log(`   Email: ${memberData.email}`);
+  logger.log(`   Monto original: ${total}€`);
+  logger.log(`   Monto de test: ${testAmount / 100}€`);
+
+  const now = new Date();
+  const oneYearFromNow = new Date();
+  oneYearFromNow.setFullYear(now.getFullYear() + 1);
+
+  // Transacción: Payment + Member update
+  const result = await prisma.$transaction(async (tx) => {
+    // 1) Crear Payment COMPLETED
+    const payment = await tx.payment.create({
+      data: {
+        payment_type: 'membership',
+        member_id: memberId,
+        stripe_session_id: fakeSessionId,
+        amount: testAmount,
+        currency: 'eur',
+        status: PaymentStatus.completed,
+        description: `🧪 TEST - Membresía - Licencia ${memberData.licenseType}`,
+        metadata: {
+          is_test_payment: true,
+          license_type: memberData.licenseType,
+          age_category: memberData.ageCategory || 'unknown',
+        },
+      },
+    });
+
+    // 2) Actualizar Member a ACTIVE
+    const updatedMember = await tx.member.update({
+      where: { id: memberId },
+      data: {
+        membership_status: MembershipStatus.active,
+        membership_start_date: now,
+        membership_end_date: oneYearFromNow,
+        admin_notes: `🧪 TEST - Pago completado el ${now.toISOString()}. Session: ${fakeSessionId}`,
+        updated_at: now,
+      },
+    });
+
+    return { payment, member: updatedMember };
+  });
+
+  logger.log('✅ Membresía activada directamente');
+  logger.log('   Payment ID:', result.payment.id);
+  logger.log('   Member status:', result.member.membership_status);
+
+  return result;
+}
 
 export async function POST(req: NextRequest) {
   try {
-    const stripe = getStripe();
     const body = await req.json();
     const { memberId, total, memberData } = body;
 
@@ -35,16 +105,44 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 🎯 DETECTAR SI ES USUARIO DE TEST
-    const isTestUser = memberData.email === process.env.TEST_USER_EMAIL;
-    const testAmount = parseInt(process.env.TEST_PAYMENT_AMOUNT || '500'); // 5€ por defecto
+    // ========================================
+    // 🎯 DETECTAR MODO TEST
+    // ========================================
+    const isTestUser = isTestUserEmail(memberData.email);
 
     if (isTestUser) {
-      logger.log('🧪 MODO TEST ACTIVADO - Usuario de prueba detectado');
-      logger.log(`   Email: ${memberData.email}`);
-      logger.log(`   Monto original: ${total}€`);
-      logger.log(`   Monto de test: ${testAmount / 100}€`);
+      // ========================================
+      // 🧪 FLUJO TEST: Sin Stripe
+      // ========================================
+      const result = await activateMembershipDirectly({
+        memberId,
+        memberData,
+        total,
+      });
+
+      const publicUrl = process.env.NEXT_PUBLIC_URL;
+      
+      return NextResponse.json({
+        success: true,
+        isTest: true,
+        sessionId: result.payment.stripe_session_id,
+        url: `${publicUrl}/pago-exito?session_id=${result.payment.stripe_session_id}`,
+        payment: {
+          id: result.payment.id,
+          status: result.payment.status,
+          amount: result.payment.amount,
+        },
+        member: {
+          id: result.member.id,
+          membership_status: result.member.membership_status,
+        },
+      });
     }
+
+    // ========================================
+    // 💳 FLUJO NORMAL: Con Stripe
+    // ========================================
+    const stripe = getStripe();
 
     // Buscar información de la licencia
     const selectedLicense = LICENSE_TYPES.find(l => l.id === memberData.licenseType);
@@ -61,51 +159,33 @@ export async function POST(req: NextRequest) {
       ? getLicensePrice(selectedLicense, memberData.ageCategory)
       : 0;
 
-    // 🎯 CREAR LINE ITEMS (modo test = un solo item de 5€)
-    let lineItems: Stripe.Checkout.SessionCreateParams.LineItem[];
-
-    if (isTestUser) {
-      // Modo test: un solo producto de 5€
-      lineItems = [{
+    // Crear line items (modo normal)
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+      {
         price_data: {
           currency: 'eur',
           product_data: {
-            name: '🧪 TEST - Membresía Proyecto Cumbre',
-            description: 'Pago de prueba en producción',
+            name: 'Cuota de Socio Anual - Proyecto Cumbre',
+            description: 'Membresía anual del club de montaña',
           },
-          unit_amount: testAmount, // 500 = 5€
+          unit_amount: MEMBERSHIP_FEE * 100,
         },
         quantity: 1,
-      }];
-    } else {
-      // Modo normal: cuota + licencia
-      lineItems = [
-        {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: 'Cuota de Socio Anual - Proyecto Cumbre',
-              description: 'Membresía anual del club de montaña',
-            },
-            unit_amount: MEMBERSHIP_FEE * 100,
-          },
-          quantity: 1,
-        },
-      ];
+      },
+    ];
 
-      if (licensePrice > 0) {
-        lineItems.push({
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: `Licencia FEDME - ${selectedLicense.name}`,
-              description: selectedLicense.coverage,
-            },
-            unit_amount: Math.round(licensePrice * 100),
+    if (licensePrice > 0) {
+      lineItems.push({
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: `Licencia FEDME - ${selectedLicense.name}`,
+            description: selectedLicense.coverage,
           },
-          quantity: 1,
-        });
-      }
+          unit_amount: Math.round(licensePrice * 100),
+        },
+        quantity: 1,
+      });
     }
 
     // ✅ CREAR SESIÓN DE STRIPE
@@ -121,29 +201,24 @@ export async function POST(req: NextRequest) {
         email: memberData.email,
         licenseType: memberData.licenseType,
         ageCategory: memberData.ageCategory || 'unknown',
-        isTestPayment: isTestUser ? 'true' : 'false', // 👈 Marcar como test
       },
       customer_email: memberData.email,
     });
 
     logger.log('✅ Sesión de Stripe creada:', session.id);
 
-    // ✅ CREAR PAYMENT EN BD (con el monto correcto según modo)
+    // ✅ CREAR PAYMENT EN BD
     try {
-      const finalAmount = isTestUser ? testAmount : (total * 100);
-      
       const payment = await prisma.payment.create({
         data: {
           payment_type: 'membership',
           member_id: memberId,
           stripe_session_id: session.id,
           stripe_payment_id: session.payment_intent as string || null,
-          amount: finalAmount, // Ya en centavos
+          amount: total * 100,
           currency: 'eur',
           status: 'pending' as PaymentStatus,
-          description: isTestUser 
-            ? `🧪 TEST - Membresía - Licencia ${memberData.licenseType}`
-            : `Membresía - Licencia ${memberData.licenseType}`,
+          description: `Membresía - Licencia ${memberData.licenseType}`,
         }
       });
 
@@ -153,9 +228,6 @@ export async function POST(req: NextRequest) {
       logger.log('   - Status:', payment.status);
       logger.log('   - Amount:', payment.amount / 100, '€');
       logger.log('   - Stripe Session:', session.id);
-      if (isTestUser) {
-        logger.log('   - ⚠️ MODO TEST ACTIVADO');
-      }
 
     } catch (paymentError: any) {
       if (paymentError.code === 'P2002') {
@@ -166,6 +238,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({
+      success: true,
+      isTest: false,
       sessionId: session.id,
       url: session.url,
     });
@@ -178,5 +252,4 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-  // 👈 NO HAY finally con $disconnect()
 }

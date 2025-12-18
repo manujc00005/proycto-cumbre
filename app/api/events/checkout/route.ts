@@ -1,8 +1,9 @@
 // ========================================
-// API CHECKOUT CORREGIDO
-// ✅ NO crea EventRegistration hasta pago exitoso
-// ✅ Crea Payment pending con metadata
-// ✅ Webhook completa el registro
+// API CHECKOUT EVENTOS - CON BYPASS STRIPE
+// ✅ Detecta emails en allowlist
+// ✅ Crea Payment completed directamente
+// ✅ Crea EventRegistration sin pasar por Stripe
+// ✅ Devuelve URL especial /pago-exito-test
 // app/api/events/checkout/route.ts
 // ========================================
 
@@ -10,8 +11,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { EventStatus, MembershipStatus, PaymentStatus, PaymentType } from "@prisma/client";
+import { EventStatus, MembershipStatus, PaymentStatus, PaymentType, RegistrationStatus } from "@prisma/client";
 import { z } from "zod";
+import crypto from "crypto";
+import { isTestUserEmail } from "../../helpers";
 
 export const runtime = "nodejs";
 
@@ -45,6 +48,142 @@ function getClientIp(request: NextRequest) {
   );
 }
 
+// ========================================
+// FUNCIÓN: Crear registro COMPLETO sin Stripe
+// ========================================
+async function createDirectRegistration(params: {
+  event: any;
+  memberId: string | null;
+  isMember: boolean;
+  name: string;
+  email: string;
+  phone: string;
+  dni: string;
+  shirtSize?: string;
+  customData: Record<string, any>;
+  consents: any;
+  waiverAcceptanceId?: string;
+  clientIp: string;
+}) {
+  const {
+    event,
+    memberId,
+    isMember,
+    name,
+    email,
+    phone,
+    dni,
+    shirtSize,
+    customData,
+    consents,
+    waiverAcceptanceId,
+    clientIp,
+  } = params;
+
+  // Generar ID único para simular sesión
+  const fakeSessionId = `test_${crypto.randomBytes(16).toString('hex')}`;
+  const testAmount = parseInt(process.env.TEST_PAYMENT_AMOUNT || '500');
+
+  logger.log('🧪 MODO TEST - Creando registro directo');
+  logger.log(`   Email: ${email}`);
+  logger.log(`   Evento: ${event.name}`);
+  logger.log(`   Monto: ${testAmount / 100}€`);
+
+  // Transacción: Payment + EventRegistration
+  const result = await prisma.$transaction(async (tx) => {
+    // 1) Crear Payment COMPLETED
+    const payment = await tx.payment.create({
+      data: {
+        payment_type: PaymentType.event,
+        member_id: memberId,
+        stripe_session_id: fakeSessionId,
+        amount: testAmount,
+        currency: event.currency ?? "eur",
+        status: PaymentStatus.completed, // ✅ Directamente completed
+        description: `🧪 TEST - ${event.name} - ${name}${isMember ? " (Socio)" : ""}`,
+        metadata: {
+          event_id: event.id,
+          event_slug: event.slug,
+          participant_name: name,
+          participant_email: email,
+          participant_phone: phone,
+          participant_dni: dni,
+          shirt_size: shirtSize,
+          custom_data: customData,
+          ip_address: clientIp,
+          is_member: isMember,
+          waiver_acceptance_id: waiverAcceptanceId,
+          is_test_payment: true, // ✅ Marcar como test
+          
+          privacy_accepted: true,
+          privacy_accepted_at: consents.privacy_accepted_at || new Date().toISOString(),
+          whatsapp_consent: true,
+          whatsapp_consent_at: consents.whatsapp_consent_at || new Date().toISOString(),
+          marketing_consent: consents.marketing_consent || false,
+        },
+      },
+    });
+
+    // 2) Crear EventRegistration CONFIRMED
+    const registration = await tx.eventRegistration.create({
+      data: {
+        event_id: event.id,
+        member_id: memberId,
+        participant_name: name,
+        participant_email: email,
+        participant_phone: phone,
+        participant_dni: dni,
+        shirt_size: shirtSize,
+        status: RegistrationStatus.confirmed, // ✅ Directamente confirmed
+        
+        // RGPD
+        privacy_accepted: true,
+        privacy_accepted_at: new Date(consents.privacy_accepted_at || new Date()),
+        whatsapp_consent: true,
+        whatsapp_consent_at: new Date(consents.whatsapp_consent_at || new Date()),
+        marketing_consent: consents.marketing_consent || false,
+        
+        custom_data: customData,
+        ip_address: clientIp,
+      },
+    });
+
+    // 3) Vincular Payment con EventRegistration
+    await tx.payment.update({
+      where: { id: payment.id },
+      data: { event_registration_id: registration.id },
+    });
+
+    // 4) Vincular WaiverAcceptance (si existe)
+    if (waiverAcceptanceId) {
+      await tx.waiverAcceptance.update({
+        where: { id: waiverAcceptanceId },
+        data: { 
+          event_registration_id: registration.id,
+          member_id: memberId,
+        },
+      });
+    }
+
+    // 5) Incrementar current_participants
+    await tx.event.update({
+      where: { id: event.id },
+      data: { current_participants: { increment: 1 } },
+    });
+
+    return { payment, registration };
+  });
+
+  logger.log('✅ Registro directo completado');
+  logger.log('   Payment ID:', result.payment.id);
+  logger.log('   Registration ID:', result.registration.id);
+
+  return result;
+}
+
+// ========================================
+// HANDLER PRINCIPAL
+// ========================================
 export async function POST(request: NextRequest) {
   try {
     const raw = await request.json();
@@ -85,7 +224,7 @@ export async function POST(request: NextRequest) {
     logger.apiStart("POST", "/api/events/checkout", { eventId, email: normalizedEmail });
 
     // ========================================
-    // ✅ VALIDACIÓN RGPD
+    // VALIDACIÓN RGPD
     // ========================================
     if (!consents.privacy_accepted) {
       return NextResponse.json(
@@ -147,7 +286,7 @@ export async function POST(request: NextRequest) {
       where: {
         event_id: eventId,
         participant_dni: normalizedDni,
-        status: { in: ['pending', 'confirmed'] }
+        status: { in: [RegistrationStatus.pending, RegistrationStatus.confirmed] }
       },
       select: { id: true, status: true }
     });
@@ -188,7 +327,56 @@ export async function POST(request: NextRequest) {
     if (custom_fields) Object.assign(customData, custom_fields);
 
     // ========================================
-    // 5) CREAR SESIÓN STRIPE
+    // 🎯 DETECTAR MODO TEST
+    // ========================================
+    const isTestUser = isTestUserEmail(normalizedEmail);
+
+    if (isTestUser) {
+      // ========================================
+      // 🧪 FLUJO TEST: Sin Stripe
+      // ========================================
+      const result = await createDirectRegistration({
+        event,
+        memberId,
+        isMember,
+        name,
+        email: normalizedEmail,
+        phone: normalizedPhone,
+        dni: normalizedDni,
+        shirtSize,
+        customData,
+        consents,
+        waiverAcceptanceId: waiver_acceptance_id,
+        clientIp,
+      });
+
+      logger.apiSuccess("Checkout TEST completado", {
+        eventSlug: event.slug,
+        payment_id: result.payment.id,
+        registration_id: result.registration.id,
+      });
+
+      // ✅ Devolver URL especial para test
+      const publicUrl = process.env.NEXT_PUBLIC_URL;
+      return NextResponse.json({
+        success: true,
+        isTest: true,
+        sessionId: result.payment.stripe_session_id,
+        url: `${publicUrl}/pago-exito?session_id=${result.payment.stripe_session_id}`,
+        registration: {
+          id: result.registration.id,
+          status: result.registration.status,
+        },
+        payment: {
+          id: result.payment.id,
+          status: result.payment.status,
+          amount: result.payment.amount,
+        },
+      });
+    }
+
+    // ========================================
+    // 💳 FLUJO NORMAL: Con Stripe
     // ========================================
     const stripe = getStripe();
 
@@ -231,7 +419,6 @@ export async function POST(request: NextRequest) {
         member_id: memberId ?? "",
         is_member: isMember ? "true" : "false",
         
-        // ✅ GUARDAR DATOS PARA EL WEBHOOK
         participant_name: name,
         participant_email: normalizedEmail,
         participant_phone: normalizedPhone,
@@ -239,23 +426,19 @@ export async function POST(request: NextRequest) {
         shirt_size: shirtSize,
         custom_data: JSON.stringify(customData),
         
-        // ✅ CONSENTIMIENTOS
         privacy_accepted: true,
         privacy_accepted_at: consents.privacy_accepted_at || new Date().toISOString(),
         whatsapp_consent: true,
         whatsapp_consent_at: consents.whatsapp_consent_at || new Date().toISOString(),
         marketing_consent: true,
         
-        // ✅ WAIVER ACCEPTANCE ID
         waiver_acceptance_id: waiver_acceptance_id ?? "",
       },
     });
 
     logger.log("✅ Sesión de Stripe creada:", session.id);
 
-    // ========================================
-    // 6) CREAR PAYMENT PENDING
-    // ========================================
+    // Crear Payment PENDING
     await prisma.payment.create({
       data: {
         payment_type: PaymentType.event,
@@ -278,7 +461,6 @@ export async function POST(request: NextRequest) {
           is_member: isMember,
           waiver_acceptance_id: waiver_acceptance_id,
           
-          // ✅ Consentimientos en metadata
           privacy_accepted: true,
           privacy_accepted_at: consents.privacy_accepted_at || new Date().toISOString(),
           whatsapp_consent: true,
@@ -298,6 +480,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      isTest: false,
       sessionId: session.id,
       url: session.url,
     });

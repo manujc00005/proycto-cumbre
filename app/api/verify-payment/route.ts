@@ -26,63 +26,108 @@ export async function POST(request: NextRequest) {
 
     logger.log("🔍 Verificando pago:", sessionId);
 
-    // 1) Stripe
-    const stripe = getStripe();
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    // ========================================
+    // 🎯 DETECTAR SI ES SESIÓN TEST
+    // ========================================
+    const isTestSession = sessionId.startsWith('test_');
 
-    if (!session) {
-      return NextResponse.json({ error: "Sesión no encontrada" }, { status: 404 });
-    }
+    let payment;
+    let stripeMappedStatus;
 
-    // 2) Payment en BD
-    const payment = await prisma.payment.findUnique({
-      where: { stripe_session_id: sessionId },
-      select: {
-        id: true,
-        payment_type: true,
-        amount: true,
-        currency: true,
-        status: true,
-        member_id: true,
-        event_registration_id: true,
-        order_id: true,
-        metadata: true,
-      },
-    });
+    if (isTestSession) {
+      // ========================================
+      // 🧪 SESIÓN TEST: Solo consultar BD
+      // ========================================
+      logger.log('🧪 Sesión de test detectada');
 
-    if (!payment) {
-      return NextResponse.json(
-        { error: "Pago no encontrado en base de datos" },
-        { status: 404 }
-      );
-    }
-
-    // 3) Sincroniza status con Stripe (si cambia)
-    const stripeMappedStatus = mapStripeToPaymentStatus(session);
-
-    // Si añadiste PaymentStatus.cancelled, aquí podrías mapear "canceled" si lo detectas por tu lógica.
-    // Stripe no siempre lo marca como "canceled" en checkout, suele ser open/expired.
-
-    if (payment.status !== stripeMappedStatus) {
-      await prisma.payment.update({
-        where: { id: payment.id },
-        data: { status: stripeMappedStatus },
+      payment = await prisma.payment.findUnique({
+        where: { stripe_session_id: sessionId },
+        select: {
+          id: true,
+          payment_type: true,
+          amount: true,
+          currency: true,
+          status: true,
+          member_id: true,
+          event_registration_id: true,
+          order_id: true,
+          metadata: true,
+        },
       });
+
+      if (!payment) {
+        return NextResponse.json(
+          { error: "Pago no encontrado en base de datos" },
+          { status: 404 }
+        );
+      }
+
+      // Para test, el status ya está en completed
+      stripeMappedStatus = payment.status;
+
+    } else {
+      // ========================================
+      // 💳 SESIÓN NORMAL: Consultar Stripe + BD
+      // ========================================
+      const stripe = getStripe();
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+      if (!session) {
+        return NextResponse.json({ error: "Sesión no encontrada en Stripe" }, { status: 404 });
+      }
+
+      payment = await prisma.payment.findUnique({
+        where: { stripe_session_id: sessionId },
+        select: {
+          id: true,
+          payment_type: true,
+          amount: true,
+          currency: true,
+          status: true,
+          member_id: true,
+          event_registration_id: true,
+          order_id: true,
+          metadata: true,
+        },
+      });
+
+      if (!payment) {
+        return NextResponse.json(
+          { error: "Pago no encontrado en base de datos" },
+          { status: 404 }
+        );
+      }
+
+      // Sincronizar status con Stripe
+      stripeMappedStatus = mapStripeToPaymentStatus(session);
+
+      if (payment.status !== stripeMappedStatus) {
+        await prisma.payment.update({
+          where: { id: payment.id },
+          data: { status: stripeMappedStatus },
+        });
+      }
     }
 
-    // 4) Construir respuesta tipada (sin any)
+    // ========================================
+    // CONSTRUIR RESPUESTA
+    // ========================================
     const uiType =
       payment.payment_type === PaymentType.order ? "shop" : payment.payment_type;
+    
     const baseResponse = {
       sessionId,
       type: uiType,
       amount: payment.amount,
       currency: payment.currency,
       status: stripeMappedStatus,
-      stripe: {
-        status: session.status,
-        payment_status: session.payment_status,
-      },
+      isTest: isTestSession, // ✅ Indicar si es test
+      ...(isTestSession ? {} : {
+        stripe: {
+          status: 'complete',
+          payment_status: 'paid',
+        },
+      }),
       metadata: payment.metadata,
     };
 
@@ -189,6 +234,7 @@ export async function POST(request: NextRequest) {
 
     // Default
     return NextResponse.json(baseResponse);
+    
   } catch (error: any) {
     logger.error("❌ Error verificando pago:", error);
     return NextResponse.json(

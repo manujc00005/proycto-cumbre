@@ -20,3 +20,13 @@ export function getMetadataObject(metadata: unknown): JsonObject | null {
   if (metadata && typeof metadata === "object" && !Array.isArray(metadata)) return metadata as JsonObject;
   return null;
 }
+
+const normalizeEmail = (v: string) => v.trim().toLowerCase();
+
+const testEmails = (process.env.TEST_USER_EMAILS ?? '')
+  .split(',')
+  .map(normalizeEmail)
+  .filter(Boolean);
+
+export const isTestUserEmail = (email?: string | null) =>
+  !!email && testEmails.includes(normalizeEmail(email));

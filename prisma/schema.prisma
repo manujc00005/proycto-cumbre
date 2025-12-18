@@ -1,3 +1,8 @@
+// ========================================
+// PRISMA SCHEMA - E-COMMERCE COMPLETE
+// Production-ready con todas las mejoras
+// ========================================
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,6 +12,10 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
+// ========================================
+// HEADQUARTERS & MEMBERS (Sin cambios)
+// ========================================
 
 model Headquarters {
   id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -33,7 +42,7 @@ model Member {
   email                  String              @unique @db.VarChar(255)
   first_name             String              @db.VarChar(100)
   last_name              String              @db.VarChar(100)
-  nickname String? @db.VarChar(50)
+  nickname               String?             @db.VarChar(50)
   birth_date             DateTime            @db.Date
   dni                    String?             @db.VarChar(20)
   sex                    Sex
@@ -67,11 +76,16 @@ model Member {
   admin_notes            String?
   created_at             DateTime            @default(now())
   updated_at             DateTime            @updatedAt
-  eventRegistrations     EventRegistration[]
+  
+  // Relations
   headquarters           Headquarters?       @relation(fields: [headquarters_id], references: [id])
+  eventRegistrations     EventRegistration[]
   orders                 Order[]
   payments               Payment[]
   waiverAcceptances      WaiverAcceptance[]
+  carts                  Cart[]
+  shippingAddresses      ShippingAddress[]
+  productReviews         ProductReview[]
 
   @@index([headquarters_id])
   @@index([email])
@@ -85,6 +99,10 @@ model Member {
   @@index([privacy_policy_version])
   @@map("members")
 }
+
+// ========================================
+// EVENTS (Sin cambios)
+// ========================================
 
 model Event {
   id                   String              @id @default(uuid()) @db.Uuid
@@ -116,31 +134,35 @@ model Event {
 }
 
 model EventRegistration {
-  id                     String             @id @default(uuid()) @db.Uuid
-  event_id               String             @db.Uuid
-  member_id              String?            @db.Uuid
-  participant_name       String             @db.VarChar(255)
-  participant_email      String             @db.VarChar(255)
-  participant_phone      String             @db.VarChar(20)
-  participant_dni        String             @db.VarChar(50)
+  id                     String               @id @default(uuid()) @db.Uuid
+  event_id               String               @db.Uuid
+  member_id              String?              @db.Uuid
+  participant_name       String               @db.VarChar(255)
+  participant_email      String               @db.VarChar(255)
+  participant_phone      String               @db.VarChar(20)
+  participant_dni        String               @db.VarChar(50)
+  shirt_size             String?              @db.VarChar(10)
+  ip_address             String?              @db.VarChar(45)
   custom_data            Json?
-  status                 String             @default("pending") @db.VarChar(20)
-  privacy_accepted       Boolean            @default(false)
+  status                 RegistrationStatus   @default(pending)
+  privacy_accepted       Boolean              @default(false)
   privacy_accepted_at    DateTime?
-  privacy_policy_version String?            @default("1.0") @db.VarChar(20)
-  whatsapp_consent       Boolean            @default(false)
+  privacy_policy_version String?              @default("1.0") @db.VarChar(20)
+  whatsapp_consent       Boolean              @default(false)
   whatsapp_consent_at    DateTime?
-  marketing_consent      Boolean            @default(false)
+  marketing_consent      Boolean              @default(false)
   marketing_consent_at   DateTime?
   marketing_revoked_at   DateTime?
-  registered_at          DateTime           @default(now())
-  created_at             DateTime           @default(now())
-  updated_at             DateTime           @updatedAt
-  event                  Event              @relation(fields: [event_id], references: [id], onDelete: Cascade)
-  member                 Member?            @relation(fields: [member_id], references: [id])
+  registered_at          DateTime             @default(now())
+  created_at             DateTime             @default(now())
+  updated_at             DateTime             @updatedAt
+  
+  event                  Event                @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  member                 Member?              @relation(fields: [member_id], references: [id])
   payment                Payment?
   waiverAcceptances      WaiverAcceptance[]
 
+  @@unique([event_id, participant_dni])
   @@index([event_id])
   @@index([member_id])
   @@index([participant_email])
@@ -148,10 +170,43 @@ model EventRegistration {
   @@index([privacy_accepted])
   @@index([privacy_policy_version])
   @@index([marketing_consent])
-  @@index([participant_dni]) 
-  @@unique([event_id, participant_dni])
+  @@index([participant_dni])
   @@map("event_registrations")
 }
+
+// ========================================
+// E-COMMERCE: CATEGORIES
+// ========================================
+
+model Category {
+  id          String     @id @default(uuid()) @db.Uuid
+  slug        String     @unique @db.VarChar(100)
+  name        String     @db.VarChar(255)
+  description String?
+  
+  parent_id   String?    @db.Uuid
+  parent      Category?  @relation("CategoryHierarchy", fields: [parent_id], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+  
+  image_url   String?    @db.VarChar(500)
+  sort_order  Int        @default(0)
+  status      String     @default("active") @db.VarChar(20)
+  
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+  
+  products    ProductCategory[]
+  
+  @@index([slug])
+  @@index([parent_id])
+  @@index([status])
+  @@index([sort_order])
+  @@map("categories")
+}
+
+// ========================================
+// E-COMMERCE: PRODUCTS
+// ========================================
 
 model Product {
   id                  String      @id @default(uuid()) @db.Uuid
@@ -166,7 +221,6 @@ model Product {
   track_inventory     Boolean     @default(true)
   has_variants        Boolean     @default(false)
   variants            Json?
-  category            String?     @db.VarChar(100)
   tags                String[]
   images              Json?
   meta_title          String?     @db.VarChar(255)
@@ -175,41 +229,169 @@ model Product {
   featured            Boolean     @default(false)
   created_at          DateTime    @default(now())
   updated_at          DateTime    @updatedAt
+  
+  // Relations
+  categories          ProductCategory[]
   orderItems          OrderItem[]
+  cartItems           CartItem[]
+  reviews             ProductReview[]
+  stockReservations   StockReservation[]
 
   @@index([slug])
   @@index([status])
-  @@index([category])
   @@index([featured])
   @@map("products")
 }
 
+model ProductCategory {
+  product_id    String   @db.Uuid
+  category_id   String   @db.Uuid
+  
+  product       Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  category      Category @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  
+  @@id([product_id, category_id])
+  @@index([product_id])
+  @@index([category_id])
+  @@map("product_categories")
+}
+
+// ========================================
+// E-COMMERCE: CART (NUEVO)
+// ========================================
+
+model Cart {
+  id                String     @id @default(uuid()) @db.Uuid
+  session_id        String?    @unique @db.VarChar(255)
+  member_id         String?    @db.Uuid
+  guest_email       String?    @db.VarChar(255)
+  
+  marketing_consent    Boolean?
+  marketing_consent_at DateTime?
+  
+  expires_at        DateTime
+  created_at        DateTime   @default(now())
+  updated_at        DateTime   @updatedAt
+  
+  items             CartItem[]
+  member            Member?    @relation(fields: [member_id], references: [id])
+  
+  @@index([session_id])
+  @@index([member_id])
+  @@index([guest_email])
+  @@index([expires_at])
+  @@map("carts")
+}
+
+model CartItem {
+  id           String   @id @default(uuid()) @db.Uuid
+  cart_id      String   @db.Uuid
+  product_id   String   @db.Uuid
+  variant_data Json?
+  quantity     Int
+  unit_price   Int
+  
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  
+  cart         Cart     @relation(fields: [cart_id], references: [id], onDelete: Cascade)
+  product      Product  @relation(fields: [product_id], references: [id])
+  
+  @@index([cart_id])
+  @@index([product_id])
+  @@map("cart_items")
+}
+
+// ========================================
+// E-COMMERCE: DISCOUNT CODES (NUEVO)
+// ========================================
+
+model DiscountCode {
+  id                String       @id @default(uuid()) @db.Uuid
+  code              String       @unique @db.VarChar(50)
+  description       String?
+  
+  discount_type     DiscountType
+  discount_value    Int
+  
+  min_purchase      Int?
+  max_discount      Int?
+  
+  valid_from        DateTime?
+  valid_until       DateTime?
+  
+  max_uses          Int?
+  max_uses_per_user Int?         @default(1)
+  current_uses      Int          @default(0)
+  
+  applicable_to     Json?
+  members_only      Boolean      @default(false)
+  
+  status            String       @default("active") @db.VarChar(20)
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+  
+  orders            Order[]
+  
+  @@index([code])
+  @@index([status])
+  @@index([valid_until])
+  @@map("discount_codes")
+}
+
+// ========================================
+// E-COMMERCE: ORDERS (MEJORADO)
+// ========================================
+
 model Order {
-  id                     String      @id @default(uuid()) @db.Uuid
-  order_number           String      @unique @db.VarChar(50)
-  member_id              String?     @db.Uuid
-  customer_email         String      @db.VarChar(255)
-  customer_name          String      @db.VarChar(255)
-  customer_phone         String?     @db.VarChar(20)
+  id                     String         @id @default(uuid()) @db.Uuid
+  order_number           String         @unique @db.VarChar(50)
+  member_id              String?        @db.Uuid
+  customer_email         String         @db.VarChar(255)
+  customer_name          String         @db.VarChar(255)
+  customer_phone         String?        @db.VarChar(20)
+  
+  // Dirección (mantener Json como snapshot)
+  shipping_address_id    String?        @db.Uuid
   shipping_address       Json
+  
+  // Precios
   subtotal               Int
-  shipping_cost          Int         @default(0)
-  tax                    Int         @default(0)
-  discount               Int         @default(0)
+  shipping_cost          Int            @default(0)
+  tax                    Int            @default(0)
+  discount               Int            @default(0)
   total                  Int
-  currency               String      @default("eur") @db.VarChar(3)
-  status                 OrderStatus @default(pending)
-  tracking_number        String?     @db.VarChar(255)
+  currency               String         @default("eur") @db.VarChar(3)
+  
+  // Cupón
+  discount_code_id       String?        @db.Uuid
+  discount_code          DiscountCode?  @relation(fields: [discount_code_id], references: [id])
+  
+  // Estado
+  status                 OrderStatus    @default(pending)
+  tracking_number        String?        @db.VarChar(255)
   shipped_at             DateTime?
   delivered_at           DateTime?
+  
+  // Notas
   customer_notes         String?
   admin_notes            String?
-  privacy_policy_version String?     @default("1.0") @db.VarChar(20)
-  created_at             DateTime    @default(now())
-  updated_at             DateTime    @updatedAt
+  
+  // RGPD
+  privacy_policy_version String?        @default("1.0") @db.VarChar(20)
+  marketing_consent      Boolean        @default(false)
+  marketing_consent_at   DateTime?
+  marketing_revoked_at   DateTime?
+  ip_address             String?        @db.VarChar(45)
+  
+  created_at             DateTime       @default(now())
+  updated_at             DateTime       @updatedAt
+  
+  // Relations
   items                  OrderItem[]
-  member                 Member?     @relation(fields: [member_id], references: [id])
+  member                 Member?        @relation(fields: [member_id], references: [id])
   payments               Payment[]
+  reviews                ProductReview[]
 
   @@index([order_number])
   @@index([member_id])
@@ -217,6 +399,8 @@ model Order {
   @@index([status])
   @@index([created_at(sort: Desc)])
   @@index([privacy_policy_version])
+  @@index([marketing_consent])
+  @@index([discount_code_id])
   @@map("orders")
 }
 
@@ -231,6 +415,7 @@ model OrderItem {
   unit_price   Int
   total_price  Int
   created_at   DateTime @default(now())
+  
   order        Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
   product      Product? @relation(fields: [product_id], references: [id])
 
@@ -238,6 +423,105 @@ model OrderItem {
   @@index([product_id])
   @@map("order_items")
 }
+
+// ========================================
+// E-COMMERCE: STOCK RESERVATIONS (NUEVO)
+// ========================================
+
+model StockReservation {
+  id         String    @id @default(uuid()) @db.Uuid
+  product_id String    @db.Uuid
+  variant_id String?   @db.VarChar(100)
+  quantity   Int
+  
+  cart_id    String?   @db.Uuid
+  order_id   String?   @db.Uuid
+  
+  status     String    @default("active") @db.VarChar(20)
+  expires_at DateTime
+  
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  
+  product    Product   @relation(fields: [product_id], references: [id])
+  
+  @@index([product_id])
+  @@index([cart_id])
+  @@index([order_id])
+  @@index([expires_at])
+  @@index([status])
+  @@map("stock_reservations")
+}
+
+// ========================================
+// E-COMMERCE: SHIPPING ADDRESSES (NUEVO)
+// ========================================
+
+model ShippingAddress {
+  id             String   @id @default(uuid()) @db.Uuid
+  member_id      String?  @db.Uuid
+  guest_email    String?  @db.VarChar(255)
+  
+  label          String?  @db.VarChar(100)
+  recipient_name String   @db.VarChar(255)
+  address_line1  String   @db.VarChar(255)
+  address_line2  String?  @db.VarChar(255)
+  city           String   @db.VarChar(100)
+  province       String   @db.VarChar(100)
+  postal_code    String   @db.VarChar(10)
+  country        String   @default("ES") @db.VarChar(2)
+  phone          String   @db.VarChar(20)
+  
+  is_default     Boolean  @default(false)
+  
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+  
+  member         Member?  @relation(fields: [member_id], references: [id])
+  
+  @@index([member_id])
+  @@index([guest_email])
+  @@map("shipping_addresses")
+}
+
+// ========================================
+// E-COMMERCE: REVIEWS (NUEVO)
+// ========================================
+
+model ProductReview {
+  id                 String   @id @default(uuid()) @db.Uuid
+  product_id         String   @db.Uuid
+  order_id           String?  @db.Uuid
+  member_id          String?  @db.Uuid
+  
+  rating             Int
+  title              String?  @db.VarChar(255)
+  comment            String?  @db.Text
+  
+  verified_purchase  Boolean  @default(false)
+  status             String   @default("pending") @db.VarChar(20)
+  
+  helpful_count      Int      @default(0)
+  not_helpful_count  Int      @default(0)
+  
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+  
+  product            Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  member             Member?  @relation(fields: [member_id], references: [id])
+  order              Order?   @relation(fields: [order_id], references: [id])
+  
+  @@unique([order_id, product_id])
+  @@index([product_id])
+  @@index([member_id])
+  @@index([status])
+  @@index([rating])
+  @@map("product_reviews")
+}
+
+// ========================================
+// PAYMENTS (Sin cambios)
+// ========================================
 
 model Payment {
   id                    String             @id @default(uuid()) @db.Uuid
@@ -254,6 +538,7 @@ model Payment {
   metadata              Json?
   created_at            DateTime           @default(now())
   updated_at            DateTime           @updatedAt
+  
   eventRegistration     EventRegistration? @relation(fields: [event_registration_id], references: [id])
   member                Member?            @relation(fields: [member_id], references: [id])
   order                 Order?             @relation(fields: [order_id], references: [id])
@@ -267,6 +552,10 @@ model Payment {
   @@index([created_at(sort: Desc)])
   @@map("payments")
 }
+
+// ========================================
+// WAIVERS (Sin cambios)
+// ========================================
 
 model WaiverAcceptance {
   id                      String             @id @default(uuid()) @db.Uuid
@@ -285,6 +574,7 @@ model WaiverAcceptance {
   updated_at              DateTime           @updatedAt
   event_registration_id   String?            @db.Uuid
   member_id               String?            @db.Uuid
+  
   event                   Event              @relation(fields: [event_id], references: [id], onDelete: Cascade)
   eventRegistration       EventRegistration? @relation(fields: [event_registration_id], references: [id])
   member                  Member?            @relation(fields: [member_id], references: [id])
@@ -298,6 +588,10 @@ model WaiverAcceptance {
   @@index([accepted_at(sort: Desc)])
   @@map("waiver_acceptances")
 }
+
+// ========================================
+// ENUMS
+// ========================================
 
 enum Sex {
   M
@@ -363,4 +657,18 @@ enum OrderStatus {
   delivered
   cancelled
   refunded
+}
+
+enum RegistrationStatus {
+  pending
+  confirmed
+  cancelled
+  attended
+  no_show
+}
+
+// ✅ NUEVO: Tipos de descuento
+enum DiscountType {
+  percentage
+  fixed
 }

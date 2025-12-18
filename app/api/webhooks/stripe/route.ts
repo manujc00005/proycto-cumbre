@@ -224,7 +224,7 @@ async function processMembershipPayment(session: Stripe.Checkout.Session) {
       email: updatedMember.email,
       firstName: updatedMember.first_name,
       lastName: updatedMember.last_name,
-      memberNumber: updatedMember.member_number,
+      memberNumber: updatedMember.member_number || 'none' ,
       licenseType: updatedMember.license_type || 'none',
       paymentStatus: 'success',
       amount: session.amount_total || 0,
