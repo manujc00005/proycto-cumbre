@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
-import { useEffect } from 'react';
+import Image from "next/image";
+import { useEffect } from "react";
 
 interface LightboxProps {
   isOpen: boolean;
@@ -22,39 +22,39 @@ export default function Lightbox({
   onNext,
   onPrev,
   currentIndex,
-  totalImages
+  totalImages,
 }: LightboxProps) {
   // Cerrar con tecla ESC
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     };
     if (isOpen) {
-      window.addEventListener('keydown', handleEsc);
-      document.body.style.overflow = 'hidden'; // Prevenir scroll
+      window.addEventListener("keydown", handleEsc);
+      document.body.style.overflow = "hidden"; // Prevenir scroll
     }
     return () => {
-      window.removeEventListener('keydown', handleEsc);
-      document.body.style.overflow = 'unset';
+      window.removeEventListener("keydown", handleEsc);
+      document.body.style.overflow = "unset";
     };
   }, [isOpen, onClose]);
 
   // Navegar con flechas del teclado
   useEffect(() => {
     const handleArrows = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft' && onPrev) onPrev();
-      if (e.key === 'ArrowRight' && onNext) onNext();
+      if (e.key === "ArrowLeft" && onPrev) onPrev();
+      if (e.key === "ArrowRight" && onNext) onNext();
     };
     if (isOpen) {
-      window.addEventListener('keydown', handleArrows);
+      window.addEventListener("keydown", handleArrows);
     }
-    return () => window.removeEventListener('keydown', handleArrows);
+    return () => window.removeEventListener("keydown", handleArrows);
   }, [isOpen, onNext, onPrev]);
 
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={onClose}
     >
@@ -64,8 +64,18 @@ export default function Lightbox({
         className="absolute top-4 right-4 text-white hover:text-orange-400 transition z-10"
         aria-label="Cerrar"
       >
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        <svg
+          className="w-8 h-8"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
 
@@ -86,14 +96,24 @@ export default function Lightbox({
           className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-orange-400 transition bg-black/50 hover:bg-black/70 p-3 rounded-full backdrop-blur-sm"
           aria-label="Anterior"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
         </button>
       )}
 
       {/* Imagen */}
-      <div 
+      <div
         className="relative max-w-7xl max-h-[90vh] w-full h-full"
         onClick={(e) => e.stopPropagation()}
       >
@@ -118,8 +138,18 @@ export default function Lightbox({
           className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-orange-400 transition bg-black/50 hover:bg-black/70 p-3 rounded-full backdrop-blur-sm"
           aria-label="Siguiente"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
           </svg>
         </button>
       )}

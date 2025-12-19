@@ -4,9 +4,9 @@
 // components/EventFunnelModal/steps/RulesStep.tsx
 // ========================================
 
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 interface RulesStepProps {
   url?: string;
@@ -15,7 +15,12 @@ interface RulesStepProps {
   onAccept: () => void;
 }
 
-export default function RulesStep({ url, text, requireAcceptance, onAccept }: RulesStepProps) {
+export default function RulesStep({
+  url,
+  text,
+  requireAcceptance,
+  onAccept,
+}: RulesStepProps) {
   const [accepted, setAccepted] = useState(false);
 
   const handleAccept = (checked: boolean) => {
@@ -40,12 +45,23 @@ export default function RulesStep({ url, text, requireAcceptance, onAccept }: Ru
         {/* Banner informativo */}
         <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            <svg
+              className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clipRule="evenodd"
+              />
             </svg>
             <div className="flex-1">
               <p className="text-sm text-blue-200/90">
-                <strong className="text-blue-400">Normativa del evento:</strong> Lee atentamente el reglamento antes de continuar. Contiene información importante sobre material obligatorio, horarios y normas de seguridad.
+                <strong className="text-blue-400">Normativa del evento:</strong>{" "}
+                Lee atentamente el reglamento antes de continuar. Contiene
+                información importante sobre material obligatorio, horarios y
+                normas de seguridad.
               </p>
             </div>
           </div>
@@ -64,13 +80,23 @@ export default function RulesStep({ url, text, requireAcceptance, onAccept }: Ru
                 rel="noreferrer"
                 className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 text-purple-400 rounded-lg transition font-medium text-sm"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
                 </svg>
                 Abrir reglamento
               </a>
             </div>
-            
+
             {/* Iframe del PDF */}
             <iframe
               src={`${url}#view=FitH`}
@@ -103,7 +129,8 @@ export default function RulesStep({ url, text, requireAcceptance, onAccept }: Ru
                   He leído y acepto el reglamento del evento
                 </span>
                 <p className="text-xs text-zinc-500 mt-2">
-                  Al marcar esta casilla confirmas que has leído el reglamento completo y te comprometes a cumplir con todas sus normas.
+                  Al marcar esta casilla confirmas que has leído el reglamento
+                  completo y te comprometes a cumplir con todas sus normas.
                 </p>
               </div>
             </label>
@@ -112,7 +139,8 @@ export default function RulesStep({ url, text, requireAcceptance, onAccept }: Ru
 
         {/* Info adicional */}
         <div className="text-xs text-zinc-500 text-center">
-          El reglamento forma parte de las condiciones de participación en el evento
+          El reglamento forma parte de las condiciones de participación en el
+          evento
         </div>
       </div>
     </div>

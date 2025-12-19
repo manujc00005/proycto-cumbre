@@ -3,16 +3,16 @@
 // lib/funnels/types.ts
 // ========================================
 
-import { WaiverEvent, WaiverAcceptancePayload } from '@/lib/waivers/types';
+import { WaiverEvent, WaiverAcceptancePayload } from "@/lib/waivers/types";
 
-export type FieldType = 
-  | 'text' 
-  | 'email' 
-  | 'tel' 
-  | 'dni' 
-  | 'select' 
-  | 'date' 
-  | 'checkbox';
+export type FieldType =
+  | "text"
+  | "email"
+  | "tel"
+  | "dni"
+  | "select"
+  | "date"
+  | "checkbox";
 
 export interface FormField {
   id: string;
@@ -37,26 +37,26 @@ export interface FunnelStep {
 }
 
 export interface EventFunnelConfig {
-  eventId: string;           // UUID del evento
-  eventSlug: string;         // Slug para URLs (ej: 'misa')
-  eventName: string;         // Nombre mostrado en UI
-  
+  eventId: string; // UUID del evento
+  eventSlug: string; // Slug para URLs (ej: 'misa')
+  eventName: string; // Nombre mostrado en UI
+
   // Paso 1: Formulario
   formFields: FormField[];
-  
+
   // Paso 2: Pliego (siempre obligatorio)
   waiver: {
     event: WaiverEvent;
     required: true;
   };
-  
+
   // Paso 3: Reglamento (opcional)
   rules?: {
     url: string;
     requireAcceptance: boolean;
     text?: string;
   };
-  
+
   // Paso 4: Pago
   payment: {
     amount: number;
@@ -64,21 +64,23 @@ export interface EventFunnelConfig {
     description: string;
     checkoutUrl: string;
   };
-  
+
   // Configuración RGPD
   gdpr: {
     includeWhatsApp: boolean;
     whatsappRequired: boolean;
-    whatsappContext: 'club' | 'event';
+    whatsappContext: "club" | "event";
   };
-  
+
   // Callbacks
   onFormDraft?: (data: any) => void;
-  onWaiverAccept?: (payload: WaiverAcceptancePayload) => Promise<{ acceptanceId: string }>;
+  onWaiverAccept?: (
+    payload: WaiverAcceptancePayload,
+  ) => Promise<{ acceptanceId: string }>;
   onPaymentStart?: (data: any) => Promise<{ url: string }>;
 }
 
-export type StepId = 'form' | 'waiver' | 'rules' | 'payment';
+export type StepId = "form" | "waiver" | "rules" | "payment";
 
 export interface FunnelState {
   currentStep: StepId;

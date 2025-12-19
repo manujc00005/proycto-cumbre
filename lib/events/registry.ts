@@ -4,15 +4,19 @@
 // ========================================
 
 import { MISA_EVENT_ID, MISA_SLUG } from "../funnels/configs/misa";
-import { MISA_META, MISA_TERMS_V1, MISA_WAIVER_V1 } from "../waivers/pliegos/misa.v1";
+import {
+  MISA_META,
+  MISA_TERMS_V1,
+  MISA_WAIVER_V1,
+} from "../waivers/pliegos/misa.v1";
 import { WaiverRegistryItem } from "../waivers/types";
-
-
 
 // ========================================
 // ARRAY PRINCIPAL - ÚNICA FUENTE DE VERDAD
 // ========================================
-export const WAIVER_REGISTRY: Array<WaiverRegistryItem & { eventId: string; slug: string }> = [
+export const WAIVER_REGISTRY: Array<
+  WaiverRegistryItem & { eventId: string; slug: string }
+> = [
   {
     eventId: MISA_EVENT_ID,
     slug: MISA_SLUG,
@@ -47,26 +51,24 @@ export const WAIVER_REGISTRY_BY_EVENT_ID: Record<string, WaiverRegistryItem> =
         waiver: item.waiver,
         terms: item.terms,
       },
-    ])
+    ]),
   );
 
 /**
  * Convertir slug → eventId
  * @example SLUG_TO_EVENT_ID['misa'] → 'ba063181-...'
  */
-export const SLUG_TO_EVENT_ID: Record<string, string> =
-  Object.fromEntries(
-    WAIVER_REGISTRY.map((item) => [item.slug, item.eventId])
-  );
+export const SLUG_TO_EVENT_ID: Record<string, string> = Object.fromEntries(
+  WAIVER_REGISTRY.map((item) => [item.slug, item.eventId]),
+);
 
 /**
  * Convertir eventId → slug
  * @example EVENT_ID_TO_SLUG['ba063181-...'] → 'misa'
  */
-export const EVENT_ID_TO_SLUG: Record<string, string> =
-  Object.fromEntries(
-    WAIVER_REGISTRY.map((item) => [item.eventId, item.slug])
-  );
+export const EVENT_ID_TO_SLUG: Record<string, string> = Object.fromEntries(
+  WAIVER_REGISTRY.map((item) => [item.eventId, item.slug]),
+);
 
 /**
  * Buscar evento por slug
@@ -81,7 +83,7 @@ export const WAIVER_REGISTRY_BY_SLUG: Record<string, WaiverRegistryItem> =
         waiver: item.waiver,
         terms: item.terms,
       },
-    ])
+    ]),
   );
 
 // ========================================

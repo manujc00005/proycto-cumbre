@@ -5,22 +5,22 @@
  * y formato de la base de datos (guiones bajos)
  */
 
-export type FrontendLicenseType = 'none' | 'a1' | 'a1-plus' | 'b1' | 'b1-plus';
-export type DatabaseLicenseType = 'none' | 'a1' | 'a1_plus' | 'b1' | 'b1_plus';
+export type FrontendLicenseType = "none" | "a1" | "a1-plus" | "b1" | "b1-plus";
+export type DatabaseLicenseType = "none" | "a1" | "a1_plus" | "b1" | "b1_plus";
 
 /**
  * Convierte de formato frontend (a1-plus) a formato BD (a1_plus)
  */
 export function toDBLicenseType(frontendType: string): DatabaseLicenseType {
   const mapping: Record<FrontendLicenseType, DatabaseLicenseType> = {
-    'none': 'none',
-    'a1': 'a1',
-    'a1-plus': 'a1_plus',
-    'b1': 'b1',
-    'b1-plus': 'b1_plus',
+    none: "none",
+    a1: "a1",
+    "a1-plus": "a1_plus",
+    b1: "b1",
+    "b1-plus": "b1_plus",
   };
 
-  return mapping[frontendType as FrontendLicenseType] || 'none';
+  return mapping[frontendType as FrontendLicenseType] || "none";
 }
 
 /**
@@ -28,14 +28,14 @@ export function toDBLicenseType(frontendType: string): DatabaseLicenseType {
  */
 export function toFrontendLicenseType(dbType: string): FrontendLicenseType {
   const mapping: Record<DatabaseLicenseType, FrontendLicenseType> = {
-    'none': 'none',
-    'a1': 'a1',
-    'a1_plus': 'a1-plus',
-    'b1': 'b1',
-    'b1_plus': 'b1-plus',
+    none: "none",
+    a1: "a1",
+    a1_plus: "a1-plus",
+    b1: "b1",
+    b1_plus: "b1-plus",
   };
 
-  return mapping[dbType as DatabaseLicenseType] || 'none';
+  return mapping[dbType as DatabaseLicenseType] || "none";
 }
 
 /**
@@ -43,13 +43,13 @@ export function toFrontendLicenseType(dbType: string): FrontendLicenseType {
  */
 export function getLicenseName(licenseType: string): string {
   const names: Record<string, string> = {
-    'none': 'Sin Licencia FEDME',
-    'a1': 'A1 - Media Temporada',
-    'a1-plus': 'A1+ - Media Temporada Plus',
-    'a1_plus': 'A1+ - Media Temporada Plus',
-    'b1': 'B1 - Cobertura Ampliada',
-    'b1-plus': 'B1+ - Cobertura Ampliada Plus',
-    'b1_plus': 'B1+ - Cobertura Ampliada Plus',
+    none: "Sin Licencia FEDME",
+    a1: "A1 - Media Temporada",
+    "a1-plus": "A1+ - Media Temporada Plus",
+    a1_plus: "A1+ - Media Temporada Plus",
+    b1: "B1 - Cobertura Ampliada",
+    "b1-plus": "B1+ - Cobertura Ampliada Plus",
+    b1_plus: "B1+ - Cobertura Ampliada Plus",
   };
 
   return names[licenseType] || licenseType;
@@ -60,7 +60,13 @@ export function getLicenseName(licenseType: string): string {
  */
 export function isValidLicenseType(licenseType: string): boolean {
   const validTypes = [
-    'none', 'a1', 'a1-plus', 'a1_plus', 'b1', 'b1-plus', 'b1_plus'
+    "none",
+    "a1",
+    "a1-plus",
+    "a1_plus",
+    "b1",
+    "b1-plus",
+    "b1_plus",
   ];
   return validTypes.includes(licenseType);
 }

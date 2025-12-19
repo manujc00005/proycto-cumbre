@@ -1,10 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { ProductCard } from '../Productos/NewProductCard';
-import { productsData } from '../Productos/ProductsData';
-
-
+import { useState } from "react";
+import { ProductCard } from "../Productos/NewProductCard";
+import { productsData } from "../Productos/ProductsData";
 
 export default function MerchantSection() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -27,8 +25,8 @@ export default function MerchantSection() {
           </h2>
           <div className="w-20 h-1 bg-orange-500 mb-6"></div>
           <p className="text-zinc-600 max-w-2xl text-lg">
-            Merchandising exclusivo del club para miembros y amigos de Proyecto Cumbre. 
-            Calidad premium, diseños únicos.
+            Merchandising exclusivo del club para miembros y amigos de Proyecto
+            Cumbre. Calidad premium, diseños únicos.
           </p>
         </div>
 
@@ -61,7 +59,7 @@ export default function MerchantSection() {
 
       {/* Lightbox - Implementa tu lightbox existente aquí si lo necesitas */}
       {lightboxOpen && selectedProduct !== null && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
           onClick={() => setLightboxOpen(false)}
         >

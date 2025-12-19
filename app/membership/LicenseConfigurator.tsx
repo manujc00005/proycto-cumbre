@@ -1,7 +1,16 @@
 // components/LicenseConfigurator.tsx - ACTUALIZADO CON A NAC Y A NAC+ (2026)
 
-import { useState, useEffect } from 'react';
-import { Check, ChevronRight, Mountain, Shield, Bike, Info, AlertTriangle, Sparkles } from 'lucide-react';
+import { useState, useEffect } from "react";
+import {
+  Check,
+  ChevronRight,
+  Mountain,
+  Shield,
+  Bike,
+  Info,
+  AlertTriangle,
+  Sparkles,
+} from "lucide-react";
 import {
   TERRITORIES,
   LICENSE_TYPES,
@@ -11,8 +20,8 @@ import {
   filterLicenses,
   getRecommendedLicense,
   getLicensePrice,
-  getCategoryLabel
-} from '@/lib/constants';
+  getCategoryLabel,
+} from "@/lib/constants";
 
 interface LicenseConfiguratorProps {
   selectedLicense: string;
@@ -21,27 +30,28 @@ interface LicenseConfiguratorProps {
   hasError?: boolean;
 }
 
-type Step = 'territory' | 'extras' | 'result';
+type Step = "territory" | "extras" | "result";
 
 export default function LicenseConfigurator({
   selectedLicense,
   onSelectLicense,
   ageCategory,
-  hasError
+  hasError,
 }: LicenseConfiguratorProps) {
-  const [currentStep, setCurrentStep] = useState<Step>('territory');
-  const [selectedTerritory, setSelectedTerritory] = useState<TerritoryScope | null>(null);
+  const [currentStep, setCurrentStep] = useState<Step>("territory");
+  const [selectedTerritory, setSelectedTerritory] =
+    useState<TerritoryScope | null>(null);
   const [wantsExtras, setWantsExtras] = useState<boolean | null>(null);
   const [filteredLicenses, setFilteredLicenses] = useState<LicenseType[]>([]);
 
   // Auto-detectar configuración desde licencia seleccionada
   useEffect(() => {
     if (selectedLicense && ageCategory) {
-      const license = LICENSE_TYPES.find(l => l.id === selectedLicense);
+      const license = LICENSE_TYPES.find((l) => l.id === selectedLicense);
       if (license) {
         setSelectedTerritory(license.territory);
         setWantsExtras(license.includesExtras);
-        setCurrentStep('result');
+        setCurrentStep("result");
       }
     }
   }, [selectedLicense, ageCategory]);
@@ -49,7 +59,11 @@ export default function LicenseConfigurator({
   // Filtrar licencias cuando cambian las preferencias
   useEffect(() => {
     if (selectedTerritory && wantsExtras !== null && ageCategory) {
-      const filtered = filterLicenses(selectedTerritory, wantsExtras, ageCategory);
+      const filtered = filterLicenses(
+        selectedTerritory,
+        wantsExtras,
+        ageCategory,
+      );
       setFilteredLicenses(filtered);
     }
   }, [selectedTerritory, wantsExtras, ageCategory]);
@@ -58,27 +72,31 @@ export default function LicenseConfigurator({
     setSelectedTerritory(territory);
 
     // Si selecciona "Sin Licencia", saltar directo al resultado
-    if (territory === 'none') {
+    if (territory === "none") {
       setWantsExtras(false);
-      onSelectLicense('none');
-      setCurrentStep('result');
-    } else if (territory === 'european') {
+      onSelectLicense("none");
+      setCurrentStep("result");
+    } else if (territory === "european") {
       // Europa siempre incluye extras
       setWantsExtras(true);
-      setCurrentStep('result');
+      setCurrentStep("result");
     } else {
       // Para regional, regional_national y national, preguntar por extras
-      setCurrentStep('extras');
+      setCurrentStep("extras");
     }
   };
 
   const handleExtrasSelect = (wants: boolean) => {
     setWantsExtras(wants);
-    setCurrentStep('result');
+    setCurrentStep("result");
 
     // Auto-seleccionar licencia recomendada
     if (selectedTerritory && ageCategory) {
-      const recommended = getRecommendedLicense(selectedTerritory, wants, ageCategory);
+      const recommended = getRecommendedLicense(
+        selectedTerritory,
+        wants,
+        ageCategory,
+      );
       if (recommended) {
         onSelectLicense(recommended.id);
       }
@@ -90,7 +108,7 @@ export default function LicenseConfigurator({
   };
 
   const handleReset = () => {
-    setCurrentStep('territory');
+    setCurrentStep("territory");
     setSelectedTerritory(null);
     setWantsExtras(null);
     setFilteredLicenses([]);
@@ -102,15 +120,20 @@ export default function LicenseConfigurator({
       <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 flex gap-3">
         <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
         <div className="text-sm text-blue-300">
-          <p className="font-semibold mb-1">Introduce tu fecha de nacimiento primero</p>
-          <p className="text-blue-400">Necesitamos conocer tu edad para mostrarte los precios correctos de las licencias.</p>
+          <p className="font-semibold mb-1">
+            Introduce tu fecha de nacimiento primero
+          </p>
+          <p className="text-blue-400">
+            Necesitamos conocer tu edad para mostrarte los precios correctos de
+            las licencias.
+          </p>
         </div>
       </div>
     );
   }
 
   // PASO 1: Selección de Territorio
-  if (currentStep === 'territory') {
+  if (currentStep === "territory") {
     return (
       <div className="space-y-6">
         {/* Header del paso */}
@@ -120,7 +143,9 @@ export default function LicenseConfigurator({
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-3 flex-wrap">
-              <h3 className="text-white font-bold text-lg">¿Dónde practicas montaña habitualmente?</h3>
+              <h3 className="text-white font-bold text-lg">
+                ¿Dónde practicas montaña habitualmente?
+              </h3>
               <a
                 href="https://fadmes.es/wp-content/uploads/2025/11/Licencias-Anuales-deportistas-2026.pdf"
                 target="_blank"
@@ -132,14 +157,16 @@ export default function LicenseConfigurator({
                 <span className="font-medium">Tarifas oficiales FADMES</span>
               </a>
             </div>
-            <p className="text-zinc-400 text-sm mt-1">Selecciona el ámbito de cobertura que necesitas</p>
+            <p className="text-zinc-400 text-sm mt-1">
+              Selecciona el ámbito de cobertura que necesitas
+            </p>
           </div>
         </div>
 
         {/* Opciones de territorio */}
         <div className="grid gap-4">
           {TERRITORIES.map((territory) => {
-            const isNone = territory.id === 'none';
+            const isNone = territory.id === "none";
 
             return (
               <button
@@ -148,8 +175,8 @@ export default function LicenseConfigurator({
                 onClick={() => handleTerritorySelect(territory.id)}
                 className={`group relative p-6 rounded-xl border-2 transition-all duration-200 text-left ${
                   isNone
-                    ? 'border-yellow-500/50 bg-yellow-500/5 hover:border-yellow-500 hover:bg-yellow-500/10'
-                    : 'border-zinc-700 bg-zinc-800/50 hover:border-orange-500 hover:bg-orange-500/5'
+                    ? "border-yellow-500/50 bg-yellow-500/5 hover:border-yellow-500 hover:bg-yellow-500/10"
+                    : "border-zinc-700 bg-zinc-800/50 hover:border-orange-500 hover:bg-orange-500/5"
                 }`}
               >
                 <div className="flex items-start justify-between gap-4">
@@ -161,15 +188,21 @@ export default function LicenseConfigurator({
                         {territory.icon}
                       </span>
                       <div>
-                        <h4 className={`font-bold text-lg ${isNone ? 'text-yellow-300' : 'text-white'}`}>
+                        <h4
+                          className={`font-bold text-lg ${isNone ? "text-yellow-300" : "text-white"}`}
+                        >
                           {territory.name}
                         </h4>
-                        <p className="text-zinc-400 text-sm">{territory.shortName}</p>
+                        <p className="text-zinc-400 text-sm">
+                          {territory.shortName}
+                        </p>
                       </div>
                     </div>
 
                     {/* Description */}
-                    <p className="text-zinc-400 text-sm">{territory.description}</p>
+                    <p className="text-zinc-400 text-sm">
+                      {territory.description}
+                    </p>
 
                     {/* Coverage */}
                     <div className="flex items-center gap-2 text-xs text-zinc-500">
@@ -182,7 +215,8 @@ export default function LicenseConfigurator({
                       <div className="mt-3 p-2 bg-yellow-500/10 border border-yellow-500/30 rounded-lg flex gap-2">
                         <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
                         <p className="text-xs text-yellow-300">
-                          Sin seguro federativo. Necesitarás tu propio seguro para actividades técnicas.
+                          Sin seguro federativo. Necesitarás tu propio seguro
+                          para actividades técnicas.
                         </p>
                       </div>
                     )}
@@ -191,7 +225,7 @@ export default function LicenseConfigurator({
                   {/* Arrow */}
                   <ChevronRight
                     className={`w-6 h-6 transition-transform group-hover:translate-x-1 ${
-                      isNone ? 'text-yellow-400' : 'text-orange-400'
+                      isNone ? "text-yellow-400" : "text-orange-400"
                     }`}
                   />
                 </div>
@@ -204,7 +238,7 @@ export default function LicenseConfigurator({
   }
 
   // PASO 2: Actividades Extras (BTT, Espeleología, Esquí Nórdico)
-  if (currentStep === 'extras') {
+  if (currentStep === "extras") {
     return (
       <div className="space-y-6">
         {/* Header del paso */}
@@ -213,8 +247,12 @@ export default function LicenseConfigurator({
             2
           </div>
           <div>
-            <h3 className="text-white font-bold text-lg">¿Practicas estas actividades?</h3>
-            <p className="text-zinc-400 text-sm">BTT, Espeleología o Esquí Nórdico (no competitivo)</p>
+            <h3 className="text-white font-bold text-lg">
+              ¿Practicas estas actividades?
+            </h3>
+            <p className="text-zinc-400 text-sm">
+              BTT, Espeleología o Esquí Nórdico (no competitivo)
+            </p>
           </div>
         </div>
 
@@ -232,19 +270,29 @@ export default function LicenseConfigurator({
           <div className="flex items-start gap-3 mb-3">
             <Bike className="w-6 h-6 text-orange-400 flex-shrink-0" />
             <div>
-              <p className="text-white font-semibold mb-1">Actividades extras incluidas:</p>
+              <p className="text-white font-semibold mb-1">
+                Actividades extras incluidas:
+              </p>
               <ul className="text-sm text-zinc-400 space-y-1">
-                <li>• <strong>BTT</strong> - Bicicleta de montaña (no competitivo)</li>
-                <li>• <strong>Espeleología</strong> - Exploración de cuevas (no competitivo)</li>
-                <li>• <strong>Esquí Nórdico</strong> - Esquí de fondo (no competitivo)</li>
+                <li>
+                  • <strong>BTT</strong> - Bicicleta de montaña (no competitivo)
+                </li>
+                <li>
+                  • <strong>Espeleología</strong> - Exploración de cuevas (no
+                  competitivo)
+                </li>
+                <li>
+                  • <strong>Esquí Nórdico</strong> - Esquí de fondo (no
+                  competitivo)
+                </li>
               </ul>
             </div>
           </div>
           <p className="text-xs text-zinc-500 italic">
             <strong>
-              {' '}
-              NO válida para competiciones, actividades o formaciones FEDME ni para descuentos en refugios del convenio de
-              reciprocidad.
+              {" "}
+              NO válida para competiciones, actividades o formaciones FEDME ni
+              para descuentos en refugios del convenio de reciprocidad.
             </strong>
           </p>
         </div>
@@ -265,7 +313,9 @@ export default function LicenseConfigurator({
                   </div>
                   <div>
                     <h4 className="text-white font-bold">Sí, las practico</h4>
-                    <p className="text-sm text-zinc-400">Licencia Plus con cobertura extra</p>
+                    <p className="text-sm text-zinc-400">
+                      Licencia Plus con cobertura extra
+                    </p>
                   </div>
                 </div>
                 <p className="text-xs text-zinc-500 ml-13">
@@ -289,8 +339,12 @@ export default function LicenseConfigurator({
                     <Mountain className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h4 className="text-white font-bold">No, solo montañismo</h4>
-                    <p className="text-sm text-zinc-400">Licencia básica (más económica)</p>
+                    <h4 className="text-white font-bold">
+                      No, solo montañismo
+                    </h4>
+                    <p className="text-sm text-zinc-400">
+                      Licencia básica (más económica)
+                    </p>
                   </div>
                 </div>
                 <p className="text-xs text-zinc-500 ml-13">
@@ -306,9 +360,9 @@ export default function LicenseConfigurator({
   }
 
   // PASO 3: Resultado - Licencias filtradas
-  if (currentStep === 'result') {
-    const isNone = selectedTerritory === 'none';
-    const territory = TERRITORIES.find(t => t.id === selectedTerritory);
+  if (currentStep === "result") {
+    const isNone = selectedTerritory === "none";
+    const territory = TERRITORIES.find((t) => t.id === selectedTerritory);
 
     return (
       <div className="space-y-6">
@@ -320,7 +374,9 @@ export default function LicenseConfigurator({
           <div className="flex-1">
             <div className="flex items-center gap-3 flex-wrap">
               <h3 className="text-white font-bold text-lg">
-                {isNone ? 'Sin Licencia Federativa' : 'Licencias disponibles para ti'}
+                {isNone
+                  ? "Sin Licencia Federativa"
+                  : "Licencias disponibles para ti"}
               </h3>
               <a
                 href="https://fadmes.es/wp-content/uploads/2025/11/Licencias-Anuales-deportistas-2026.pdf"
@@ -334,7 +390,9 @@ export default function LicenseConfigurator({
               </a>
             </div>
             <p className="text-zinc-400 text-sm mt-1">
-              {isNone ? 'Solo membresía del club' : `${territory?.name} ${wantsExtras ? '+ Actividades extras' : ''}`}
+              {isNone
+                ? "Solo membresía del club"
+                : `${territory?.name} ${wantsExtras ? "+ Actividades extras" : ""}`}
             </p>
           </div>
         </div>
@@ -363,11 +421,11 @@ export default function LicenseConfigurator({
                 className={`w-full text-left p-5 rounded-xl border-2 transition-all duration-200 ${
                   isSelected
                     ? isNone
-                      ? 'border-yellow-500 bg-yellow-500/10 ring-2 ring-yellow-500/20'
-                      : 'border-orange-500 bg-orange-500/10 ring-2 ring-orange-500/20'
+                      ? "border-yellow-500 bg-yellow-500/10 ring-2 ring-yellow-500/20"
+                      : "border-orange-500 bg-orange-500/10 ring-2 ring-orange-500/20"
                     : hasError
-                    ? 'border-red-500/50 bg-red-500/5 hover:border-red-500'
-                    : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
+                      ? "border-red-500/50 bg-red-500/5 hover:border-red-500"
+                      : "border-zinc-700 bg-zinc-800/50 hover:border-zinc-600"
                 }`}
               >
                 {/* ✅ NUEVO LAYOUT: fila superior (titulo+precio+tick) + cuerpo flexible */}
@@ -381,9 +439,9 @@ export default function LicenseConfigurator({
                           className={`font-bold text-lg ${
                             isSelected
                               ? isNone
-                                ? 'text-yellow-300'
-                                : 'text-orange-400'
-                              : 'text-white'
+                                ? "text-yellow-300"
+                                : "text-orange-400"
+                              : "text-white"
                           }`}
                         >
                           {license.name}
@@ -411,24 +469,29 @@ export default function LicenseConfigurator({
                           className={`text-2xl font-bold ${
                             isSelected
                               ? isNone
-                                ? 'text-yellow-400'
-                                : 'text-orange-400'
-                              : 'text-white'
+                                ? "text-yellow-400"
+                                : "text-orange-400"
+                              : "text-white"
                           }`}
                         >
-                          {price > 0 ? `${price}€` : 'Gratis'}
+                          {price > 0 ? `${price}€` : "Gratis"}
                         </div>
                         <div className="text-xs text-zinc-500 mt-1">
-                          {getCategoryLabel(ageCategory).split('(')[0].trim()}
+                          {getCategoryLabel(ageCategory).split("(")[0].trim()}
                         </div>
                       </div>
 
                       <div
                         className={`w-7 h-7 rounded-full flex items-center justify-center transition-all flex-shrink-0 ${
-                          isSelected ? 'bg-green-500' : 'bg-zinc-700'
+                          isSelected ? "bg-green-500" : "bg-zinc-700"
                         }`}
                       >
-                        {isSelected && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
+                        {isSelected && (
+                          <Check
+                            className="w-4 h-4 text-white"
+                            strokeWidth={3}
+                          />
+                        )}
                       </div>
                     </div>
                   </div>
@@ -446,7 +509,9 @@ export default function LicenseConfigurator({
                   )}
 
                   {/* Cobertura */}
-                  <p className={`text-sm ${isSelected ? 'text-zinc-300' : 'text-zinc-500'}`}>
+                  <p
+                    className={`text-sm ${isSelected ? "text-zinc-300" : "text-zinc-500"}`}
+                  >
                     {license.coverage}
                   </p>
 
@@ -466,7 +531,10 @@ export default function LicenseConfigurator({
                       <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0" />
                       <div className="text-xs text-yellow-300">
                         <p className="font-semibold mb-1">Importante:</p>
-                        <p>Sin licencia FEDME no tendrás cobertura de seguro en actividades de montaña.</p>
+                        <p>
+                          Sin licencia FEDME no tendrás cobertura de seguro en
+                          actividades de montaña.
+                        </p>
                       </div>
                     </div>
                   )}
@@ -481,10 +549,14 @@ export default function LicenseConfigurator({
           <div className="mt-6 bg-zinc-800/50 border border-zinc-700 rounded-lg p-4 flex gap-3">
             <Info className="w-5 h-5 text-zinc-400 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-zinc-400">
-              <p className="font-semibold text-zinc-300 mb-1">Sobre las licencias FEDME:</p>
+              <p className="font-semibold text-zinc-300 mb-1">
+                Sobre las licencias FEDME:
+              </p>
               <ul className="space-y-1 text-xs">
                 <li>• Seguro de accidentes y responsabilidad civil incluido</li>
-                <li>• Válidas para la temporada completa (01/01/2026 - 31/12/2026)</li>
+                <li>
+                  • Válidas para la temporada completa (01/01/2026 - 31/12/2026)
+                </li>
                 <li>• Procesamiento en 48-72h laborables</li>
               </ul>
             </div>

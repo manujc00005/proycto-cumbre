@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
 
 interface ConsentCheckboxProps {
   id: string;
@@ -17,7 +17,7 @@ export function ConsentCheckbox({
   required = false,
   onChange,
   children,
-  className = '',
+  className = "",
 }: ConsentCheckboxProps) {
   return (
     <div className={`flex items-start gap-3 ${className}`}>

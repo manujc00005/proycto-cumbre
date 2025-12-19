@@ -6,24 +6,24 @@
 // lib/email/event-email-template.ts
 // ========================================
 
-import { BaseEventEmailData, EventEmailConfig } from './types';
+import { BaseEventEmailData, EventEmailConfig } from "./types";
 
 export function buildEventEmail(
   participant: BaseEventEmailData,
-  config: EventEmailConfig
+  config: EventEmailConfig,
 ): string {
-  const heroColor = config.heroColor || '#f97316';
+  const heroColor = config.heroColor || "#f97316";
   const heroDark = adjustBrightness(heroColor, -20);
 
   // Google Calendar link
-  const calendarLink = config.eventDate 
+  const calendarLink = config.eventDate
     ? generateGoogleCalendarLink({
         title: config.eventName,
         date: config.eventDate,
-        location: config.eventLocation || '',
-        description: `Inscripción confirmada para ${config.eventName}`
+        location: config.eventLocation || "",
+        description: `Inscripción confirmada para ${config.eventName}`,
       })
-    : '';
+    : "";
 
   return `
 <!DOCTYPE html>
@@ -57,7 +57,9 @@ export function buildEventEmail(
         <p style="font-size: 16px; color: #fafafa; margin: 0 0 8px 0; font-weight: 600;">Hola ${participant.name} 👋</p>
         <p style="color: #a1a1aa; font-size: 14px; margin: 0 0 24px 0; line-height: 1.5;">Tu reserva ha sido confirmada. A continuación encontrarás todos los detalles.</p>
         
-        ${config.eventDate || config.eventLocation || config.eventDetails ? `
+        ${
+          config.eventDate || config.eventLocation || config.eventDetails
+            ? `
         <!-- EVENT INFO CARD -->
         <div style="background: linear-gradient(135deg, #27272a 0%, #1f1f23 100%); border: 1px solid #3f3f46; border-radius: 10px; padding: 20px; margin: 24px 0;">
           
@@ -66,7 +68,9 @@ export function buildEventEmail(
             <span style="font-size: 15px; font-weight: 700; color: ${heroColor}; text-transform: uppercase; letter-spacing: 0.5px;">📅 DETALLES DEL EVENTO</span>
           </div>
           
-          ${config.eventDate ? `
+          ${
+            config.eventDate
+              ? `
           <!-- Fecha -->
           <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 10px 0;">
             <tr>
@@ -80,9 +84,13 @@ export function buildEventEmail(
               </td>
             </tr>
           </table>
-          ` : ''}
+          `
+              : ""
+          }
           
-          ${config.eventLocation ? `
+          ${
+            config.eventLocation
+              ? `
           <!-- Ubicación -->
           <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 10px 0;">
             <tr>
@@ -95,9 +103,13 @@ export function buildEventEmail(
               </td>
             </tr>
           </table>
-          ` : ''}
+          `
+              : ""
+          }
           
-          ${config.eventDetails?.meetingPoint ? `
+          ${
+            config.eventDetails?.meetingPoint
+              ? `
           <!-- Punto de encuentro -->
           <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 10px 0;">
             <tr>
@@ -110,9 +122,13 @@ export function buildEventEmail(
               </td>
             </tr>
           </table>
-          ` : ''}
+          `
+              : ""
+          }
           
-          ${config.eventDetails?.duration ? `
+          ${
+            config.eventDetails?.duration
+              ? `
           <!-- Duración -->
           <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 10px 0;">
             <tr>
@@ -125,9 +141,13 @@ export function buildEventEmail(
               </td>
             </tr>
           </table>
-          ` : ''}
+          `
+              : ""
+          }
           
-          ${config.eventDetails?.difficulty ? `
+          ${
+            config.eventDetails?.difficulty
+              ? `
           <!-- Nivel -->
           <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 10px 0;">
             <tr>
@@ -140,9 +160,13 @@ export function buildEventEmail(
               </td>
             </tr>
           </table>
-          ` : ''}
+          `
+              : ""
+          }
           
-          ${config.eventDetails?.requiredEquipment ? `
+          ${
+            config.eventDetails?.requiredEquipment
+              ? `
           <!-- Material -->
           <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 10px 0;">
             <tr>
@@ -155,9 +179,13 @@ export function buildEventEmail(
               </td>
             </tr>
           </table>
-          ` : ''}
+          `
+              : ""
+          }
           
-          ${calendarLink ? `
+          ${
+            calendarLink
+              ? `
           <!-- CALENDAR CTA - SUTIL -->
           <div style="background: #1f1f23; border: 1px dashed #3f3f46; border-radius: 6px; padding: 12px; text-align: center; margin-top: 16px;">
             <a href="${calendarLink}" target="_blank" style="color: #a1a1aa; text-decoration: none; font-size: 13px; font-weight: 500;">
@@ -165,19 +193,27 @@ export function buildEventEmail(
               <span style="border-bottom: 1px solid #3f3f46;">Añadir a Google Calendar</span>
             </a>
           </div>
-          ` : ''}
+          `
+              : ""
+          }
         </div>
-        ` : ''}
+        `
+            : ""
+        }
         
         <!-- PARTICIPANT DETAILS -->
         <div style="background: #27272a; border-radius: 8px; padding: 16px; margin: 20px 0;">
           ${buildParticipantDetails(participant, config, heroColor)}
         </div>
         
-        ${config.features && config.features.length > 0 ? `
+        ${
+          config.features && config.features.length > 0
+            ? `
         <!-- FEATURES -->
         <div style="margin: 24px 0;">
-          ${config.features.map(feature => `
+          ${config.features
+            .map(
+              (feature) => `
             <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 10px 0;">
               <tr>
                 <td width="28" valign="top">
@@ -185,30 +221,40 @@ export function buildEventEmail(
                 </td>
                 <td>
                   <div style="color: #fafafa; font-weight: 600; font-size: 14px; margin-bottom: 2px;">${feature.title}</div>
-                  ${feature.description ? `<div style="color: #a1a1aa; font-size: 12px; line-height: 1.4;">${feature.description}</div>` : ''}
+                  ${feature.description ? `<div style="color: #a1a1aa; font-size: 12px; line-height: 1.4;">${feature.description}</div>` : ""}
                 </td>
               </tr>
             </table>
-          `).join('')}
+          `,
+            )
+            .join("")}
         </div>
-        ` : ''}
+        `
+            : ""
+        }
         
-        ${config.whatsappLink ? `
+        ${
+          config.whatsappLink
+            ? `
         <!-- WHATSAPP -->
         <div style="background: linear-gradient(135deg, #065f46 0%, #047857 100%); border-radius: 10px; padding: 20px; text-align: center; margin: 24px 0;">
           <h3 style="color: #ffffff; font-size: 16px; margin: 0 0 8px 0; font-weight: 700;">💬 Grupo de WhatsApp</h3>
-          <p style="color: #d1fae5; margin: 0 0 16px 0; font-size: 13px; line-height: 1.5;">${config.whatsappMessage || 'Únete al grupo para recibir actualizaciones.'}</p>
+          <p style="color: #d1fae5; margin: 0 0 16px 0; font-size: 13px; line-height: 1.5;">${config.whatsappMessage || "Únete al grupo para recibir actualizaciones."}</p>
           <a href="${config.whatsappLink}" style="display: inline-block; background-color: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px;">Unirse →</a>
         </div>
-        ` : ''}
+        `
+            : ""
+        }
         
-        ${config.importantNote ? `
+        ${
+          config.importantNote
+            ? `
         <!-- ALERT -->
         <div style="background: #422006; border: 1px solid #7c2d12; border-left: 3px solid ${heroColor}; border-radius: 8px; padding: 16px; margin: 24px 0;">
           <table cellpadding="0" cellspacing="0" border="0" width="100%">
             <tr>
               <td width="28" valign="top">
-                <span style="font-size: 20px;">${config.importantNote.icon || '⚠️'}</span>
+                <span style="font-size: 20px;">${config.importantNote.icon || "⚠️"}</span>
               </td>
               <td>
                 <div style="color: #fbbf24; font-weight: 700; font-size: 14px; margin-bottom: 6px;">${config.importantNote.title}</div>
@@ -217,7 +263,9 @@ export function buildEventEmail(
             </tr>
           </table>
         </div>
-        ` : ''}
+        `
+            : ""
+        }
         
         <!-- CLOSING -->
         <p style="margin: 32px 0 0 0; color: #fafafa; font-size: 14px; text-align: center;">¡Nos vemos pronto! 🏔️</p>
@@ -246,20 +294,20 @@ export function buildEventEmail(
 function buildParticipantDetails(
   participant: BaseEventEmailData,
   config: EventEmailConfig,
-  heroColor: string
+  heroColor: string,
 ): string {
   const details = [
-    { label: 'Nombre', value: participant.name },
-    { label: 'Email', value: participant.email },
-    { label: 'Teléfono', value: participant.phone },
+    { label: "Nombre", value: participant.name },
+    { label: "Email", value: participant.email },
+    { label: "Teléfono", value: participant.phone },
   ];
 
   if (participant.dni) {
-    details.push({ label: 'DNI/NIE', value: participant.dni });
+    details.push({ label: "DNI/NIE", value: participant.dni });
   }
 
   if (participant.shirtSize) {
-    details.push({ label: 'Talla', value: participant.shirtSize });
+    details.push({ label: "Talla", value: participant.shirtSize });
   }
 
   if (config.customDetails) {
@@ -267,17 +315,17 @@ function buildParticipantDetails(
   }
 
   details.push({
-    label: 'Importe',
+    label: "Importe",
     value: `${(participant.amount / 100).toFixed(2)}€`,
   });
 
   return details
     .map((detail, index) => {
       const isLast = index === details.length - 1;
-      const isAmount = detail.label === 'Importe';
-      const borderStyle = isLast ? 'none' : '1px solid #3f3f46';
-      const color = isAmount ? heroColor : '#fafafa';
-      const fontSize = isAmount ? '16px' : '13px';
+      const isAmount = detail.label === "Importe";
+      const borderStyle = isLast ? "none" : "1px solid #3f3f46";
+      const color = isAmount ? heroColor : "#fafafa";
+      const fontSize = isAmount ? "16px" : "13px";
 
       return `
         <div style="padding: 8px 0; border-bottom: ${borderStyle};">
@@ -290,33 +338,33 @@ function buildParticipantDetails(
         </div>
       `;
     })
-    .join('');
+    .join("");
 }
 
 function adjustBrightness(hex: string, percent: number): string {
-  const num = parseInt(hex.replace('#', ''), 16);
+  const num = parseInt(hex.replace("#", ""), 16);
   const r = Math.max(0, Math.min(255, (num >> 16) + percent));
   const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00ff) + percent));
   const b = Math.max(0, Math.min(255, (num & 0x0000ff) + percent));
-  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
 }
 
 function formatEventDate(date: Date): string {
-  return date.toLocaleDateString('es-ES', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
+  return date.toLocaleDateString("es-ES", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 }
 
 function formatEventTime(date: Date): string {
   return (
-    date.toLocaleTimeString('es-ES', {
-      hour: '2-digit',
-      minute: '2-digit',
+    date.toLocaleTimeString("es-ES", {
+      hour: "2-digit",
+      minute: "2-digit",
       hour12: false,
-    }) + 'h'
+    }) + "h"
   );
 }
 
@@ -327,16 +375,16 @@ function generateGoogleCalendarLink(event: {
   description: string;
 }): string {
   const startDate =
-    event.date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    event.date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
 
   // Asumimos 4 horas de duración por defecto
   const endDate = new Date(event.date);
   endDate.setHours(endDate.getHours() + 4);
   const endDateStr =
-    endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    endDate.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
 
   const params = new URLSearchParams({
-    action: 'TEMPLATE',
+    action: "TEMPLATE",
     text: event.title,
     dates: `${startDate}/${endDateStr}`,
     details: event.description,
