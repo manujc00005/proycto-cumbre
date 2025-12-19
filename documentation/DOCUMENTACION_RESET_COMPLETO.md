@@ -23,6 +23,7 @@ Usa esta guía cuando:
 **RESET_COMPLETO_FINAL.sql** - Script SQL que crea todo desde cero
 
 Este archivo incluye:
+
 - 5 Enums (tipos de datos personalizados)
 - 3 Tablas principales (headquarters, members, payments)
 - Índices optimizados
@@ -55,6 +56,7 @@ Este archivo incluye:
 El script incluye queries de verificación al final. Deberías ver:
 
 **Tablas creadas:**
+
 ```
 headquarters
 members
@@ -62,6 +64,7 @@ payments
 ```
 
 **Enums creados:**
+
 ```
 FedmeStatus: pending, processing, active, rejected, expired, none
 LicenseType: none, a1, a1_plus, b1, b1_plus
@@ -71,6 +74,7 @@ Sex: M, F, O
 ```
 
 **Vistas creadas:**
+
 ```
 active_members
 expiring_soon
@@ -79,6 +83,7 @@ pending_members
 ```
 
 **Sede creada:**
+
 ```
 Proyecto Cumbre Málaga (MAL) - Málaga
 ```
@@ -184,13 +189,14 @@ Después del reset, ejecuta estas queries en Neon para verificar:
 
 ```sql
 SELECT table_name, table_type
-FROM information_schema.tables 
+FROM information_schema.tables
 WHERE table_schema = 'public'
   AND table_type = 'BASE TABLE'
 ORDER BY table_name;
 ```
 
 **Resultado esperado:**
+
 - headquarters
 - members
 - payments
@@ -198,10 +204,10 @@ ORDER BY table_name;
 ### 2. Ver todos los enums
 
 ```sql
-SELECT 
+SELECT
   t.typname as enum_name,
   e.enumlabel as valor
-FROM pg_type t 
+FROM pg_type t
 JOIN pg_enum e ON t.oid = e.enumtypid
 WHERE t.typtype = 'e'
 ORDER BY t.typname, e.enumsortorder;
@@ -217,6 +223,7 @@ FROM headquarters;
 ```
 
 **Resultado esperado:**
+
 ```
 Proyecto Cumbre Málaga | MAL | Málaga | active
 ```
@@ -224,13 +231,14 @@ Proyecto Cumbre Málaga | MAL | Málaga | active
 ### 4. Contar registros
 
 ```sql
-SELECT 
+SELECT
   (SELECT COUNT(*) FROM headquarters) as sedes,
   (SELECT COUNT(*) FROM members) as socios,
   (SELECT COUNT(*) FROM payments) as pagos;
 ```
 
 **Resultado esperado:**
+
 ```
 sedes: 1
 socios: 0
@@ -283,6 +291,7 @@ Si se inserta correctamente → ✅ Todo funciona
 ### Tablas Principales
 
 #### 1. **headquarters** (Sedes)
+
 ```
 ├── id (UUID)
 ├── name (Proyecto Cumbre Málaga)
@@ -295,6 +304,7 @@ Si se inserta correctamente → ✅ Todo funciona
 ```
 
 #### 2. **members** (Socios) - TABLA PRINCIPAL
+
 ```
 ├── id (UUID)
 ├── headquarters_id (FK → headquarters)
@@ -309,6 +319,7 @@ Si se inserta correctamente → ✅ Todo funciona
 ```
 
 #### 3. **payments** (Pagos)
+
 ```
 ├── id (UUID)
 ├── member_id (FK → members)
@@ -321,11 +332,13 @@ Si se inserta correctamente → ✅ Todo funciona
 ### Enums (Tipos Personalizados)
 
 #### Sex
+
 - `M` - Masculino
 - `F` - Femenino
 - `O` - Otro
 
 #### LicenseType
+
 - `none` - Sin licencia
 - `a1` - A1 - Media Temporada
 - `a1_plus` - A1+ - Media Temporada Plus
@@ -333,6 +346,7 @@ Si se inserta correctamente → ✅ Todo funciona
 - `b1_plus` - B1+ - Cobertura Ampliada Plus
 
 #### FedmeStatus
+
 - `pending` - Pendiente de tramitar
 - `processing` - En proceso con FEDME
 - `active` - Licencia activa
@@ -341,6 +355,7 @@ Si se inserta correctamente → ✅ Todo funciona
 - `none` - Sin licencia
 
 #### MembershipStatus
+
 - `pending` - Esperando pago
 - `active` - Activa
 - `expired` - Expirada
@@ -348,6 +363,7 @@ Si se inserta correctamente → ✅ Todo funciona
 - `cancelled` - Cancelada
 
 #### PaymentStatus
+
 - `pending` - Pendiente
 - `completed` - Completado
 - `failed` - Fallido
@@ -356,20 +372,25 @@ Si se inserta correctamente → ✅ Todo funciona
 ### Vistas
 
 #### members_list
+
 Lista completa de todos los socios con información detallada.
 
 #### active_members
+
 Solo socios con membresía activa y no expirada.
 
 #### pending_members
+
 Socios que están esperando completar el pago.
 
 #### expiring_soon
+
 Membresías que expiran en los próximos 30 días.
 
 ### Funciones
 
 #### generate_member_number(headquarters_id)
+
 Genera un número único de socio: `MAL-2025-001`
 
 ```sql
@@ -382,6 +403,7 @@ SELECT generate_member_number(
 ```
 
 #### activate_membership(member_id, duration_days)
+
 Activa una membresía después del pago.
 
 ```sql
@@ -393,6 +415,7 @@ SELECT * FROM activate_membership(
 ```
 
 #### update_updated_at_column()
+
 Trigger que actualiza automáticamente el campo `updated_at`.
 
 ---
@@ -404,6 +427,7 @@ Trigger que actualiza automáticamente el campo `updated_at`.
 **Causa:** Los enums no se crearon correctamente.
 
 **Solución:**
+
 ```sql
 -- Ejecuta manualmente en Neon:
 CREATE TYPE "Sex" AS ENUM ('M', 'F', 'O');
@@ -423,7 +447,8 @@ CREATE TYPE "PaymentStatus" AS ENUM ('pending', 'completed', 'failed', 'refunded
 
 **Causa:** Ya existe una sede con código 'MAL'.
 
-**Solución:** 
+**Solución:**
+
 ```sql
 -- Ver sedes existentes
 SELECT * FROM headquarters;
@@ -439,6 +464,7 @@ DELETE FROM headquarters WHERE code = 'MAL';
 **Causa:** El schema de Prisma no está actualizado.
 
 **Solución:**
+
 ```bash
 # 1. Asegurar schema correcto
 cp schema_final.prisma prisma/schema.prisma
@@ -458,6 +484,7 @@ npx prisma studio
 **Causa:** Estás usando una réplica de solo lectura en Neon.
 
 **Solución:**
+
 1. Ve a Neon Console
 2. Asegúrate de estar en la **branch principal** (main)
 3. No uses réplicas de lectura para ejecutar el script
@@ -518,7 +545,7 @@ Después del reset, el flujo normal es:
 ### Ver estructura de una tabla
 
 ```sql
-SELECT 
+SELECT
   column_name,
   data_type,
   is_nullable
@@ -531,11 +558,11 @@ ORDER BY ordinal_position;
 
 ```sql
 SELECT
-  tc.table_name, 
+  tc.table_name,
   kcu.column_name,
   ccu.table_name AS foreign_table_name,
-  ccu.column_name AS foreign_column_name 
-FROM information_schema.table_constraints AS tc 
+  ccu.column_name AS foreign_column_name
+FROM information_schema.table_constraints AS tc
 JOIN information_schema.key_column_usage AS kcu
   ON tc.constraint_name = kcu.constraint_name
 JOIN information_schema.constraint_column_usage AS ccu
@@ -576,20 +603,22 @@ Si después de seguir esta guía sigues teniendo problemas:
    - Busca mensajes de error en rojo
 
 2. **Verifica tu conexión a BD**
+
    ```bash
    # En tu .env debe estar:
    DATABASE_URL="postgresql://..."
    ```
 
 3. **Nuclear Reset (último recurso)**
+
    ```bash
    # Localmente
    rm -rf node_modules prisma/migrations .next
    npm install
-   
+
    # En Neon
    # Ejecuta RESET_COMPLETO_FINAL.sql de nuevo
-   
+
    # Sincronizar
    npx prisma generate
    npx prisma studio
@@ -609,6 +638,7 @@ Si después de seguir esta guía sigues teniendo problemas:
 ## 🏔️ Proyecto Cumbre
 
 Base de datos optimizada y lista para:
+
 - ✅ Registro de socios
 - ✅ Gestión de membresías
 - ✅ Integración con Stripe

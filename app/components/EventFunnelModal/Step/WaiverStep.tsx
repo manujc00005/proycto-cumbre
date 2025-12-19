@@ -4,10 +4,10 @@
 // components/EventFunnelModal/steps/WaiverStep.tsx
 // ========================================
 
-'use client';
+"use client";
 
-import { WaiverEvent, WaiverAcceptanceProps } from '@/lib/waivers/types';
-import WaiverAcceptance from '../../PliegoDescarga/WaiverAcceptances';
+import { WaiverEvent, WaiverAcceptanceProps } from "@/lib/waivers/types";
+import WaiverAcceptance from "../../PliegoDescarga/WaiverAcceptances";
 
 interface WaiverStepProps {
   event: WaiverEvent;
@@ -19,7 +19,11 @@ interface WaiverStepProps {
   onAccept: WaiverAcceptanceProps["onAccept"];
 }
 
-export default function WaiverStep({ event, participant, onAccept }: WaiverStepProps) {
+export default function WaiverStep({
+  event,
+  participant,
+  onAccept,
+}: WaiverStepProps) {
   return (
     <div className="max-w-4xl mx-auto">
       <WaiverAcceptance

@@ -1,6 +1,6 @@
 /**
  * Feature Flags Configuration
- * 
+ *
  * Sistema centralizado de feature flags para controlar funcionalidades en producción.
  * Permite activar/desactivar features sin hacer deploy.
  */
@@ -9,7 +9,7 @@ export interface FeatureFlags {
   // Cart System
   enableCart: boolean;
   enableCheckout: boolean;
-  
+
   // Future features
   enableWishlist: boolean;
   enableReviews: boolean;
@@ -22,9 +22,9 @@ export interface FeatureFlags {
  */
 const defaultFlags: FeatureFlags = {
   // Cart
-  enableCart: false,           // ← Cambiar a false para desactivar el carrito
-  enableCheckout: false,        // ← Desactivar checkout si Stripe falla
-  
+  enableCart: false, // ← Cambiar a false para desactivar el carrito
+  enableCheckout: false, // ← Desactivar checkout si Stripe falla
+
   // Future features
   enableWishlist: false,
   enableReviews: false,
@@ -36,23 +36,25 @@ const defaultFlags: FeatureFlags = {
  * Permite override de flags via .env sin tocar código
  */
 const getEnvFlags = (): Partial<FeatureFlags> => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     // Client-side: no tiene acceso a process.env en producción
     return {};
   }
 
   return {
-    enableCart: process.env.NEXT_PUBLIC_ENABLE_CART === 'true' 
-      ? true 
-      : process.env.NEXT_PUBLIC_ENABLE_CART === 'false' 
-        ? false 
-        : undefined,
-    
-    enableCheckout: process.env.NEXT_PUBLIC_ENABLE_CHECKOUT === 'true'
-      ? true
-      : process.env.NEXT_PUBLIC_ENABLE_CHECKOUT === 'false'
-        ? false
-        : undefined,
+    enableCart:
+      process.env.NEXT_PUBLIC_ENABLE_CART === "true"
+        ? true
+        : process.env.NEXT_PUBLIC_ENABLE_CART === "false"
+          ? false
+          : undefined,
+
+    enableCheckout:
+      process.env.NEXT_PUBLIC_ENABLE_CHECKOUT === "true"
+        ? true
+        : process.env.NEXT_PUBLIC_ENABLE_CHECKOUT === "false"
+          ? false
+          : undefined,
   };
 };
 

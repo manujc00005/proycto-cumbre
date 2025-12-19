@@ -45,7 +45,9 @@ export default function TermsAndConditionsPage() {
             </Link>
 
             <div className="hidden sm:flex items-center gap-2">
-              <span className="text-xs text-zinc-500">Última actualización:</span>
+              <span className="text-xs text-zinc-500">
+                Última actualización:
+              </span>
               <span className="text-xs text-zinc-300">{LAST_UPDATED}</span>
             </div>
           </div>
@@ -103,8 +105,18 @@ export default function TermsAndConditionsPage() {
                 className="inline-flex items-center justify-between gap-3 rounded-xl bg-zinc-950/40 border border-zinc-800 px-4 py-3 text-sm text-zinc-200 hover:border-orange-500/40 hover:text-white transition"
               >
                 Ver reglamento (PDF)
-                <svg className="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <svg
+                  className="w-4 h-4 text-zinc-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
                 </svg>
               </Link>
 
@@ -113,8 +125,18 @@ export default function TermsAndConditionsPage() {
                 className="inline-flex items-center justify-between gap-3 rounded-xl bg-zinc-950/40 border border-zinc-800 px-4 py-3 text-sm text-zinc-200 hover:border-orange-500/40 hover:text-white transition"
               >
                 Ver descargo
-                <svg className="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <svg
+                  className="w-4 h-4 text-zinc-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
                 </svg>
               </Link>
 
@@ -123,8 +145,18 @@ export default function TermsAndConditionsPage() {
                 className="inline-flex items-center justify-between gap-3 rounded-xl bg-zinc-950/40 border border-zinc-800 px-4 py-3 text-sm text-zinc-200 hover:border-orange-500/40 hover:text-white transition"
               >
                 Política de privacidad
-                <svg className="w-4 h-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <svg
+                  className="w-4 h-4 text-zinc-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
                 </svg>
               </Link>
             </div>
@@ -185,22 +217,22 @@ export default function TermsAndConditionsPage() {
               </p>
             </Section>
 
-            <Section n="3" title="Inscripción y proceso de compra" accent="zinc">
+            <Section
+              n="3"
+              title="Inscripción y proceso de compra"
+              accent="zinc"
+            >
               <p>
                 La inscripción se realiza exclusivamente a través de la
                 plataforma oficial habilitada por el organizador.
               </p>
               <div className="mt-4 grid gap-3">
-                <Bullet>
-                  Facilitar datos veraces y completos.
-                </Bullet>
+                <Bullet>Facilitar datos veraces y completos.</Bullet>
                 <Bullet>
                   Aceptar expresamente el Descargo de Responsabilidad y la
                   Política de Privacidad.
                 </Bullet>
-                <Bullet>
-                  Realizar el pago íntegro de la inscripción.
-                </Bullet>
+                <Bullet>Realizar el pago íntegro de la inscripción.</Bullet>
               </div>
               <p className="mt-4">
                 El organizador se reserva el derecho de rechazar o cancelar
@@ -210,43 +242,77 @@ export default function TermsAndConditionsPage() {
 
             <Section n="4" title="Precio y forma de pago" accent="green">
               <div className="grid gap-3">
-                <Bullet>El precio de la inscripción se indica claramente durante el proceso de compra.</Bullet>
+                <Bullet>
+                  El precio de la inscripción se indica claramente durante el
+                  proceso de compra.
+                </Bullet>
                 <Bullet>
                   El pago se realiza mediante{" "}
-                  <span className="text-white font-medium">Stripe</span>, plataforma de pago segura.
+                  <span className="text-white font-medium">Stripe</span>,
+                  plataforma de pago segura.
                 </Bullet>
-                <Bullet>El organizador no almacena datos bancarios del participante.</Bullet>
-                <Bullet>El precio incluye la participación en el evento y los servicios especificados en la descripción del mismo.</Bullet>
+                <Bullet>
+                  El organizador no almacena datos bancarios del participante.
+                </Bullet>
+                <Bullet>
+                  El precio incluye la participación en el evento y los
+                  servicios especificados en la descripción del mismo.
+                </Bullet>
               </div>
             </Section>
 
-            <Section n="5" title="Política de cancelación y devoluciones" accent="orange">
-              <p>El participante podrá solicitar la cancelación de su inscripción conforme a las siguientes condiciones:</p>
+            <Section
+              n="5"
+              title="Política de cancelación y devoluciones"
+              accent="orange"
+            >
+              <p>
+                El participante podrá solicitar la cancelación de su inscripción
+                conforme a las siguientes condiciones:
+              </p>
               <div className="mt-4 grid gap-3">
                 <Bullet>
-                  Cancelación con más de <span className="text-white font-medium">48 horas</span> de antelación: devolución del{" "}
-                  <span className="text-white font-medium">100%</span> del importe.
+                  Cancelación con más de{" "}
+                  <span className="text-white font-medium">48 horas</span> de
+                  antelación: devolución del{" "}
+                  <span className="text-white font-medium">100%</span> del
+                  importe.
                 </Bullet>
                 <Bullet>
-                  Cancelación con menos de <span className="text-white font-medium">48 horas</span>: devolución del{" "}
-                  <span className="text-white font-medium">50%</span> del importe.
+                  Cancelación con menos de{" "}
+                  <span className="text-white font-medium">48 horas</span>:
+                  devolución del{" "}
+                  <span className="text-white font-medium">50%</span> del
+                  importe.
                 </Bullet>
-                <Bullet>No se realizarán devoluciones por no asistencia al evento.</Bullet>
-                <Bullet>No se devolverán gastos asociados como desplazamientos, alojamiento u otros.</Bullet>
+                <Bullet>
+                  No se realizarán devoluciones por no asistencia al evento.
+                </Bullet>
+                <Bullet>
+                  No se devolverán gastos asociados como desplazamientos,
+                  alojamiento u otros.
+                </Bullet>
               </div>
             </Section>
 
-            <Section n="6" title="Modificación o cancelación del evento" accent="zinc">
+            <Section
+              n="6"
+              title="Modificación o cancelación del evento"
+              accent="zinc"
+            >
               <div className="grid gap-3">
                 <Bullet>
-                  El organizador podrá modificar fecha, horario, recorrido o ubicación por razones de seguridad,
-                  meteorología, fuerza mayor o decisiones administrativas.
+                  El organizador podrá modificar fecha, horario, recorrido o
+                  ubicación por razones de seguridad, meteorología, fuerza mayor
+                  o decisiones administrativas.
                 </Bullet>
                 <Bullet>
-                  En caso de cancelación total del evento, se aplicará la política de devoluciones indicada anteriormente.
+                  En caso de cancelación total del evento, se aplicará la
+                  política de devoluciones indicada anteriormente.
                 </Bullet>
                 <Bullet>
-                  Dichas modificaciones no darán derecho a reclamaciones adicionales.
+                  Dichas modificaciones no darán derecho a reclamaciones
+                  adicionales.
                 </Bullet>
               </div>
             </Section>
@@ -254,20 +320,24 @@ export default function TermsAndConditionsPage() {
             <Section n="7" title="Responsabilidad" accent="zinc">
               <div className="grid gap-3">
                 <Bullet>
-                  La participación en el evento está sujeta a la aceptación expresa del Descargo de Responsabilidad.
+                  La participación en el evento está sujeta a la aceptación
+                  expresa del Descargo de Responsabilidad.
                 </Bullet>
                 <Bullet>
-                  El organizador no se hace responsable de los daños derivados de la práctica deportiva, conforme a lo
-                  establecido en dicho documento.
+                  El organizador no se hace responsable de los daños derivados
+                  de la práctica deportiva, conforme a lo establecido en dicho
+                  documento.
                 </Bullet>
-                <Bullet>El participante asume los riesgos inherentes a la actividad.</Bullet>
+                <Bullet>
+                  El participante asume los riesgos inherentes a la actividad.
+                </Bullet>
               </div>
             </Section>
 
             <Section n="8" title="Protección de datos" accent="zinc">
               <p>
-                El tratamiento de los datos personales se rige por lo establecido en la Política de Privacidad de
-                Proyecto Cumbre.
+                El tratamiento de los datos personales se rige por lo
+                establecido en la Política de Privacidad de Proyecto Cumbre.
               </p>
               <div className="mt-3">
                 <a
@@ -277,8 +347,18 @@ export default function TermsAndConditionsPage() {
                   className="inline-flex items-center gap-2 text-orange-400 hover:text-orange-300 underline"
                 >
                   Ver política de privacidad
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
                   </svg>
                 </a>
               </div>
@@ -286,15 +366,17 @@ export default function TermsAndConditionsPage() {
 
             <Section n="9" title="Legislación y jurisdicción" accent="zinc">
               <p>
-                Estos Términos y Condiciones se rigen por la legislación española. Cualquier controversia se someterá a
-                los Juzgados y Tribunales de Málaga capital.
+                Estos Términos y Condiciones se rigen por la legislación
+                española. Cualquier controversia se someterá a los Juzgados y
+                Tribunales de Málaga capital.
               </p>
             </Section>
 
             <Section n="10" title="Aceptación" accent="orange">
               <p>
-                La inscripción en el evento implica la aceptación expresa de estos Términos y Condiciones, del
-                Reglamento del evento y del Descargo de Responsabilidad.
+                La inscripción en el evento implica la aceptación expresa de
+                estos Términos y Condiciones, del Reglamento del evento y del
+                Descargo de Responsabilidad.
               </p>
             </Section>
 
@@ -306,7 +388,8 @@ export default function TermsAndConditionsPage() {
                     ¿Listo para inscribirte?
                   </h2>
                   <p className="text-sm text-zinc-400 mt-1">
-                    Revisa el reglamento y el descargo antes de completar el pago.
+                    Revisa el reglamento y el descargo antes de completar el
+                    pago.
                   </p>
                 </div>
 
@@ -316,8 +399,18 @@ export default function TermsAndConditionsPage() {
                     className="inline-flex justify-center items-center gap-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-black font-semibold px-5 py-3 transition"
                   >
                     Ir a la inscripción
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
                     </svg>
                   </Link>
 
@@ -356,15 +449,15 @@ function Section({
     accent === "orange"
       ? "border-orange-500/20 bg-orange-500/5"
       : accent === "green"
-      ? "border-green-500/20 bg-green-500/5"
-      : "border-zinc-800 bg-zinc-900/60";
+        ? "border-green-500/20 bg-green-500/5"
+        : "border-zinc-800 bg-zinc-900/60";
 
   const badgeClasses =
     accent === "orange"
       ? "bg-orange-500/15 text-orange-300 border-orange-500/20"
       : accent === "green"
-      ? "bg-green-500/15 text-green-300 border-green-500/20"
-      : "bg-zinc-800/60 text-zinc-300 border-zinc-700";
+        ? "bg-green-500/15 text-green-300 border-green-500/20"
+        : "bg-zinc-800/60 text-zinc-300 border-zinc-700";
 
   return (
     <section className={`rounded-2xl border ${accentClasses} p-6 md:p-7`}>
@@ -376,9 +469,7 @@ function Section({
             >
               {n}
             </span>
-            <h2 className="text-lg md:text-xl font-bold text-white">
-              {title}
-            </h2>
+            <h2 className="text-lg md:text-xl font-bold text-white">{title}</h2>
           </div>
         </div>
       </div>
@@ -393,8 +484,18 @@ function Bullet({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-3">
       <div className="w-6 h-6 rounded-lg bg-zinc-950/40 border border-zinc-800 flex items-center justify-center flex-shrink-0 mt-0.5">
-        <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+        <svg
+          className="w-4 h-4 text-green-500"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M5 13l4 4L19 7"
+          />
         </svg>
       </div>
       <div className="text-zinc-300">{children}</div>

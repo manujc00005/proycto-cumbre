@@ -3,19 +3,24 @@
 // Descargo de responsabilidad + Términos y Condiciones
 // ========================================
 
-import type { EventMeta, WaiverDefinition, TermsDefinition, WaiverEvent } from "../types";
+import type {
+  EventMeta,
+  WaiverDefinition,
+  TermsDefinition,
+  WaiverEvent,
+} from "../types";
 
 // ========================================
 // META INFORMACIÓN DEL EVENTO
 // ========================================
 
 export const MISA_META: EventMeta = {
-  eventId: 'ba063181-9a20-466d-9400-246842b547a0',
-  eventName: 'MISA - Ritual Furtivo',
-  eventDateISO: '2026-01-23',
-  eventLocation: 'Málaga, Andalucía',
-  modalityName: '11K Trail Nocturno',
-  rulesUrl: 'https://proyecto-cumbre.es/misa-reglamento.pdf',
+  eventId: "ba063181-9a20-466d-9400-246842b547a0",
+  eventName: "MISA - Ritual Furtivo",
+  eventDateISO: "2026-01-23",
+  eventLocation: "Málaga, Andalucía",
+  modalityName: "11K Trail Nocturno",
+  rulesUrl: "https://proyecto-cumbre.es/misa-reglamento.pdf",
 };
 
 // ========================================
@@ -23,10 +28,10 @@ export const MISA_META: EventMeta = {
 // ========================================
 
 export const MISA_WAIVER_V1: WaiverDefinition = {
-  id: 'misa',
-  title: 'Descargo de responsabilidad y normativa',
-  version: 'v1.0',
-  effectiveFromISO: '2024-12-13',
+  id: "misa",
+  title: "Descargo de responsabilidad y normativa",
+  version: "v1.0",
+  effectiveFromISO: "2024-12-13",
   text: `DESCARGO DE RESPONSABILIDAD, ASUNCIÓN DE RIESGOS
 
 Y DECLARACIÓN DE FEDERACIÓN OBLIGATORIA
@@ -193,7 +198,7 @@ VERSIÓN: v1.0
 FECHA DE VIGENCIA: Desde el 13 de diciembre de 2024
 
 CLUB DEPORTIVO PROYECTO CUMBRE
-NIF: G75790246`
+NIF: G75790246`,
 };
 
 // ========================================
@@ -201,11 +206,11 @@ NIF: G75790246`
 // ========================================
 
 export const MISA_TERMS_V1: TermsDefinition = {
-  id: 'misa',
-  title: 'Términos y condiciones del evento',
-  version: 'v1.0',
-  effectiveFromISO: '2024-12-13',
-  lastUpdatedText: '13 de diciembre de 2024',
+  id: "misa",
+  title: "Términos y condiciones del evento",
+  version: "v1.0",
+  effectiveFromISO: "2024-12-13",
+  lastUpdatedText: "13 de diciembre de 2024",
   text: `TÉRMINOS Y CONDICIONES DEL EVENTO
 MISA – RITUAL FURTIVO 2026
 
@@ -294,7 +299,7 @@ Cualquier controversia se someterá a los Juzgados y Tribunales de Málaga capit
 
 10. ACEPTACIÓN
 
-La inscripción en el evento implica la aceptación expresa de estos Términos y Condiciones, del Reglamento del evento y del Descargo de Responsabilidad.`
+La inscripción en el evento implica la aceptación expresa de estos Términos y Condiciones, del Reglamento del evento y del Descargo de Responsabilidad.`,
 };
 
 // ========================================

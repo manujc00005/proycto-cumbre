@@ -4,14 +4,13 @@
 // components/EventFunnelModal/hooks/useStepValidation.ts
 // ========================================
 
-import { FormField } from '@/lib/funnels/types';
+import { FormField } from "@/lib/funnels/types";
 
 export function useStepValidation(fields: FormField[]) {
-  
   // Validar un campo individual
   const validateField = (field: FormField, value: any): string | null => {
     // Campo requerido vacío
-    if (field.required && (!value || value.toString().trim() === '')) {
+    if (field.required && (!value || value.toString().trim() === "")) {
       return `${field.label} es obligatorio`;
     }
 
@@ -26,25 +25,25 @@ export function useStepValidation(fields: FormField[]) {
 
     // Validación por tipo
     switch (field.type) {
-      case 'email':
+      case "email":
         if (!/\S+@\S+\.\S+/.test(value)) {
-          return 'Email inválido';
+          return "Email inválido";
         }
         break;
 
-      case 'tel':
-        const phone = value.replace(/\s/g, '');
+      case "tel":
+        const phone = value.replace(/\s/g, "");
         if (!/^(\+?[1-9]\d{0,2})?\d{9,}$/.test(phone)) {
-          return 'Teléfono inválido';
+          return "Teléfono inválido";
         }
         break;
 
-      case 'dni':
+      case "dni":
         const dniRegex = /^[0-9]{8}[A-Za-z]$/;
         const nieRegex = /^[XYZ][0-9]{7}[A-Za-z]$/;
         const upperValue = value.toUpperCase();
         if (!dniRegex.test(upperValue) && !nieRegex.test(upperValue)) {
-          return 'DNI/NIE inválido (ej: 12345678A)';
+          return "DNI/NIE inválido (ej: 12345678A)";
         }
         break;
 
@@ -56,7 +55,9 @@ export function useStepValidation(fields: FormField[]) {
   };
 
   // Validar todos los campos
-  const validateAll = (formData: Record<string, any>): Record<string, string> => {
+  const validateAll = (
+    formData: Record<string, any>,
+  ): Record<string, string> => {
     const errors: Record<string, string> = {};
 
     fields.forEach((field) => {

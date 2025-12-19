@@ -5,16 +5,20 @@
 // app/api/checkout/route.ts
 // ========================================
 
-import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
-import { PaymentStatus, MembershipStatus } from '@prisma/client';
-import { getLicensePrice, LICENSE_TYPES, MEMBERSHIP_FEE } from '@/lib/constants';
-import { logger } from '@/lib/logger';
-import { getStripe } from '@/lib/stripe';
-import { prisma } from '@/lib/prisma';
-import crypto from 'crypto';
-import { EmailService } from '@/lib/mail/email-service';
-import { isTestUserEmail } from '../helpers';
+import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
+import { PaymentStatus, MembershipStatus } from "@prisma/client";
+import {
+  getLicensePrice,
+  LICENSE_TYPES,
+  MEMBERSHIP_FEE,
+} from "@/lib/constants";
+import { logger } from "@/lib/logger";
+import { getStripe } from "@/lib/stripe";
+import { prisma } from "@/lib/prisma";
+import crypto from "crypto";
+import { EmailService } from "@/lib/mail/email-service";
+import { isTestUserEmail } from "../helpers";
 
 // ========================================
 // FUNCIÓN: Activar membresía sin Stripe
@@ -25,10 +29,10 @@ async function activateMembershipDirectly(params: {
   total: number;
 }) {
   const { memberId, memberData, total } = params;
-  const testAmount = parseInt(process.env.TEST_PAYMENT_AMOUNT || '500');
-  const fakeSessionId = `test_${crypto.randomBytes(16).toString('hex')}`;
+  const testAmount = parseInt(process.env.TEST_PAYMENT_AMOUNT || "500");
+  const fakeSessionId = `test_${crypto.randomBytes(16).toString("hex")}`;
 
-  logger.log('🧪 MODO TEST - Activando membresía directamente');
+  logger.log("🧪 MODO TEST - Activando membresía directamente");
   logger.log(`   Email: ${memberData.email}`);
   logger.log(`   Monto original: ${total}€`);
   logger.log(`   Monto de test: ${testAmount / 100}€`);
@@ -40,17 +44,17 @@ async function activateMembershipDirectly(params: {
   const result = await prisma.$transaction(async (tx) => {
     const payment = await tx.payment.create({
       data: {
-        payment_type: 'membership',
+        payment_type: "membership",
         member_id: memberId,
         stripe_session_id: fakeSessionId,
         amount: testAmount,
-        currency: 'eur',
+        currency: "eur",
         status: PaymentStatus.completed,
         description: `🧪 TEST - Membresía - Licencia ${memberData.licenseType}`,
         metadata: {
           is_test_payment: true,
           license_type: memberData.licenseType,
-          age_category: memberData.ageCategory || 'unknown',
+          age_category: memberData.ageCategory || "unknown",
         },
       },
     });
@@ -69,31 +73,31 @@ async function activateMembershipDirectly(params: {
     return { payment, member: updatedMember };
   });
 
-  logger.log('✅ Membresía activada directamente');
-  logger.log('   Payment ID:', result.payment.id);
-  logger.log('   Member status:', result.member.membership_status);
+  logger.log("✅ Membresía activada directamente");
+  logger.log("   Payment ID:", result.payment.id);
+  logger.log("   Member status:", result.member.membership_status);
 
   // ========================================
   // 📧 ENVIAR EMAIL INMEDIATAMENTE (TEST USER)
   // ========================================
   try {
-    logger.log('📧 Enviando email de bienvenida (test user)...');
-    
+    logger.log("📧 Enviando email de bienvenida (test user)...");
+
     await EmailService.sendWelcomeWithPaymentStatus({
       email: result.member.email,
       firstName: result.member.first_name,
       lastName: result.member.last_name,
-      memberNumber: result.member.member_number || 'none',
-      licenseType: result.member.license_type || 'none',
-      paymentStatus: 'success',
+      memberNumber: result.member.member_number || "none",
+      licenseType: result.member.license_type || "none",
+      paymentStatus: "success",
       amount: testAmount,
-      currency: 'eur',
+      currency: "eur",
     });
-    
-    logger.log('✅ Email enviado correctamente');
+
+    logger.log("✅ Email enviado correctamente");
   } catch (emailError: any) {
     // No es crítico, pero logueamos el error
-    logger.error('[TEST] Error enviando email:', emailError.message);
+    logger.error("[TEST] Error enviando email:", emailError.message);
   }
 
   return result;
@@ -104,23 +108,23 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { memberId, total, memberData } = body;
 
-    logger.log('💳 Procesando checkout:', { memberId, total, memberData });
+    logger.log("💳 Procesando checkout:", { memberId, total, memberData });
 
     if (!memberId || !total || !memberData) {
       return NextResponse.json(
-        { error: 'Faltan datos requeridos' },
-        { status: 400 }
+        { error: "Faltan datos requeridos" },
+        { status: 400 },
       );
     }
 
     const member = await prisma.member.findUnique({
-      where: { id: memberId }
+      where: { id: memberId },
     });
 
     if (!member) {
       return NextResponse.json(
-        { error: 'Miembro no encontrado' },
-        { status: 404 }
+        { error: "Miembro no encontrado" },
+        { status: 404 },
       );
     }
 
@@ -140,7 +144,7 @@ export async function POST(req: NextRequest) {
       });
 
       const publicUrl = process.env.NEXT_PUBLIC_URL;
-      
+
       return NextResponse.json({
         success: true,
         isTest: true,
@@ -163,26 +167,28 @@ export async function POST(req: NextRequest) {
     // ========================================
     const stripe = getStripe();
 
-    const selectedLicense = LICENSE_TYPES.find(l => l.id === memberData.licenseType);
-    
+    const selectedLicense = LICENSE_TYPES.find(
+      (l) => l.id === memberData.licenseType,
+    );
+
     if (!selectedLicense) {
       return NextResponse.json(
-        { error: 'Licencia no encontrada' },
-        { status: 400 }
+        { error: "Licencia no encontrada" },
+        { status: 400 },
       );
     }
 
-    const licensePrice = memberData.ageCategory 
+    const licensePrice = memberData.ageCategory
       ? getLicensePrice(selectedLicense, memberData.ageCategory)
       : 0;
 
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
       {
         price_data: {
-          currency: 'eur',
+          currency: "eur",
           product_data: {
-            name: 'Cuota de Socio Anual - Proyecto Cumbre',
-            description: 'Membresía anual del club de montaña',
+            name: "Cuota de Socio Anual - Proyecto Cumbre",
+            description: "Membresía anual del club de montaña",
           },
           unit_amount: MEMBERSHIP_FEE * 100,
         },
@@ -193,7 +199,7 @@ export async function POST(req: NextRequest) {
     if (licensePrice > 0) {
       lineItems.push({
         price_data: {
-          currency: 'eur',
+          currency: "eur",
           product_data: {
             name: `Licencia FEDME - ${selectedLicense.name}`,
             description: selectedLicense.coverage,
@@ -205,49 +211,48 @@ export async function POST(req: NextRequest) {
     }
 
     const session = await stripe.checkout.sessions.create({
-      mode: 'payment', // ✅ OBLIGATORIO con line_items
-      payment_method_types: ['card'],
+      mode: "payment", // ✅ OBLIGATORIO con line_items
+      payment_method_types: ["card"],
       line_items: lineItems,
       success_url: `${process.env.NEXT_PUBLIC_URL}/pago-exito?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_URL}/pago-cancelado?session_id={CHECKOUT_SESSION_ID}`,
       metadata: {
-        type: 'membership', 
+        type: "membership",
         memberId: memberId,
         email: memberData.email,
         licenseType: memberData.licenseType,
-        ageCategory: memberData.ageCategory || 'unknown',
+        ageCategory: memberData.ageCategory || "unknown",
       },
       customer_email: memberData.email,
     });
 
-    logger.log('✅ Sesión de Stripe creada:', session.id);
+    logger.log("✅ Sesión de Stripe creada:", session.id);
 
     try {
       const payment = await prisma.payment.create({
         data: {
-          payment_type: 'membership',
+          payment_type: "membership",
           member_id: memberId,
           stripe_session_id: session.id,
-          stripe_payment_id: session.payment_intent as string || null,
+          stripe_payment_id: (session.payment_intent as string) || null,
           amount: total * 100,
-          currency: 'eur',
-          status: 'pending' as PaymentStatus,
+          currency: "eur",
+          status: "pending" as PaymentStatus,
           description: `Membresía - Licencia ${memberData.licenseType}`,
-        }
+        },
       });
 
-      logger.log('✅ Payment creado en BD:', payment.id);
-      logger.log('📊 Estado actual:');
-      logger.log('   - Payment ID:', payment.id);
-      logger.log('   - Status:', payment.status);
-      logger.log('   - Amount:', payment.amount / 100, '€');
-      logger.log('   - Stripe Session:', session.id);
-
+      logger.log("✅ Payment creado en BD:", payment.id);
+      logger.log("📊 Estado actual:");
+      logger.log("   - Payment ID:", payment.id);
+      logger.log("   - Status:", payment.status);
+      logger.log("   - Amount:", payment.amount / 100, "€");
+      logger.log("   - Stripe Session:", session.id);
     } catch (paymentError: any) {
-      if (paymentError.code === 'P2002') {
-        logger.log('⚠️ Payment ya existe para esta sesión, continuando...');
+      if (paymentError.code === "P2002") {
+        logger.log("⚠️ Payment ya existe para esta sesión, continuando...");
       } else {
-        logger.error('❌ Error creando payment:', paymentError);
+        logger.error("❌ Error creando payment:", paymentError);
       }
     }
 
@@ -257,13 +262,12 @@ export async function POST(req: NextRequest) {
       sessionId: session.id,
       url: session.url,
     });
-
   } catch (error: any) {
-    logger.error('❌ Error en checkout:', error);
-    
+    logger.error("❌ Error en checkout:", error);
+
     return NextResponse.json(
-      { error: error.message || 'Error al crear sesión de pago' },
-      { status: 500 }
+      { error: error.message || "Error al crear sesión de pago" },
+      { status: 500 },
     );
   }
 }

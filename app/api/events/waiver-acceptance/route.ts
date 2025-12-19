@@ -1,22 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { logger } from '@/lib/logger';
-import crypto from 'crypto';
-import { getWaiverOrThrow } from '@/lib/waivers';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
+import crypto from "crypto";
+import { getWaiverOrThrow } from "@/lib/waivers";
 
 // Canoniza para que el hash sea estable (CRLF vs LF, etc.)
 function canonicalizeText(input: string) {
-  return input.replace(/\r\n/g, '\n').trim();
+  return input.replace(/\r\n/g, "\n").trim();
 }
 
 function sha256Hex(input: string) {
-  return crypto.createHash('sha256').update(input, 'utf8').digest('hex');
+  return crypto.createHash("sha256").update(input, "utf8").digest("hex");
 }
 
 function getClientIp(request: NextRequest) {
-  const xff = request.headers.get('x-forwarded-for');
-  if (xff) return xff.split(',')[0].trim();
-  return request.headers.get('x-real-ip') ?? 'unknown';
+  const xff = request.headers.get("x-forwarded-for");
+  if (xff) return xff.split(",")[0].trim();
+  return request.headers.get("x-real-ip") ?? "unknown";
 }
 
 export async function POST(request: NextRequest) {
@@ -33,15 +33,18 @@ export async function POST(request: NextRequest) {
       !payload?.participantDocumentId
     ) {
       return NextResponse.json(
-        { error: 'Faltan campos obligatorios (eventId, participantFullName, participantDocumentId)' },
-        { status: 400 }
+        {
+          error:
+            "Faltan campos obligatorios (eventId, participantFullName, participantDocumentId)",
+        },
+        { status: 400 },
       );
     }
-    
+
     // ========================================
     // 2.5) RESOLVER UUID DEL EVENTO (slug -> uuid)
     // ========================================
-    logger.log('🧪 WAIVER ACCEPTANCE');
+    logger.log("🧪 WAIVER ACCEPTANCE");
     logger.log(`   EventId: ${payload.eventId}`);
     logger.log(`   EventSlug: ${payload.eventSlug}`);
     logger.log(`   Participante: ${payload.participantFullName}`);
@@ -51,13 +54,13 @@ export async function POST(request: NextRequest) {
     });
 
     if (!eventRow) {
-    return NextResponse.json(
-      { error: `Evento no encontrado: ${payload.eventSlug}` },
-      { status: 404 }
-    );
-  }
+      return NextResponse.json(
+        { error: `Evento no encontrado: ${payload.eventSlug}` },
+        { status: 404 },
+      );
+    }
 
-    const eventUuid = eventRow.id
+    const eventUuid = eventRow.id;
 
     // ========================================
     // 2) FUENTE DE VERDAD DEL PLIEGO (SERVER-SIDE)
@@ -67,8 +70,15 @@ export async function POST(request: NextRequest) {
       waiver = getWaiverOrThrow(payload.eventId, payload.waiverVersion);
     } catch (e: any) {
       return NextResponse.json(
-        { error: e?.message ?? 'Pliego no encontrado evento=' + payload.eventName + ', version=' + payload.waiverVersion  },
-        { status: 400 }
+        {
+          error:
+            e?.message ??
+            "Pliego no encontrado evento=" +
+              payload.eventName +
+              ", version=" +
+              payload.waiverVersion,
+        },
+        { status: 400 },
       );
     }
 
@@ -87,10 +97,10 @@ export async function POST(request: NextRequest) {
     // 3) METADATA (SERVER-SIDE)
     // ========================================
     const clientIp = getClientIp(request);
-    const userAgent = request.headers.get('user-agent') || '';
+    const userAgent = request.headers.get("user-agent") || "";
     const acceptedAt = new Date();
 
-    logger.log('📝 Guardando aceptación de pliego (server-side truth):', {
+    logger.log("📝 Guardando aceptación de pliego (server-side truth):", {
       eventSlug: payload.eventId,
       eventUuid,
       participant: payload.participantFullName,
@@ -108,13 +118,15 @@ export async function POST(request: NextRequest) {
     let eventRegistrationId: string | null = null;
 
     const email = payload.participantEmail?.toLowerCase?.().trim();
-    const documentId = String(payload.participantDocumentId).trim().toUpperCase();
+    const documentId = String(payload.participantDocumentId)
+      .trim()
+      .toUpperCase();
 
     // 4.1) member por email
     if (email) {
       const member = await prisma.member.findUnique({
         where: { email },
-        select: { id: true }
+        select: { id: true },
       });
       memberId = member?.id ?? null;
     }
@@ -123,7 +135,7 @@ export async function POST(request: NextRequest) {
     if (!memberId) {
       const memberByDni = await prisma.member.findFirst({
         where: { dni: documentId },
-        select: { id: true }
+        select: { id: true },
       });
       memberId = memberByDni?.id ?? null;
     }
@@ -137,7 +149,7 @@ export async function POST(request: NextRequest) {
           { participant_dni: documentId },
         ],
       },
-      select: { id: true, member_id: true }
+      select: { id: true, member_id: true },
     });
 
     eventRegistrationId = registration?.id ?? null;
@@ -166,11 +178,11 @@ export async function POST(request: NextRequest) {
         ip_address: clientIp,
         user_agent: userAgent,
         event_registration_id: eventRegistrationId,
-        member_id: memberId                            // 👈 VINCULACIÓN
-      }
+        member_id: memberId, // 👈 VINCULACIÓN
+      },
     });
 
-    logger.log('✅ Aceptación guardada:', {
+    logger.log("✅ Aceptación guardada:", {
       id: acceptance.id,
       eventId: acceptance.event_id,
       version: acceptance.waiver_version,
@@ -188,21 +200,24 @@ export async function POST(request: NextRequest) {
       waiverTextHash: acceptance.waiver_text_hash,
       acceptedAtISO: acceptance.accepted_at.toISOString(),
       memberId: acceptance.member_id,
-      eventRegistrationId
+      eventRegistrationId,
     });
   } catch (error: any) {
-    logger.error('❌ Error al guardar aceptación:', error);
+    logger.error("❌ Error al guardar aceptación:", error);
 
-    if (error?.code === 'P2002') {
+    if (error?.code === "P2002") {
       return NextResponse.json(
-        { error: 'Ya existe una aceptación para este participante en esta versión del pliego' },
-        { status: 409 }
+        {
+          error:
+            "Ya existe una aceptación para este participante en esta versión del pliego",
+        },
+        { status: 409 },
       );
     }
 
     return NextResponse.json(
-      { error: 'Error al guardar aceptación', details: error.message },
-      { status: 500 }
+      { error: "Error al guardar aceptación", details: error.message },
+      { status: 500 },
     );
   }
 }

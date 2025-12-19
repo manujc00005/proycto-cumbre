@@ -1,25 +1,25 @@
 // ========================================
-// EMAIL TEMPLATE BUILDER - 
+// EMAIL TEMPLATE BUILDER -
 // lib/email/email-service.ts
 // ========================================
 import { BASE_STYLES } from "./email-base-styles";
 
 export default class EmailTemplateBuilder {
   private styles: string = BASE_STYLES;
-  private headerTitle: string = 'PROYECTO CUMBRE';
-  private headerStyle: string = 'background: #000000;';
-  
+  private headerTitle: string = "PROYECTO CUMBRE";
+  private headerStyle: string = "background: #000000;";
+
   withCustomStyles(additionalStyles: string): this {
     this.styles += `\n${additionalStyles}`;
     return this;
   }
-  
+
   withCustomHeader(title: string, style?: string): this {
     this.headerTitle = title;
     if (style) this.headerStyle = style;
     return this;
   }
-  
+
   build(content: string): string {
     return `
       <!DOCTYPE html>

@@ -5,11 +5,11 @@
 // lib/email/email-service.ts
 // ========================================
 
-import { Resend } from 'resend';
-import { logger } from '@/lib/logger';
-import EmailTemplates from './email-templates';
-import { buildEventEmail } from './event-email-template';
-import { getEventEmailConfig } from './event-email-configs';
+import { Resend } from "resend";
+import { logger } from "@/lib/logger";
+import EmailTemplates from "./email-templates";
+import { buildEventEmail } from "./event-email-template";
+import { getEventEmailConfig } from "./event-email-configs";
 import {
   BaseEventEmailData,
   ContactFormData,
@@ -17,14 +17,15 @@ import {
   LicenseActivatedData,
   MembershipEmailData,
   OrderEmailData,
-} from './types';
+} from "./types";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default class EmailService {
-  private static from = process.env.EMAIL_FROM || 'info@proyecto-cumbre.es';
-  private static adminEmail = process.env.EMAIL_ADMIN || 'info@proyecto-cumbre.es';
-  private static isDevelopment = process.env.NODE_ENV === 'development';
+  private static from = process.env.EMAIL_FROM || "info@proyecto-cumbre.es";
+  private static adminEmail =
+    process.env.EMAIL_ADMIN || "info@proyecto-cumbre.es";
+  private static isDevelopment = process.env.NODE_ENV === "development";
 
   /**
    * Enviar email genérico (bajo nivel)
@@ -34,11 +35,11 @@ export default class EmailService {
     const fromAddress = options.from || this.from;
 
     const finalRecipients = this.isDevelopment
-      ? [process.env.DEV_TEST_EMAIL || 'mjc00005@gmail.com']
+      ? [process.env.DEV_TEST_EMAIL || "mjc00005@gmail.com"]
       : recipients;
 
     try {
-      logger.log('📧 [Email] Enviando:', {
+      logger.log("📧 [Email] Enviando:", {
         from: fromAddress,
         to: finalRecipients,
         originalTo: this.isDevelopment ? recipients : undefined,
@@ -49,20 +50,22 @@ export default class EmailService {
       const { data, error } = await resend.emails.send({
         from: fromAddress,
         to: finalRecipients,
-        subject: this.isDevelopment ? `[DEV] ${options.subject}` : options.subject,
+        subject: this.isDevelopment
+          ? `[DEV] ${options.subject}`
+          : options.subject,
         html: options.html,
         text: options.text,
       });
 
       if (error) {
-        logger.error('❌ [Email] Error de Resend:', error);
+        logger.error("❌ [Email] Error de Resend:", error);
         throw new Error(error.message);
       }
 
-      logger.apiSuccess('Email enviado', { id: data?.id, to: finalRecipients });
+      logger.apiSuccess("Email enviado", { id: data?.id, to: finalRecipients });
       return { success: true, id: data?.id };
     } catch (error: any) {
-      logger.apiError('Error crítico enviando email', error);
+      logger.apiError("Error crítico enviando email", error);
       throw error;
     }
   }
@@ -72,7 +75,7 @@ export default class EmailService {
   // ========================================
 
   static async sendWelcomeWithPaymentStatus(data: MembershipEmailData) {
-    const isSuccess = data.paymentStatus === 'success';
+    const isSuccess = data.paymentStatus === "success";
     const html = isSuccess
       ? EmailTemplates.membershipSuccess(data)
       : EmailTemplates.membershipFailed(data);
@@ -80,8 +83,8 @@ export default class EmailService {
     return this.send({
       to: data.email,
       subject: isSuccess
-        ? '¡Bienvenido a Proyecto Cumbre! 🏔️'
-        : '⚠️ Problema con tu pago - Proyecto Cumbre',
+        ? "¡Bienvenido a Proyecto Cumbre! 🏔️"
+        : "⚠️ Problema con tu pago - Proyecto Cumbre",
       html,
     });
   }
@@ -89,7 +92,7 @@ export default class EmailService {
   static async sendLicenseActivated(data: LicenseActivatedData) {
     return this.send({
       to: data.email,
-      subject: '✅ Tu licencia FEDME está activa',
+      subject: "✅ Tu licencia FEDME está activa",
       html: EmailTemplates.licenseActivated(data),
     });
   }
@@ -101,13 +104,13 @@ export default class EmailService {
   /**
    * Enviar email de confirmación de evento
    * ✅ Automáticamente usa la config correcta según el slug
-   * 
+   *
    * @param eventSlug - Slug del evento ('misa', 'trail-nocturno', etc.)
    * @param data - Datos del participante
    */
   static async sendEventConfirmation(
     eventSlug: string,
-    data: BaseEventEmailData
+    data: BaseEventEmailData,
   ) {
     // ✅ Obtener config automáticamente por slug
     const config = getEventEmailConfig(eventSlug, {

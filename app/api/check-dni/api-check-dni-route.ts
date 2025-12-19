@@ -22,10 +22,10 @@
 //     // Validar formato básico de DNI español
 //     const dniRegex = /^[0-9]{8}[A-Z]$/;
 //     const nieRegex = /^[XYZ][0-9]{7}[A-Z]$/;
-    
+
 //     if (!dniRegex.test(normalizedDni) && !nieRegex.test(normalizedDni)) {
 //       return NextResponse.json(
-//         { 
+//         {
 //           exists: false,
 //           validFormat: false,
 //           message: 'Formato de DNI/NIE inválido'

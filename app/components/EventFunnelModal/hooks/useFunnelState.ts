@@ -4,12 +4,12 @@
 // components/EventFunnelModal/hooks/useFunnelState.ts
 // ========================================
 
-import { useState, useCallback } from 'react';
-import { StepId, FunnelState } from '@/lib/funnels/types';
+import { useState, useCallback } from "react";
+import { StepId, FunnelState } from "@/lib/funnels/types";
 
 export function useFunnelState(hasRules: boolean) {
   const [state, setState] = useState<FunnelState>({
-    currentStep: 'form',
+    currentStep: "form",
     completedSteps: [],
     formData: {},
     waiverAccepted: false,
@@ -19,10 +19,10 @@ export function useFunnelState(hasRules: boolean) {
 
   // Definir pasos según configuración
   const steps: StepId[] = [
-    'form',
-    'waiver',
-    ...(hasRules ? ['rules' as StepId] : []),
-    'payment',
+    "form",
+    "waiver",
+    ...(hasRules ? ["rules" as StepId] : []),
+    "payment",
   ];
 
   const currentStepIndex = steps.indexOf(state.currentStep);
@@ -80,27 +80,33 @@ export function useFunnelState(hasRules: boolean) {
   // Verificar si puede avanzar
   const canGoNext = useCallback(() => {
     switch (state.currentStep) {
-      case 'form':
+      case "form":
         // Validar que haya datos mínimos Y consentimientos aceptados
         const hasFormData = Object.keys(state.formData).length > 0;
-        const hasConsents = state.formData.consents?.privacy_accepted === true && 
-                           state.formData.consents?.whatsapp_consent === true;
+        const hasConsents =
+          state.formData.consents?.privacy_accepted === true &&
+          state.formData.consents?.whatsapp_consent === true;
         return hasFormData && hasConsents;
-      case 'waiver':
+      case "waiver":
         return state.waiverAccepted;
-      case 'rules':
+      case "rules":
         return state.rulesAccepted;
-      case 'payment':
+      case "payment":
         return true;
       default:
         return false;
     }
-  }, [state.currentStep, state.formData, state.waiverAccepted, state.rulesAccepted]);
+  }, [
+    state.currentStep,
+    state.formData,
+    state.waiverAccepted,
+    state.rulesAccepted,
+  ]);
 
   // Verificar si puede retroceder
   const canGoBack = useCallback(() => {
     // No se puede retroceder desde el waiver una vez aceptado
-    if (state.currentStep === 'payment' && state.waiverAccepted) {
+    if (state.currentStep === "payment" && state.waiverAccepted) {
       return false;
     }
     return currentStepIndex > 0;
