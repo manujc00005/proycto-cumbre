@@ -3,4 +3,4 @@ interface ConsentState {
   whatsapp?: boolean;
 }
 
-type WhatsappContext = 'club' | 'event';
+type WhatsappContext = "club" | "event";

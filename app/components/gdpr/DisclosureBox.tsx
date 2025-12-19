@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useId, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import React, { useId, useState } from "react";
+import { ChevronDown } from "lucide-react";
 
 interface DisclosureBoxProps {
   title: string;
@@ -18,7 +18,7 @@ export function DisclosureBox({
   defaultOpen = false,
   icon,
   children,
-  className = '',
+  className = "",
 }: DisclosureBoxProps) {
   const [open, setOpen] = useState(defaultOpen);
   const contentId = useId();
@@ -27,18 +27,20 @@ export function DisclosureBox({
     <div className={`rounded-lg border ${className}`}>
       <button
         type="button"
-        onClick={() => setOpen(v => !v)}
+        onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls={contentId}
         className="w-full p-4 flex items-start gap-3 text-left transition-colors rounded-lg"
       >
         <div
-          className={`w-5 h-5 flex-shrink-0 mt-0.5 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`w-5 h-5 flex-shrink-0 mt-0.5 transition-transform ${open ? "rotate-180" : ""}`}
         >
           <ChevronDown className="w-5 h-5" />
         </div>
 
-        {icon ? <div className="w-5 h-5 flex-shrink-0 mt-0.5">{icon}</div> : null}
+        {icon ? (
+          <div className="w-5 h-5 flex-shrink-0 mt-0.5">{icon}</div>
+        ) : null}
 
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-sm">{title}</p>

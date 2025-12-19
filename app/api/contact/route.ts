@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { logger } from '@/lib/logger';
-import { EmailService } from '@/lib/mail/email-service';
+import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
+import { EmailService } from "@/lib/mail/email-service";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,8 +10,8 @@ export async function POST(request: NextRequest) {
     // Validación
     if (!name || !email || !subject || !message) {
       return NextResponse.json(
-        { error: 'Todos los campos son obligatorios' },
-        { status: 400 }
+        { error: "Todos los campos son obligatorios" },
+        { status: 400 },
       );
     }
 
@@ -23,18 +23,18 @@ export async function POST(request: NextRequest) {
       message,
     });
 
-    logger.apiSuccess('Formulario de contacto enviado', { email, subject });
+    logger.apiSuccess("Formulario de contacto enviado", { email, subject });
 
     return NextResponse.json(
-      { success: true, message: 'Mensaje enviado correctamente' },
-      { status: 200 }
+      { success: true, message: "Mensaje enviado correctamente" },
+      { status: 200 },
     );
   } catch (error: any) {
-    logger.apiError('Error procesando formulario de contacto', error);
-    
+    logger.apiError("Error procesando formulario de contacto", error);
+
     return NextResponse.json(
-      { error: 'Error al enviar el mensaje. Inténtalo de nuevo.' },
-      { status: 500 }
+      { error: "Error al enviar el mensaje. Inténtalo de nuevo." },
+      { status: 500 },
     );
   }
 }

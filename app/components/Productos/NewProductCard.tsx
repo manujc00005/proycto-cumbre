@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Image from 'next/image';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { AddToCartButton } from '../Cart/AddToCartButton';
+import { useState } from "react";
+import Image from "next/image";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { AddToCartButton } from "../Cart/AddToCartButton";
 
 interface ProductCardProps {
   id: string;
@@ -22,9 +22,9 @@ export const ProductCard = ({
   desc,
   price,
   images,
-  sizes = ['One Size'],
+  sizes = ["One Size"],
   tags = [],
-  onImageClick
+  onImageClick,
 }: ProductCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState(sizes[0]);
@@ -50,7 +50,7 @@ export const ProductCard = ({
   return (
     <div className="group">
       {/* Image Container */}
-      <div 
+      <div
         className="relative aspect-[3/4] bg-zinc-100 rounded-lg overflow-hidden mb-4 cursor-pointer"
         onClick={() => onImageClick?.(currentImageIndex)}
       >
@@ -94,8 +94,8 @@ export const ProductCard = ({
                   <span
                     className={`block rounded-full transition-all ${
                       index === currentImageIndex
-                        ? 'w-8 h-2 bg-white'
-                        : 'w-2 h-2 bg-white/60'
+                        ? "w-8 h-2 bg-white"
+                        : "w-2 h-2 bg-white/60"
                     }`}
                   />
                 </button>
@@ -125,12 +125,8 @@ export const ProductCard = ({
           <h3 className="font-bold text-zinc-900 text-lg mb-1 line-clamp-1">
             {name}
           </h3>
-          <p className="text-zinc-600 text-sm line-clamp-2 mb-2">
-            {desc}
-          </p>
-          <p className="font-bold text-zinc-900">
-            {price} EUR
-          </p>
+          <p className="text-zinc-600 text-sm line-clamp-2 mb-2">{desc}</p>
+          <p className="font-bold text-zinc-900">{price} EUR</p>
         </div>
 
         {/* Size Selector or One Size Label */}
@@ -144,8 +140,8 @@ export const ProductCard = ({
                   onClick={() => setSelectedSize(size)}
                   className={`px-3 py-1.5 text-xs font-medium border rounded transition-all ${
                     selectedSize === size
-                      ? 'bg-zinc-900 text-white border-zinc-900'
-                      : 'bg-white text-zinc-900 border-zinc-300 hover:border-zinc-900'
+                      ? "bg-zinc-900 text-white border-zinc-900"
+                      : "bg-white text-zinc-900 border-zinc-300 hover:border-zinc-900"
                   }`}
                 >
                   {size}

@@ -1,24 +1,27 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { ConsentCheckbox } from './ConsentCheckbox';
-import { WhatsappConsent } from './WhatsappConsent';
-import { GdprFooterNote } from './GdprFooterNote';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { ConsentCheckbox } from "./ConsentCheckbox";
+import { WhatsappConsent } from "./WhatsappConsent";
+import { GdprFooterNote } from "./GdprFooterNote";
 
-type WhatsappContext = 'club' | 'event';
+type WhatsappContext = "club" | "event";
 
 interface GDPRConsentEventProps {
   isMember?: boolean;
-  onConsentChange?: (consents: { privacyPolicy: boolean; whatsapp: boolean }) => void;
+  onConsentChange?: (consents: {
+    privacyPolicy: boolean;
+    whatsapp: boolean;
+  }) => void;
 
-  required?: boolean;                // obliga a aceptar privacidad
-  includeWhatsApp?: boolean;         // muestra/oculta checkbox WhatsApp
-  whatsappRequired?: boolean;        // obliga a aceptar WhatsApp
+  required?: boolean; // obliga a aceptar privacidad
+  includeWhatsApp?: boolean; // muestra/oculta checkbox WhatsApp
+  whatsappRequired?: boolean; // obliga a aceptar WhatsApp
   whatsappContext?: WhatsappContext; // 'club' | 'event'
-  compactWhatsApp?: boolean;         // opcional: modo compacto (si tu componente lo soporta)
-  showFooterNote?: boolean;          // mostrar/ocultar nota footer
-  showWhatsAppDetails?: boolean;     // mostrar/ocultar el desplegable de detalles
+  compactWhatsApp?: boolean; // opcional: modo compacto (si tu componente lo soporta)
+  showFooterNote?: boolean; // mostrar/ocultar nota footer
+  showWhatsAppDetails?: boolean; // mostrar/ocultar el desplegable de detalles
 }
 
 export default function GDPRConsentEvent({
@@ -27,7 +30,7 @@ export default function GDPRConsentEvent({
   required = true,
   includeWhatsApp = true,
   whatsappRequired = true,
-  whatsappContext = 'event',
+  whatsappContext = "event",
   compactWhatsApp = true,
   showFooterNote = true,
   showWhatsAppDetails = false,
@@ -49,15 +52,15 @@ export default function GDPRConsentEvent({
         onChange={setPrivacyPolicy}
         className="cursor-pointer"
       >
-        He leído y acepto la{' '}
+        He leído y acepto la{" "}
         <Link
           href="/politica-privacidad"
           target="_blank"
           className="text-orange-400 hover:text-orange-300 underline font-semibold"
         >
           Política de Privacidad
-        </Link>{' '}
-        y el{' '}
+        </Link>{" "}
+        y el{" "}
         <Link
           href="/aviso-legal"
           target="_blank"
@@ -69,7 +72,8 @@ export default function GDPRConsentEvent({
       </ConsentCheckbox>
 
       <p className="text-xs text-white/60">
-        Usaremos tus datos para gestionar tu plaza y enviarte avisos logísticos del evento.
+        Usaremos tus datos para gestionar tu plaza y enviarte avisos logísticos
+        del evento.
       </p>
 
       {includeWhatsApp && (
@@ -95,11 +99,17 @@ export default function GDPRConsentEvent({
           {openDetails && (
             <div className="rounded-lg bg-black/30 border border-white/10 p-3 text-xs text-white/70 space-y-2">
               <p>
-                Se compartirá tu <span className="text-white/90 font-medium">nombre</span> y{' '}
-                <span className="text-white/90 font-medium">teléfono</span> con el resto de participantes del grupo.
+                Se compartirá tu{" "}
+                <span className="text-white/90 font-medium">nombre</span> y{" "}
+                <span className="text-white/90 font-medium">teléfono</span> con
+                el resto de participantes del grupo.
               </p>
               <p>
-                Finalidad: <span className="text-white/90 font-medium">coordinación logística</span> (coordenadas, track, avisos e incidencias).
+                Finalidad:{" "}
+                <span className="text-white/90 font-medium">
+                  coordinación logística
+                </span>{" "}
+                (coordenadas, track, avisos e incidencias).
               </p>
             </div>
           )}

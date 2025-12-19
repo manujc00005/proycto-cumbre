@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { Menu, X, Instagram, MessageCircle, Music } from 'lucide-react';
-import { CartButton } from './Cart/CartButton';
+import { useState } from "react";
+import Link from "next/link";
+import { Menu, X, Instagram, MessageCircle, Music } from "lucide-react";
+import { CartButton } from "./Cart/CartButton";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navLinks = [
-    { href: '/', label: 'HOME' },
-    { href: '/about', label: 'QUIÉNES SOMOS' },
-    { href: '/adventures', label: 'AVENTURAS' },
-    { href: '/events', label: 'EVENTS' },
-    { href: '/merchant', label: 'MERCH' },
+    { href: "/", label: "HOME" },
+    { href: "/about", label: "QUIÉNES SOMOS" },
+    { href: "/adventures", label: "AVENTURAS" },
+    { href: "/events", label: "EVENTS" },
+    { href: "/merchant", label: "MERCH" },
   ];
 
   return (
@@ -62,7 +62,10 @@ export default function Navbar() {
                   className="p-2 hover:bg-zinc-800/50 rounded-lg transition-colors"
                   aria-label="WhatsApp"
                 >
-                  <MessageCircle className="w-5 h-5 text-white" strokeWidth={1.5} />
+                  <MessageCircle
+                    className="w-5 h-5 text-white"
+                    strokeWidth={1.5}
+                  />
                 </a>
                 <a
                   href="https://tiktok.com"
@@ -128,7 +131,10 @@ export default function Navbar() {
                 className="p-3 bg-zinc-800/50 hover:bg-zinc-700 rounded-lg transition-colors"
                 aria-label="WhatsApp"
               >
-                <MessageCircle className="w-6 h-6 text-white" strokeWidth={1.5} />
+                <MessageCircle
+                  className="w-6 h-6 text-white"
+                  strokeWidth={1.5}
+                />
               </a>
               <a
                 href="https://tiktok.com"

@@ -4,20 +4,20 @@
 // components/EventFunnelModal/EventFunnelModal.tsx
 // ========================================
 
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { EventFunnelConfig } from '@/lib/funnels/types';
-import { useFunnelState } from './hooks/useFunnelState';
-import { useFormDraft } from './hooks/useFormDraft';
-import StepperHeader from './StepperHeader';
-import StepperFooter from './StepperFooter';
-import FormStep from './Step/FormStep';
-import RulesStep from './Step/RulesStep';
-import WaiverStep from './Step/WaiverStep';
-import PaymentStep from './Step/PaymentStep';
-import { WaiverAcceptancePayload } from '@/lib/waivers/types';
+import { useState, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { EventFunnelConfig } from "@/lib/funnels/types";
+import { useFunnelState } from "./hooks/useFunnelState";
+import { useFormDraft } from "./hooks/useFormDraft";
+import StepperHeader from "./StepperHeader";
+import StepperFooter from "./StepperFooter";
+import FormStep from "./Step/FormStep";
+import RulesStep from "./Step/RulesStep";
+import WaiverStep from "./Step/WaiverStep";
+import PaymentStep from "./Step/PaymentStep";
+import { WaiverAcceptancePayload } from "@/lib/waivers/types";
 
 interface EventFunnelModalProps {
   config: EventFunnelConfig;
@@ -31,7 +31,7 @@ export default function EventFunnelModal({
   onClose,
 }: EventFunnelModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [attemptedNext, setAttemptedNext] = useState(false);
 
   const {
@@ -51,7 +51,7 @@ export default function EventFunnelModal({
   const { loadDraft, clearDraft } = useFormDraft(
     config.eventSlug,
     state.formData,
-    state.currentStep === 'form'
+    state.currentStep === "form",
   );
 
   // Cargar borrador al abrir
@@ -67,21 +67,24 @@ export default function EventFunnelModal({
   // Bloquear scroll del body cuando modal está abierto
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
 
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     };
   }, [isOpen]);
 
   // Confirmación al cerrar si hay datos
   const handleClose = () => {
-    if (Object.keys(state.formData).length > 0 && state.currentStep !== 'payment') {
+    if (
+      Object.keys(state.formData).length > 0 &&
+      state.currentStep !== "payment"
+    ) {
       const confirmed = window.confirm(
-        '¿Seguro que quieres salir? Tus datos se guardarán automáticamente.'
+        "¿Seguro que quieres salir? Tus datos se guardarán automáticamente.",
       );
       if (confirmed) {
         onClose();
@@ -93,9 +96,9 @@ export default function EventFunnelModal({
 
   // Handler para intentar avanzar (con validación)
   const handleNext = () => {
-    if (state.currentStep === 'form') {
+    if (state.currentStep === "form") {
       setAttemptedNext(true);
-      
+
       // Esperar un tick para que se actualicen los errores
       setTimeout(() => {
         if (canGoNext()) {
@@ -112,7 +115,7 @@ export default function EventFunnelModal({
 
   // Handler para aceptación del pliego
   const handleWaiverAccept = async (
-    payload: WaiverAcceptancePayload
+    payload: WaiverAcceptancePayload,
   ): Promise<{ acceptanceId: string }> => {
     setIsSubmitting(true);
     setError("");
@@ -141,7 +144,7 @@ export default function EventFunnelModal({
   const handlePayment = async () => {
     try {
       setIsSubmitting(true);
-      setError('');
+      setError("");
 
       const result = await config.onPaymentStart?.({
         ...state.formData,
@@ -154,8 +157,8 @@ export default function EventFunnelModal({
         window.location.href = result.url;
       }
     } catch (err: any) {
-      setError(err.message || 'Error al procesar el pago');
-      console.error('Error en pago:', err);
+      setError(err.message || "Error al procesar el pago");
+      console.error("Error en pago:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -164,7 +167,7 @@ export default function EventFunnelModal({
   // Renderizar paso actual
   const renderStep = () => {
     switch (state.currentStep) {
-      case 'form':
+      case "form":
         return (
           <FormStep
             fields={config.formFields}
@@ -175,20 +178,20 @@ export default function EventFunnelModal({
           />
         );
 
-      case 'waiver':
+      case "waiver":
         return (
           <WaiverStep
             event={config.waiver.event}
             participant={{
-              fullName: state.formData.name || '',
-              documentId: state.formData.dni || '',
+              fullName: state.formData.name || "",
+              documentId: state.formData.dni || "",
               birthDateISO: state.formData.birthDate,
             }}
             onAccept={handleWaiverAccept}
           />
         );
 
-      case 'rules':
+      case "rules":
         return config.rules ? (
           <RulesStep
             url={config.rules.url}
@@ -201,7 +204,7 @@ export default function EventFunnelModal({
           />
         ) : null;
 
-      case 'payment':
+      case "payment":
         return (
           <PaymentStep
             eventSlug={config.eventSlug}
@@ -236,7 +239,6 @@ export default function EventFunnelModal({
           exit={{ opacity: 0, scale: 0.95 }}
         >
           <div className="bg-zinc-900 border border-zinc-700 rounded-2xl w-full max-w-5xl max-h-[calc(100dvh-1.5rem)] flex flex-col overflow-hidden">
-            
             {/* HEADER */}
             <StepperHeader
               eventName={config.eventName}
@@ -251,8 +253,18 @@ export default function EventFunnelModal({
               {/* Error global */}
               {error && (
                 <div className="mb-6 max-w-2xl mx-auto bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-lg text-sm flex items-start gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    className="w-5 h-5 flex-shrink-0 mt-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                   <span>{error}</span>
                 </div>
@@ -272,13 +284,15 @@ export default function EventFunnelModal({
             </div>
 
             {/* FOOTER - Oculto en paso waiver porque ya tiene su propio botón */}
-            {state.currentStep !== 'waiver' && (
+            {state.currentStep !== "waiver" && (
               <StepperFooter
                 canGoBack={canGoBack()}
                 canGoNext={canGoNext()}
-                isLastStep={state.currentStep === 'payment'}
+                isLastStep={state.currentStep === "payment"}
                 onBack={goToPrevious}
-                onNext={state.currentStep === 'payment' ? handlePayment : handleNext}
+                onNext={
+                  state.currentStep === "payment" ? handlePayment : handleNext
+                }
                 isSubmitting={isSubmitting}
                 paymentAmount={config.payment.amount}
               />
