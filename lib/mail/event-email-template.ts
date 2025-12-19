@@ -446,17 +446,17 @@ function generateCalendarLinks(event: {
   const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${startDateTime}/${endDateTime}&details=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}`;
   
   const icsContent = `BEGIN:VCALENDAR
-    VERSION:2.0
-    PRODID:-//Proyecto Cumbre//ES
-    BEGIN:VEVENT
-    SUMMARY:${event.title}
-    DTSTART:${startDateTime}
-    DTEND:${endDateTime}
-    DESCRIPTION:${description.replace(/\n/g, '\\n')}
-    LOCATION:${location}
-    STATUS:CONFIRMED
-    END:VEVENT
-    END:VCALENDAR`;
+VERSION:2.0
+PRODID:-//Proyecto Cumbre//ES
+BEGIN:VEVENT
+SUMMARY:${event.title}
+DTSTART:${startDateTime}
+DTEND:${endDateTime}
+DESCRIPTION:${description.replace(/\n/g, '\\n')}
+LOCATION:${location}
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR`;
   
   const icsUrl = `data:text/calendar;charset=utf8,${encodeURIComponent(icsContent)}`;
   const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(event.title)}&startdt=${dateStr}T${startTime}&enddt=${dateStr}T${endTime}&body=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}`;
