@@ -9,7 +9,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { EventStatus, MembershipStatus, PaymentStatus, PaymentType, RegistrationStatus } from "@prisma/client";
+import {
+  EventStatus,
+  MembershipStatus,
+  PaymentStatus,
+  PaymentType,
+  RegistrationStatus,
+} from "@prisma/client";
 import { z } from "zod";
 import crypto from "crypto";
 import { isTestUserEmail } from "../../helpers";
@@ -79,10 +85,10 @@ async function createDirectRegistration(params: {
     clientIp,
   } = params;
 
-  const fakeSessionId = `test_${crypto.randomBytes(16).toString('hex')}`;
-  const testAmount = parseInt(process.env.TEST_PAYMENT_AMOUNT || '500');
+  const fakeSessionId = `test_${crypto.randomBytes(16).toString("hex")}`;
+  const testAmount = parseInt(process.env.TEST_PAYMENT_AMOUNT || "500");
 
-  logger.log('🧪 MODO TEST - Creando registro directo');
+  logger.log("🧪 MODO TEST - Creando registro directo");
   logger.log(`   Email: ${email}`);
   logger.log(`   Evento: ${event.name} (${event.slug})`);
   logger.log(`   Monto: ${testAmount / 100}€`);
@@ -110,11 +116,13 @@ async function createDirectRegistration(params: {
           is_member: isMember,
           waiver_acceptance_id: waiverAcceptanceId,
           is_test_payment: true,
-          
+
           privacy_accepted: true,
-          privacy_accepted_at: consents.privacy_accepted_at || new Date().toISOString(),
+          privacy_accepted_at:
+            consents.privacy_accepted_at || new Date().toISOString(),
           whatsapp_consent: true,
-          whatsapp_consent_at: consents.whatsapp_consent_at || new Date().toISOString(),
+          whatsapp_consent_at:
+            consents.whatsapp_consent_at || new Date().toISOString(),
           marketing_consent: consents.marketing_consent || false,
         },
       },
@@ -130,13 +138,17 @@ async function createDirectRegistration(params: {
         participant_dni: dni,
         shirt_size: shirtSize,
         status: RegistrationStatus.confirmed,
-        
+
         privacy_accepted: true,
-        privacy_accepted_at: new Date(consents.privacy_accepted_at || new Date()),
+        privacy_accepted_at: new Date(
+          consents.privacy_accepted_at || new Date(),
+        ),
         whatsapp_consent: true,
-        whatsapp_consent_at: new Date(consents.whatsapp_consent_at || new Date()),
+        whatsapp_consent_at: new Date(
+          consents.whatsapp_consent_at || new Date(),
+        ),
         marketing_consent: consents.marketing_consent || false,
-        
+
         custom_data: customData,
         ip_address: clientIp,
       },
@@ -150,7 +162,7 @@ async function createDirectRegistration(params: {
     if (waiverAcceptanceId) {
       await tx.waiverAcceptance.update({
         where: { id: waiverAcceptanceId },
-        data: { 
+        data: {
           event_registration_id: registration.id,
           member_id: memberId,
         },
@@ -165,16 +177,16 @@ async function createDirectRegistration(params: {
     return { payment, registration };
   });
 
-  logger.log('✅ Registro directo completado');
-  logger.log('   Payment ID:', result.payment.id);
-  logger.log('   Registration ID:', result.registration.id);
+  logger.log("✅ Registro directo completado");
+  logger.log("   Payment ID:", result.payment.id);
+  logger.log("   Registration ID:", result.registration.id);
 
   // ========================================
   // 📧 ENVIAR EMAIL INMEDIATAMENTE (TEST USER)
   // ========================================
   try {
-    logger.log('📧 Enviando email de confirmación (test user)...');
-    
+    logger.log("📧 Enviando email de confirmación (test user)...");
+
     // ✅ Método genérico único para TODOS los eventos
     await EmailService.sendEventConfirmation(event.slug, {
       email: email,
@@ -186,11 +198,11 @@ async function createDirectRegistration(params: {
       eventName: event.name,
       eventDate: event.date, // Pasar la fecha del evento si existe
     });
-    
-    logger.log('✅ Email enviado correctamente');
+
+    logger.log("✅ Email enviado correctamente");
   } catch (emailError: any) {
     // No es crítico, pero logueamos el error
-    logger.error('[TEST] Error enviando email:', emailError.message);
+    logger.error("[TEST] Error enviando email:", emailError.message);
   }
 
   return result;
@@ -207,7 +219,7 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Body inválido", details: parsed.error.flatten() },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -230,23 +242,29 @@ export async function POST(request: NextRequest) {
     const phoneRegex = /^(\+?[1-9]\d{0,2})?\d{9}$/;
     if (!phoneRegex.test(normalizedPhone)) {
       return NextResponse.json(
-        { error: "El teléfono debe tener 9 dígitos o un formato internacional válido" },
-        { status: 400 }
+        {
+          error:
+            "El teléfono debe tener 9 dígitos o un formato internacional válido",
+        },
+        { status: 400 },
       );
     }
 
-    logger.apiStart("POST", "/api/events/checkout", { eventId, email: normalizedEmail });
+    logger.apiStart("POST", "/api/events/checkout", {
+      eventId,
+      email: normalizedEmail,
+    });
 
     if (!consents.privacy_accepted) {
       return NextResponse.json(
         { error: "Debes aceptar la Política de Privacidad" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (!consents.whatsapp_consent) {
       return NextResponse.json(
         { error: "Debes aceptar compartir tus datos en WhatsApp" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -270,21 +288,27 @@ export async function POST(request: NextRequest) {
     if (!event) {
       return NextResponse.json(
         { error: `Evento no encontrado: ${eventId}` },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
-    if (event.status !== EventStatus.published && event.status !== EventStatus.draft) {
+    if (
+      event.status !== EventStatus.published &&
+      event.status !== EventStatus.draft
+    ) {
       return NextResponse.json(
         { error: "Este evento no está disponible para inscripciones" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    if (event.max_participants && event.current_participants >= event.max_participants) {
+    if (
+      event.max_participants &&
+      event.current_participants >= event.max_participants
+    ) {
       return NextResponse.json(
         { error: "El evento está completo (plazas agotadas)" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -292,15 +316,17 @@ export async function POST(request: NextRequest) {
       where: {
         event_id: eventId,
         participant_dni: normalizedDni,
-        status: { in: [RegistrationStatus.pending, RegistrationStatus.confirmed] }
+        status: {
+          in: [RegistrationStatus.pending, RegistrationStatus.confirmed],
+        },
       },
-      select: { id: true, status: true }
+      select: { id: true, status: true },
     });
 
     if (existingRegistration) {
       return NextResponse.json(
         { error: "Ya existe una inscripción para este evento con ese DNI" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -316,7 +342,8 @@ export async function POST(request: NextRequest) {
     });
 
     const memberId = existingMember?.id ?? null;
-    const isMember = existingMember?.membership_status === MembershipStatus.active;
+    const isMember =
+      existingMember?.membership_status === MembershipStatus.active;
 
     if (isMember) {
       logger.log("✅ Usuario es socio activo:", existingMember.member_number);
@@ -383,13 +410,13 @@ export async function POST(request: NextRequest) {
     if (!publicUrl) {
       return NextResponse.json(
         { error: "NEXT_PUBLIC_URL no está configurada" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     const session = await stripe.checkout.sessions.create(
       {
-        mode: 'payment',
+        mode: "payment",
         payment_method_types: ["card"],
         customer_email: normalizedEmail,
         line_items: [
@@ -413,24 +440,26 @@ export async function POST(request: NextRequest) {
           event_slug: event.slug,
           member_id: memberId ?? "",
           is_member: isMember ? "true" : "false",
-          
+
           participant_name: name,
           participant_email: normalizedEmail,
           participant_phone: normalizedPhone,
           participant_dni: normalizedDni,
           shirt_size: shirtSize ?? "",
           custom_data: JSON.stringify(customData),
-          
+
           privacy_accepted: "true",
-          privacy_accepted_at: consents.privacy_accepted_at || new Date().toISOString(),
+          privacy_accepted_at:
+            consents.privacy_accepted_at || new Date().toISOString(),
           whatsapp_consent: "true",
-          whatsapp_consent_at: consents.whatsapp_consent_at || new Date().toISOString(),
+          whatsapp_consent_at:
+            consents.whatsapp_consent_at || new Date().toISOString(),
           marketing_consent: "true",
-          
+
           waiver_acceptance_id: waiver_acceptance_id ?? "",
         },
       },
-      { apiVersion: "2023-10-16" }
+      { apiVersion: "2023-10-16" },
     );
 
     logger.log("✅ Sesión de Stripe creada:", session.id);
@@ -456,11 +485,13 @@ export async function POST(request: NextRequest) {
           ip_address: clientIp,
           is_member: isMember,
           waiver_acceptance_id: waiver_acceptance_id,
-          
+
           privacy_accepted: true,
-          privacy_accepted_at: consents.privacy_accepted_at || new Date().toISOString(),
+          privacy_accepted_at:
+            consents.privacy_accepted_at || new Date().toISOString(),
           whatsapp_consent: true,
-          whatsapp_consent_at: consents.whatsapp_consent_at || new Date().toISOString(),
+          whatsapp_consent_at:
+            consents.whatsapp_consent_at || new Date().toISOString(),
           marketing_consent: true,
         },
       },
@@ -480,20 +511,19 @@ export async function POST(request: NextRequest) {
       sessionId: session.id,
       url: session.url,
     });
-    
   } catch (error: any) {
     logger.apiError("Error en checkout", error);
 
     if (error?.code === "P2002") {
       return NextResponse.json(
         { error: "Ya existe una inscripción para este evento con ese DNI" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
     return NextResponse.json(
       { error: "Error al procesar la inscripción", details: error?.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
