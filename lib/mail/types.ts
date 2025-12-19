@@ -17,7 +17,7 @@ export interface MembershipEmailData {
   lastName: string;
   memberNumber: string;
   licenseType: string;
-  paymentStatus: 'success' | 'failed';
+  paymentStatus: "success" | "failed";
   amount?: number;
   currency?: string;
 }
@@ -75,39 +75,39 @@ export interface EventEmailConfig {
   heroColor?: string;
   whatsappLink?: string;
   whatsappMessage?: string;
-  
+
   // ✅ Detalles del evento
   eventDetails?: {
-    meetingPoint?: string;      // Punto de encuentro
-    duration?: string;           // Duración estimada
-    difficulty?: string;         // Nivel/dificultad
-    requiredEquipment?: string;  // Material obligatorio
-    startTime?: string;          // Hora inicio (HH:MM) para calendario
-    endTime?: string;            // Hora fin (HH:MM) para calendario
-    description?: string;        // Descripción adicional para calendario
+    meetingPoint?: string; // Punto de encuentro
+    duration?: string; // Duración estimada
+    difficulty?: string; // Nivel/dificultad
+    requiredEquipment?: string; // Material obligatorio
+    startTime?: string; // Hora inicio (HH:MM) para calendario
+    endTime?: string; // Hora fin (HH:MM) para calendario
+    description?: string; // Descripción adicional para calendario
   };
-  
+
   // Detalles personalizados
   customDetails?: Array<{
     label: string;
     value: string;
   }>;
-  
+
   features?: Array<{
     icon: string;
     title: string;
     description?: string;
   }>;
-  
+
   importantNote?: {
     icon?: string;
     title: string;
     message: string;
   };
-  
+
   ctaButtons?: Array<{
     text: string;
     url: string;
-    style?: 'primary' | 'secondary';
+    style?: "primary" | "secondary";
   }>;
 }
