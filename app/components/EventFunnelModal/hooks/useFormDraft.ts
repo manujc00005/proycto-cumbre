@@ -4,12 +4,12 @@
 // components/EventFunnelModal/hooks/useFormDraft.ts
 // ========================================
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 export function useFormDraft(
   eventId: string,
   formData: Record<string, any>,
-  enabled = true
+  enabled = true,
 ) {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const storageKey = `event-funnel-draft-${eventId}`;
@@ -26,13 +26,16 @@ export function useFormDraft(
     // Guardar después de 2 segundos de inactividad
     timeoutRef.current = setTimeout(() => {
       try {
-        localStorage.setItem(storageKey, JSON.stringify({
-          data: formData,
-          timestamp: new Date().toISOString(),
-        }));
-        console.log('📝 Borrador guardado automáticamente');
+        localStorage.setItem(
+          storageKey,
+          JSON.stringify({
+            data: formData,
+            timestamp: new Date().toISOString(),
+          }),
+        );
+        console.log("📝 Borrador guardado automáticamente");
       } catch (error) {
-        console.error('Error al guardar borrador:', error);
+        console.error("Error al guardar borrador:", error);
       }
     }, 2000);
 
@@ -49,14 +52,15 @@ export function useFormDraft(
       const saved = localStorage.getItem(storageKey);
       if (saved) {
         const { data, timestamp } = JSON.parse(saved);
-        
+
         // Solo cargar si tiene menos de 24 horas
         const savedDate = new Date(timestamp);
         const now = new Date();
-        const hoursDiff = (now.getTime() - savedDate.getTime()) / (1000 * 60 * 60);
-        
+        const hoursDiff =
+          (now.getTime() - savedDate.getTime()) / (1000 * 60 * 60);
+
         if (hoursDiff < 24) {
-          console.log('📂 Borrador cargado desde localStorage');
+          console.log("📂 Borrador cargado desde localStorage");
           return data;
         } else {
           // Borrador muy antiguo, eliminar
@@ -64,7 +68,7 @@ export function useFormDraft(
         }
       }
     } catch (error) {
-      console.error('Error al cargar borrador:', error);
+      console.error("Error al cargar borrador:", error);
     }
     return null;
   };
@@ -73,9 +77,9 @@ export function useFormDraft(
   const clearDraft = () => {
     try {
       localStorage.removeItem(storageKey);
-      console.log('🗑️ Borrador eliminado');
+      console.log("🗑️ Borrador eliminado");
     } catch (error) {
-      console.error('Error al eliminar borrador:', error);
+      console.error("Error al eliminar borrador:", error);
     }
   };
 
