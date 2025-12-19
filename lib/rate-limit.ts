@@ -6,8 +6,8 @@ import { kv } from '@vercel/kv';
  */
 export async function checkRateLimit(
   key: string,
-  limit: number = 100,
-  windowSeconds: number = 60
+  limit = 100,
+  windowSeconds = 60
 ): Promise<{ 
   success: boolean; 
   remaining: number;
