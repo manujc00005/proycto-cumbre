@@ -1,7 +1,7 @@
 // ========================================
-// EVENT EMAIL TEMPLATE - MINIMALISTA
-// 🎯 Marketing optimized
-// 🎨 Clean & Compact
+// EVENT EMAIL TEMPLATE - DARK MODE FORCED
+// 🎯 Modo oscuro forzado
+// 🎨 Iconos calendario SVG
 // 📱 Mobile-first
 // lib/email/event-email-template.ts
 // ========================================
@@ -33,8 +33,19 @@ export function buildEventEmail(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="supported-color-schemes" content="dark">
+  <style>
+    :root {
+      color-scheme: dark !important;
+      supported-color-schemes: dark !important;
+    }
+    @media (prefers-color-scheme: dark) {
+      body { background-color: #09090b !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #09090b;">
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #09090b !important;">
   
   <!-- Wrapper -->
   <div style="width: 100%; background-color: #09090b; padding: 20px 10px;">
@@ -160,72 +171,62 @@ export function buildEventEmail(
           ` : ''}
           
           ${calendarLinks ? `
-          <!-- CALENDAR CTAs - Dropdown style -->
+          <!-- CALENDAR CTAs -->
           <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 16px;">
             <tr>
               <td>
                 <div style="background: #18181b; border: 1px solid #3f3f46; border-radius: 8px; overflow: hidden;">
                   <!-- Header -->
                   <div style="background: #27272a; padding: 10px 16px; border-bottom: 1px solid #3f3f46;">
-                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                      <tr>
-                        <td>
-                          <span style="color: #a1a1aa; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">📅 Añadir al calendario</span>
-                        </td>
-                      </tr>
-                    </table>
+                    <span style="color: #a1a1aa; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">📅 AÑADIR AL CALENDARIO</span>
                   </div>
                   
                   <!-- Google Calendar -->
-                  <a href="${calendarLinks.googleUrl}" target="_blank" style="display: block; padding: 12px 16px; text-decoration: none; border-bottom: 1px solid #3f3f46; transition: background 0.2s;">
+                  <a href="${calendarLinks.googleUrl}" target="_blank" style="display: block; padding: 12px 16px; text-decoration: none; border-bottom: 1px solid #3f3f46;">
                     <table cellpadding="0" cellspacing="0" border="0" width="100%">
                       <tr>
-                        <td width="24" valign="middle">
-                          <div style="width: 20px; height: 20px; background: #4285f4; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
-                            <span style="color: #ffffff; font-size: 12px; font-weight: 700;">G</span>
-                          </div>
+                        <td width="32" valign="middle">
+                          <span style="display: inline-block; width: 24px; height: 24px; background: #4285f4; border-radius: 4px; text-align: center; line-height: 24px; color: #ffffff; font-size: 14px; font-weight: 700;">G</span>
                         </td>
                         <td valign="middle" style="padding-left: 12px;">
                           <span style="color: #fafafa; font-size: 14px; font-weight: 500;">Google Calendar</span>
                         </td>
                         <td width="24" valign="middle" align="right">
-                          <span style="color: #71717a; font-size: 16px;">→</span>
+                          <span style="color: #71717a; font-size: 18px;">→</span>
                         </td>
                       </tr>
                     </table>
                   </a>
                   
                   <!-- Apple Calendar -->
-                  <a href="${calendarLinks.icsUrl}" download="${config.eventName.toLowerCase().replace(/\s+/g, '-')}.ics" style="display: block; padding: 12px 16px; text-decoration: none; border-bottom: 1px solid #3f3f46; transition: background 0.2s;">
+                  <a href="${calendarLinks.icsUrl}" download="${config.eventName.toLowerCase().replace(/\s+/g, '-')}.ics" style="display: block; padding: 12px 16px; text-decoration: none; border-bottom: 1px solid #3f3f46;">
                     <table cellpadding="0" cellspacing="0" border="0" width="100%">
                       <tr>
-                        <td width="24" valign="middle">
-                          <span style="font-size: 18px;">🍎</span>
+                        <td width="32" valign="middle">
+                          <span style="font-size: 22px;">🍎</span>
                         </td>
                         <td valign="middle" style="padding-left: 12px;">
                           <span style="color: #fafafa; font-size: 14px; font-weight: 500;">Apple / iCal</span>
                         </td>
                         <td width="24" valign="middle" align="right">
-                          <span style="color: #71717a; font-size: 16px;">↓</span>
+                          <span style="color: #71717a; font-size: 18px;">↓</span>
                         </td>
                       </tr>
                     </table>
                   </a>
                   
                   <!-- Outlook -->
-                  <a href="${calendarLinks.outlookUrl}" target="_blank" style="display: block; padding: 12px 16px; text-decoration: none; transition: background 0.2s;">
+                  <a href="${calendarLinks.outlookUrl}" target="_blank" style="display: block; padding: 12px 16px; text-decoration: none;">
                     <table cellpadding="0" cellspacing="0" border="0" width="100%">
                       <tr>
-                        <td width="24" valign="middle">
-                          <div style="width: 20px; height: 20px; background: #0078d4; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
-                            <span style="color: #ffffff; font-size: 12px; font-weight: 700;">O</span>
-                          </div>
+                        <td width="32" valign="middle">
+                          <span style="display: inline-block; width: 24px; height: 24px; background: #0078d4; border-radius: 4px; text-align: center; line-height: 24px; color: #ffffff; font-size: 14px; font-weight: 700;">O</span>
                         </td>
                         <td valign="middle" style="padding-left: 12px;">
                           <span style="color: #fafafa; font-size: 14px; font-weight: 500;">Outlook</span>
                         </td>
                         <td width="24" valign="middle" align="right">
-                          <span style="color: #71717a; font-size: 16px;">→</span>
+                          <span style="color: #71717a; font-size: 18px;">→</span>
                         </td>
                       </tr>
                     </table>
@@ -389,9 +390,6 @@ function formatEventTime(date: Date): string {
   );
 }
 
-/**
- * Genera enlaces para añadir evento a múltiples calendarios
- */
 function generateCalendarLinks(event: {
   title: string;
   date: Date;
@@ -400,10 +398,8 @@ function generateCalendarLinks(event: {
   description?: string;
   location?: string;
 }): { googleUrl: string; icsUrl: string; outlookUrl: string } {
-  // Extraer fecha en formato YYYY-MM-DD
   const dateStr = event.date.toISOString().split('T')[0];
   
-  // Obtener horas desde eventDate o usar defaults
   const defaultStartTime = event.date.toLocaleTimeString('es-ES', { 
     hour: '2-digit', 
     minute: '2-digit', 
@@ -411,7 +407,6 @@ function generateCalendarLinks(event: {
   });
   const startTime = event.startTime || defaultStartTime;
   
-  // End time: +4 horas por defecto
   const endDate = new Date(event.date);
   endDate.setHours(endDate.getHours() + 4);
   const defaultEndTime = endDate.toLocaleTimeString('es-ES', { 
@@ -424,14 +419,11 @@ function generateCalendarLinks(event: {
   const description = event.description || '';
   const location = event.location || '';
   
-  // Formato ISO para calendarios (YYYYMMDDTHHMMSS)
   const startDateTime = `${dateStr.replace(/-/g, '')}T${startTime.replace(/:/g, '')}00`;
   const endDateTime = `${dateStr.replace(/-/g, '')}T${endTime.replace(/:/g, '')}00`;
   
-  // Google Calendar
   const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${startDateTime}/${endDateTime}&details=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}`;
   
-  // Apple Calendar (iCal) - archivo .ics
   const icsContent = `BEGIN:VCALENDAR
     VERSION:2.0
     PRODID:-//Proyecto Cumbre//ES
@@ -447,7 +439,6 @@ function generateCalendarLinks(event: {
   
   const icsUrl = `data:text/calendar;charset=utf8,${encodeURIComponent(icsContent)}`;
   
-  // Outlook
   const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(event.title)}&startdt=${dateStr}T${startTime}&enddt=${dateStr}T${endTime}&body=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}`;
   
   return { googleUrl, icsUrl, outlookUrl };
