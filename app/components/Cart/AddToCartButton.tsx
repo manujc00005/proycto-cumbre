@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useCartStore } from './cartStore';
-import { ShoppingBag, Check } from 'lucide-react';
-import { useFeatureFlag } from '../featureFlags';
+import { useState } from "react";
+import { useCartStore } from "./cartStore";
+import { ShoppingBag, Check } from "lucide-react";
+import { useFeatureFlag } from "../featureFlags";
 
 interface AddToCartButtonProps {
   product: {
@@ -15,28 +15,28 @@ interface AddToCartButtonProps {
     size?: string;
   };
   className?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
 }
 
-export const AddToCartButton = ({ 
-  product, 
-  className = '',
-  size = 'md'
+export const AddToCartButton = ({
+  product,
+  className = "",
+  size = "md",
 }: AddToCartButtonProps) => {
   const { addItem, openCart } = useCartStore();
   const [isAdded, setIsAdded] = useState(false);
-  const isCartEnabled = useFeatureFlag('enableCart');
+  const isCartEnabled = useFeatureFlag("enableCart");
 
   const sizeClasses = {
-    sm: 'py-2 px-4 text-sm',
-    md: 'py-3 px-6 text-base',
-    lg: 'py-4 px-8 text-lg'
+    sm: "py-2 px-4 text-sm",
+    md: "py-3 px-6 text-base",
+    lg: "py-4 px-8 text-lg",
   };
 
   const handleAddToCart = () => {
     addItem(product);
     setIsAdded(true);
-    
+
     // Reset button after animation
     setTimeout(() => {
       setIsAdded(false);

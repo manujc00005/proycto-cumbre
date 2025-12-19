@@ -4,9 +4,9 @@
 // components/EventFunnelModal/StepperHeader.tsx
 // ========================================
 
-'use client';
+"use client";
 
-import { StepId } from '@/lib/funnels/types';
+import { StepId } from "@/lib/funnels/types";
 
 interface StepperHeaderProps {
   eventName: string;
@@ -17,17 +17,17 @@ interface StepperHeaderProps {
 }
 
 const STEP_LABELS: Record<StepId, string> = {
-  form: 'Datos',
-  waiver: 'Descargo',
-  rules: 'Reglamento', // Raramente usado
-  payment: 'Pago',
+  form: "Datos",
+  waiver: "Descargo",
+  rules: "Reglamento", // Raramente usado
+  payment: "Pago",
 };
 
 const STEP_ICONS: Record<StepId, string> = {
-  form: '📝',
-  waiver: '📋',
-  rules: '📖',
-  payment: '💳',
+  form: "📝",
+  waiver: "📋",
+  rules: "📖",
+  payment: "💳",
 };
 
 export default function StepperHeader({
@@ -46,14 +46,24 @@ export default function StepperHeader({
         <h2 className="text-xl font-bold text-white truncate flex-1">
           {eventName}
         </h2>
-        
+
         <button
           onClick={onClose}
           className="ml-4 p-2 hover:bg-zinc-800 rounded-lg transition text-zinc-400 hover:text-white"
           aria-label="Cerrar"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -74,26 +84,36 @@ export default function StepperHeader({
                   <div
                     className={`
                       w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all
-                      ${isCompleted ? 'bg-green-500 text-white' : ''}
-                      ${isActive ? 'bg-orange-500 text-white ring-4 ring-orange-500/30' : ''}
-                      ${isDisabled ? 'bg-zinc-700 text-zinc-500' : ''}
+                      ${isCompleted ? "bg-green-500 text-white" : ""}
+                      ${isActive ? "bg-orange-500 text-white ring-4 ring-orange-500/30" : ""}
+                      ${isDisabled ? "bg-zinc-700 text-zinc-500" : ""}
                     `}
                   >
                     {isCompleted ? (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={3}
+                          d="M5 13l4 4L19 7"
+                        />
                       </svg>
                     ) : (
                       <span>{STEP_ICONS[step]}</span>
                     )}
                   </div>
-                  
+
                   <span
                     className={`
                       mt-2 text-xs font-medium whitespace-nowrap
-                      ${isActive ? 'text-orange-400' : ''}
-                      ${isCompleted ? 'text-green-400' : ''}
-                      ${isDisabled ? 'text-zinc-500' : ''}
+                      ${isActive ? "text-orange-400" : ""}
+                      ${isCompleted ? "text-green-400" : ""}
+                      ${isDisabled ? "text-zinc-500" : ""}
                     `}
                   >
                     {STEP_LABELS[step]}
@@ -106,7 +126,7 @@ export default function StepperHeader({
                     <div
                       className={`
                         h-1 rounded-full transition-all
-                        ${isCompleted ? 'bg-green-500' : 'bg-zinc-700'}
+                        ${isCompleted ? "bg-green-500" : "bg-zinc-700"}
                       `}
                     />
                   </div>
@@ -126,7 +146,7 @@ export default function StepperHeader({
               {STEP_ICONS[currentStep]} {STEP_LABELS[currentStep]}
             </span>
           </div>
-          
+
           {/* Barra de progreso */}
           <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
             <div

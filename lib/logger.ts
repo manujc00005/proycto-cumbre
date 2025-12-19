@@ -9,65 +9,65 @@ export const logger = {
       console.log(...args);
     }
   },
-  
+
   error: (...args: any[]) => {
     if (isDevelopment) {
       console.error(...args);
     } else {
       // En producción, solo loguear errores críticos
-      console.error('[ERROR]', ...args);
+      console.error("[ERROR]", ...args);
     }
   },
-  
+
   warn: (...args: any[]) => {
     if (isDevelopment) {
       console.warn(...args);
     }
   },
-  
+
   info: (...args: any[]) => {
     if (isDevelopment) {
       console.info(...args);
     }
   },
-  
+
   debug: (...args: any[]) => {
     if (isDevelopment) {
-      console.debug('🐛', ...args);
+      console.debug("🐛", ...args);
     }
   },
-  
+
   // Helpers para APIs
   apiStart: (method: string, path: string, data?: any) => {
     if (isDevelopment) {
       console.log(`\n🚀 ${method} ${path}`);
       if (data) {
-        console.log('📥 Datos:', data);
+        console.log("📥 Datos:", data);
       }
     }
   },
-  
+
   apiSuccess: (message: string, data?: any) => {
     if (isDevelopment) {
       console.log(`✅ ${message}`);
       if (data) {
-        console.log('📤 Respuesta:', data);
+        console.log("📤 Respuesta:", data);
       }
     }
   },
-  
+
   apiError: (message: string, error?: any) => {
     if (isDevelopment) {
       console.error(`❌ ${message}`);
       if (error) {
-        console.error('Error details:', error);
+        console.error("Error details:", error);
       }
     } else {
       // En producción, solo el mensaje
       console.error(`[API ERROR] ${message}`);
     }
   },
-  
+
   // Helper para Stripe
   stripe: (event: string, data?: any) => {
     if (isDevelopment) {
@@ -77,7 +77,7 @@ export const logger = {
       }
     }
   },
-  
+
   // Helper para database
   db: (operation: string, data?: any) => {
     if (isDevelopment) {

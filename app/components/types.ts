@@ -1,6 +1,6 @@
 // app/components/types.ts
 
-import { EventColor, IconType, EventStatus } from '@/lib/events-constants';
+import { EventColor, IconType, EventStatus } from "@/lib/events-constants";
 
 export interface EventTag {
   label: string;

@@ -1,5 +1,5 @@
-import { EmailService } from '@/lib/mail/email-service';
-import { NextResponse } from 'next/server';
+import { EmailService } from "@/lib/mail/email-service";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   // try {
@@ -10,15 +10,14 @@ export async function GET() {
   //     memberNumber: 'TEST-001',
   //     licenseType: 'A NAC',
   //   });
-
-  //   return NextResponse.json({ 
+  //   return NextResponse.json({
   //     success: true,
-  //     message: 'Email enviado correctamente' 
+  //     message: 'Email enviado correctamente'
   //   });
   // } catch (error: any) {
-  //   return NextResponse.json({ 
+  //   return NextResponse.json({
   //     success: false,
-  //     error: error.message 
+  //     error: error.message
   //   }, { status: 500 });
   // }
 }

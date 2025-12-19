@@ -1,22 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { logger } from '@/lib/logger';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const includeDeleted = searchParams.get('includeDeleted');
+    const includeDeleted = searchParams.get("includeDeleted");
 
-    const whereClause = includeDeleted === 'true' 
-      ? {} 
-      : { deleted_at: null };
+    const whereClause = includeDeleted === "true" ? {} : { deleted_at: null };
 
     const members = await prisma.member.findMany({
       where: whereClause,
-      orderBy: [
-        { fedme_status: 'asc' },
-        { created_at: 'desc' }
-      ],
+      orderBy: [{ fedme_status: "asc" }, { created_at: "desc" }],
       select: {
         id: true,
         member_number: true,
@@ -43,7 +38,7 @@ export async function GET(request: NextRequest) {
         whatsapp_revoked_at: true,
         deleted_at: true,
         created_at: true,
-      }
+      },
     });
 
     logger.log(`📋 ${members.length} miembros obtenidos`);
@@ -51,14 +46,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       count: members.length,
-      members
+      members,
     });
-
   } catch (error: any) {
-    logger.error('❌ Error al obtener miembros:', error);
+    logger.error("❌ Error al obtener miembros:", error);
     return NextResponse.json(
-      { error: 'Error al obtener miembros', details: error.message },
-      { status: 500 }
+      { error: "Error al obtener miembros", details: error.message },
+      { status: 500 },
     );
   }
 }

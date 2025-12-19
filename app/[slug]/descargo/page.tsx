@@ -7,7 +7,6 @@ import { logger } from "@/lib/logger";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
@@ -17,8 +16,8 @@ interface PageProps {
 // ========================================
 
 export async function generateMetadata({ params }: PageProps) {
-  const { slug } = await params; 
-  logger.log('Descargo Slug =', slug);
+  const { slug } = await params;
+  logger.log("Descargo Slug =", slug);
   if (!slugExists(slug)) {
     return { title: "Descargo de responsabilidad" };
   }
@@ -64,7 +63,6 @@ export default async function DescargoPage({ params }: PageProps) {
 
       <div className="relative z-10 container mx-auto px-4 py-10 md:py-14">
         <div className="max-w-4xl mx-auto">
-          
           {/* Top bar */}
           <div className="flex items-center justify-between mb-6">
             <Link
@@ -81,15 +79,13 @@ export default async function DescargoPage({ params }: PageProps) {
 
           {/* Card principal */}
           <div className="rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-900/70 to-black/40 p-6 md:p-8 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
-            
             {/* Título */}
             <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
               {waiver.title}
             </h1>
 
             <p className="text-sm text-white/60 mb-6">
-              Evento:{" "}
-              <span className="text-white/80">{meta.eventName}</span>
+              Evento: <span className="text-white/80">{meta.eventName}</span>
             </p>
 
             {/* Header del documento */}

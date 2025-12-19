@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     if (!body.success) {
       return NextResponse.json(
         { error: "Body inválido", details: body.error.flatten() },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     // ========================================
     // 🎯 DETECTAR SI ES SESIÓN TEST
     // ========================================
-    const isTestSession = sessionId.startsWith('test_');
+    const isTestSession = sessionId.startsWith("test_");
 
     let payment;
     let stripeMappedStatus;
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       // ========================================
       // 🧪 SESIÓN TEST: Solo consultar BD
       // ========================================
-      logger.log('🧪 Sesión de test detectada');
+      logger.log("🧪 Sesión de test detectada");
 
       payment = await prisma.payment.findUnique({
         where: { stripe_session_id: sessionId },
@@ -58,13 +58,12 @@ export async function POST(request: NextRequest) {
       if (!payment) {
         return NextResponse.json(
           { error: "Pago no encontrado en base de datos" },
-          { status: 404 }
+          { status: 404 },
         );
       }
 
       // Para test, el status ya está en completed
       stripeMappedStatus = payment.status;
-
     } else {
       // ========================================
       // 💳 SESIÓN NORMAL: Consultar Stripe + BD
@@ -73,7 +72,10 @@ export async function POST(request: NextRequest) {
       const session = await stripe.checkout.sessions.retrieve(sessionId);
 
       if (!session) {
-        return NextResponse.json({ error: "Sesión no encontrada en Stripe" }, { status: 404 });
+        return NextResponse.json(
+          { error: "Sesión no encontrada en Stripe" },
+          { status: 404 },
+        );
       }
 
       payment = await prisma.payment.findUnique({
@@ -94,7 +96,7 @@ export async function POST(request: NextRequest) {
       if (!payment) {
         return NextResponse.json(
           { error: "Pago no encontrado en base de datos" },
-          { status: 404 }
+          { status: 404 },
         );
       }
 
@@ -113,8 +115,10 @@ export async function POST(request: NextRequest) {
     // CONSTRUIR RESPUESTA
     // ========================================
     const uiType =
-      payment.payment_type === PaymentType.order ? "shop" : payment.payment_type;
-    
+      payment.payment_type === PaymentType.order
+        ? "shop"
+        : payment.payment_type;
+
     const baseResponse = {
       sessionId,
       type: uiType,
@@ -122,12 +126,14 @@ export async function POST(request: NextRequest) {
       currency: payment.currency,
       status: stripeMappedStatus,
       isTest: isTestSession, // ✅ Indicar si es test
-      ...(isTestSession ? {} : {
-        stripe: {
-          status: 'complete',
-          payment_status: 'paid',
-        },
-      }),
+      ...(isTestSession
+        ? {}
+        : {
+            stripe: {
+              status: "complete",
+              payment_status: "paid",
+            },
+          }),
       metadata: payment.metadata,
     };
 
@@ -148,7 +154,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         ...baseResponse,
-        type: PaymentType.membership, 
+        type: PaymentType.membership,
         firstName: member?.first_name ?? null,
         lastName: member?.last_name ?? null,
         email: member?.email ?? null,
@@ -169,7 +175,10 @@ export async function POST(request: NextRequest) {
     }
 
     // EVENT
-    if (payment.payment_type === PaymentType.event && payment.event_registration_id) {
+    if (
+      payment.payment_type === PaymentType.event &&
+      payment.event_registration_id
+    ) {
       const registration = await prisma.eventRegistration.findUnique({
         where: { id: payment.event_registration_id },
         select: {
@@ -191,7 +200,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         ...baseResponse,
-        type: PaymentType.event,                
+        type: PaymentType.event,
         participantName: registration?.participant_name ?? null,
         participantEmail: registration?.participant_email ?? null,
         eventName: registration?.event?.name ?? null,
@@ -216,7 +225,7 @@ export async function POST(request: NextRequest) {
           : null,
       });
     }
-    
+
     // ORDER
     if (payment.payment_type === PaymentType.order) {
       const metaObj = getMetadataObject(payment.metadata);
@@ -234,12 +243,11 @@ export async function POST(request: NextRequest) {
 
     // Default
     return NextResponse.json(baseResponse);
-    
   } catch (error: any) {
     logger.error("❌ Error verificando pago:", error);
     return NextResponse.json(
       { error: "Error al verificar el pago", details: error?.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

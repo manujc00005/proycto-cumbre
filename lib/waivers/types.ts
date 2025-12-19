@@ -8,12 +8,12 @@
 // ========================================
 
 export interface EventMeta {
-  eventId: string;        // UUID del evento
-  eventName: string;      // Nombre completo
-  eventDateISO: string;   // Fecha ISO: "2026-01-23"
-  eventLocation: string;  // Ubicación: "Málaga, Andalucía"
-  modalityName: string;   // Modalidad: "11K Trail Nocturno"
-  rulesUrl?: string;      // URL opcional al reglamento PDF
+  eventId: string; // UUID del evento
+  eventName: string; // Nombre completo
+  eventDateISO: string; // Fecha ISO: "2026-01-23"
+  eventLocation: string; // Ubicación: "Málaga, Andalucía"
+  modalityName: string; // Modalidad: "11K Trail Nocturno"
+  rulesUrl?: string; // URL opcional al reglamento PDF
 }
 
 // ========================================
@@ -21,11 +21,11 @@ export interface EventMeta {
 // ========================================
 
 export interface WaiverDefinition {
-  id: string;               // ID del waiver (normalmente igual a eventId)
-  title: string;            // Título del documento
-  version: string;          // Versión: "v1.0"
+  id: string; // ID del waiver (normalmente igual a eventId)
+  title: string; // Título del documento
+  version: string; // Versión: "v1.0"
   effectiveFromISO: string; // Fecha efectiva: "2024-12-13"
-  text: string;             // Texto completo del descargo
+  text: string; // Texto completo del descargo
 }
 
 // ========================================
@@ -33,12 +33,12 @@ export interface WaiverDefinition {
 // ========================================
 
 export interface TermsDefinition {
-  id: string;               // ID de los términos (normalmente igual a eventId)
-  title: string;            // Título del documento
-  version: string;          // Versión: "v1.0"
+  id: string; // ID de los términos (normalmente igual a eventId)
+  title: string; // Título del documento
+  version: string; // Versión: "v1.0"
   effectiveFromISO: string; // Fecha efectiva: "2024-12-13"
   lastUpdatedText?: string; // Texto opcional: "13 de diciembre de 2024"
-  text: string;             // Texto completo de los términos
+  text: string; // Texto completo de los términos
 }
 
 // ========================================
@@ -46,8 +46,8 @@ export interface TermsDefinition {
 // ========================================
 
 export interface WaiverEvent extends EventMeta {
-  waiverVersion: string;  // Versión del waiver asociado
-  waiverText: string;     // Texto completo del waiver
+  waiverVersion: string; // Versión del waiver asociado
+  waiverText: string; // Texto completo del waiver
 }
 
 // ========================================
@@ -55,9 +55,9 @@ export interface WaiverEvent extends EventMeta {
 // ========================================
 
 export interface WaiverRegistryItem {
-  meta: EventMeta;              // Información del evento
-  waiver: WaiverDefinition;     // Descargo de responsabilidad
-  terms: TermsDefinition;       // Términos y condiciones
+  meta: EventMeta; // Información del evento
+  waiver: WaiverDefinition; // Descargo de responsabilidad
+  terms: TermsDefinition; // Términos y condiciones
 }
 
 // ========================================
@@ -85,7 +85,9 @@ export interface WaiverAcceptanceProps {
     documentId: string;
     birthDateISO?: string;
   };
-  onAccept: (payload: WaiverAcceptancePayload) => Promise<{ acceptanceId: string }>;
+  onAccept: (
+    payload: WaiverAcceptancePayload,
+  ) => Promise<{ acceptanceId: string }>;
   className?: string;
   organizer?: {
     name: string;

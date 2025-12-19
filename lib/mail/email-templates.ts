@@ -3,22 +3,22 @@
 // lib/email/email-templates.ts
 // ========================================
 
-import { formatLicenseType, formatShortLicenseType } from '../constants';
-import EmailTemplateBuilder from './email-template-builder';
+import { formatLicenseType, formatShortLicenseType } from "../constants";
+import EmailTemplateBuilder from "./email-template-builder";
 import {
   ContactFormData,
   LicenseActivatedData,
   MembershipEmailData,
   OrderEmailData,
-} from './types';
+} from "./types";
 
 export default class EmailTemplates {
   // ========================================
   // MEMBERSHIP TEMPLATES
   // ========================================
-  
+
   static membershipSuccess(data: MembershipEmailData): string {
-    const hasLicense = data.licenseType && data.licenseType !== 'none';
+    const hasLicense = data.licenseType && data.licenseType !== "none";
 
     return new EmailTemplateBuilder().build(`
       <h2>Hola ${data.firstName},</h2>
@@ -28,7 +28,7 @@ export default class EmailTemplates {
         <div class="success-icon">✅</div>
         <div class="success-title">Pago Completado</div>
         <div class="success-subtitle">Tu membresía está activa</div>
-        ${data.amount ? `<div style="font-size: 36px; font-weight: 700; color: #10b981; margin-top: 15px;">${(data.amount / 100).toFixed(2)}€</div>` : ''}
+        ${data.amount ? `<div style="font-size: 36px; font-weight: 700; color: #10b981; margin-top: 15px;">${(data.amount / 100).toFixed(2)}€</div>` : ""}
       </div>
 
       <div class="info-box">
@@ -37,16 +37,20 @@ export default class EmailTemplates {
           <li><strong>Número de Socio:</strong> ${data.memberNumber}</li>
           <li><strong>Nombre:</strong> ${data.firstName} ${data.lastName}</li>
           <li><strong>Estado:</strong> <span style="color: #10b981; font-weight: 600;">ACTIVO</span></li>
-          ${hasLicense ? `<li><strong>Licencia FEDME:</strong> ${formatShortLicenseType(data.licenseType)}</li>` : '<li><strong>Licencia FEDME:</strong> Sin licencia</li>'}
+          ${hasLicense ? `<li><strong>Licencia FEDME:</strong> ${formatShortLicenseType(data.licenseType)}</li>` : "<li><strong>Licencia FEDME:</strong> Sin licencia</li>"}
         </ul>
       </div>
 
-      ${hasLicense ? `
+      ${
+        hasLicense
+          ? `
         <div class="alert-box">
           <p><strong>📋 Sobre tu licencia federativa</strong></p>
           <p>Tu licencia FEDME será procesada en 48-72 horas. Te notificaremos cuando esté activa.</p>
         </div>
-      ` : ''}
+      `
+          : ""
+      }
 
       <p>Ya puedes participar en todas nuestras actividades. ¡Nos vemos en la montaña!</p>
       <p style="margin-top: 30px; color: #f97316; font-weight: 600;">Equipo Proyecto Cumbre</p>
@@ -96,7 +100,7 @@ export default class EmailTemplates {
         <ul>
           <li><strong>Número de Socio:</strong> ${data.memberNumber}</li>
           <li><strong>Tipo:</strong> ${formatLicenseType(data.licenseType)}</li>
-          <li><strong>Válida hasta:</strong> ${data.validUntil.toLocaleDateString('es-ES', { dateStyle: 'long' })}</li>
+          <li><strong>Válida hasta:</strong> ${data.validUntil.toLocaleDateString("es-ES", { dateStyle: "long" })}</li>
         </ul>
       </div>
 
@@ -135,18 +139,22 @@ export default class EmailTemplates {
         </div>
         <div class="info-row">
           <span class="info-label">Fecha</span>
-          <span class="info-value">${new Date().toLocaleDateString('es-ES', { dateStyle: 'long' })}</span>
+          <span class="info-value">${new Date().toLocaleDateString("es-ES", { dateStyle: "long" })}</span>
         </div>
       </div>
 
       <div class="info-box">
         <h3>🛒 Productos</h3>
-        ${data.items.map(item => `
+        ${data.items
+          .map(
+            (item) => `
           <div class="info-row">
             <span class="info-label">${item.quantity}x ${item.name}</span>
             <span class="info-value">${(item.price / 100).toFixed(2)}€</span>
           </div>
-        `).join('')}
+        `,
+          )
+          .join("")}
         <hr style="border: none; border-top: 2px solid #3f3f46; margin: 15px 0;" />
         <div class="info-row">
           <span class="info-label">Subtotal</span>
@@ -154,7 +162,7 @@ export default class EmailTemplates {
         </div>
         <div class="info-row">
           <span class="info-label">Envío</span>
-          <span class="info-value">${data.shipping === 0 ? 'GRATIS' : `${(data.shipping / 100).toFixed(2)}€`}</span>
+          <span class="info-value">${data.shipping === 0 ? "GRATIS" : `${(data.shipping / 100).toFixed(2)}€`}</span>
         </div>
         <div class="info-row" style="font-size: 18px;">
           <span class="info-label"><strong>Total</strong></span>
@@ -233,7 +241,7 @@ export default class EmailTemplates {
   // ========================================
   // CONTACT FORM
   // ========================================
-  
+
   static contactForm(data: ContactFormData): string {
     return new EmailTemplateBuilder().build(`
       <h2>Nuevo mensaje de contacto</h2>
