@@ -298,10 +298,10 @@ export function buildEventEmail(
               <!-- WHATSAPP -->
               <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 24px 0;">
                 <tr>
-                  <td style="background-color: #10b981; border-radius: 10px; padding: 20px; text-align: center;">
-                    <h3 style="color: #ffffff; font-size: 16px; margin: 0 0 8px 0; font-weight: 700;">💬 Grupo de WhatsApp</h3>
-                    <p style="color: #d1fae5; margin: 0 0 16px 0; font-size: 13px; line-height: 1.5;">${config.whatsappMessage || 'Únete al grupo para recibir actualizaciones.'}</p>
-                    <a href="${config.whatsappLink}" style="display: inline-block; background-color: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px;">Unirse →</a>
+                  <td style="background-color: #16a34a; border-radius: 10px; padding: 24px; text-align: center;">
+                    <h3 style="color: #ffffff; font-size: 17px; margin: 0 0 10px 0; font-weight: 700;">💬 Grupo de WhatsApp</h3>
+                    <p style="color: #ffffff; margin: 0 0 18px 0; font-size: 14px; line-height: 1.6; opacity: 0.95;">${config.whatsappMessage || 'Únete al grupo para recibir actualizaciones.'}</p>
+                    <a href="${config.whatsappLink}" style="display: inline-block; background-color: #ffffff; color: #16a34a; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">Unirse →</a>
                   </td>
                 </tr>
               </table>
