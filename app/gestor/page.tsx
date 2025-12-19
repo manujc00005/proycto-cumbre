@@ -175,8 +175,8 @@ export default function GestorPage() {
 
     const confirm = window.confirm(
       `⚠️ ¿Estás seguro de ELIMINAR a ${memberName}?\n\n` +
-      `Esto marcará al usuario como eliminado pero mantendrá los registros históricos.\n` +
-      `El usuario dejará de aparecer en las listas normales.`
+      "Esto marcará al usuario como eliminado pero mantendrá los registros históricos.\n" +
+      "El usuario dejará de aparecer en las listas normales."
     );
 
     if (!confirm) return;
@@ -209,7 +209,7 @@ export default function GestorPage() {
   const restoreMember = async (memberId: string, memberName: string) => {
     const confirm = window.confirm(
       `¿Restaurar a ${memberName}?\n\n` +
-      `El usuario volverá a aparecer en las listas normales.`
+      "El usuario volverá a aparecer en las listas normales."
     );
 
     if (!confirm) return;
@@ -242,8 +242,8 @@ export default function GestorPage() {
   const revokeWhatsApp = async (memberId: string, memberName: string) => {
     const confirm = window.confirm(
       `¿Revocar WhatsApp de ${memberName}?\n\n` +
-      `El usuario será marcado como "sin consentimiento de WhatsApp".\n` +
-      `Deberías removerlo de los grupos manualmente.`
+      'El usuario será marcado como "sin consentimiento de WhatsApp".\n' +
+      "Deberías removerlo de los grupos manualmente."
     );
 
     if (!confirm) return;
@@ -276,7 +276,7 @@ export default function GestorPage() {
   const revokeMarketing = async (memberId: string, memberName: string) => {
     const confirm = window.confirm(
       `¿Revocar marketing de ${memberName}?\n\n` +
-      `El usuario dejará de recibir comunicaciones de marketing.`
+      "El usuario dejará de recibir comunicaciones de marketing."
     );
 
     if (!confirm) return;
@@ -313,8 +313,8 @@ export default function GestorPage() {
 
     const confirm = window.confirm(
       `⚠️ ATENCIÓN: Esto actualizará la versión de política de TODOS los usuarios activos a "${newVersion}".\n\n` +
-      `IMPORTANTE: Deberías tener el consentimiento de los usuarios antes de hacer esto.\n\n` +
-      `¿Continuar?`
+      "IMPORTANTE: Deberías tener el consentimiento de los usuarios antes de hacer esto.\n\n" +
+      "¿Continuar?"
     );
 
     if (!confirm) return;
