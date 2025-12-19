@@ -6,24 +6,24 @@
 // lib/email/event-email-template.ts
 // ========================================
 
-import { BaseEventEmailData, EventEmailConfig } from './types';
+import { BaseEventEmailData, EventEmailConfig } from "./types";
 
 export function buildEventEmail(
   participant: BaseEventEmailData,
-  config: EventEmailConfig
+  config: EventEmailConfig,
 ): string {
-  const heroColor = config.heroColor || '#f97316';
+  const heroColor = config.heroColor || "#f97316";
   const heroDark = adjustBrightness(heroColor, -20);
 
   // ✅ Calendar links (Google, Apple, Outlook)
-  const calendarLinks = config.eventDate 
+  const calendarLinks = config.eventDate
     ? generateCalendarLinks({
         title: config.eventName,
         date: config.eventDate,
         startTime: config.eventDetails?.startTime,
         endTime: config.eventDetails?.endTime,
-        location: config.eventLocation || '',
-        description: `Inscripción confirmada para ${config.eventName}${config.eventDetails?.description ? '\n\n' + config.eventDetails.description : ''}`
+        location: config.eventLocation || "",
+        description: `Inscripción confirmada para ${config.eventName}${config.eventDetails?.description ? "\n\n" + config.eventDetails.description : ""}`,
       })
     : null;
 
@@ -70,7 +70,9 @@ export function buildEventEmail(
         <p style="font-size: 16px; color: #fafafa; margin: 0 0 8px 0; font-weight: 600;">Hola ${participant.name} 👋</p>
         <p style="color: #a1a1aa; font-size: 14px; margin: 0 0 24px 0; line-height: 1.5;">Tu reserva ha sido confirmada. A continuación encontrarás todos los detalles.</p>
         
-        ${config.eventDate || config.eventLocation || config.eventDetails ? `
+        ${
+          config.eventDate || config.eventLocation || config.eventDetails
+            ? `
         <!-- EVENT INFO CARD -->
         <div style="background: linear-gradient(135deg, #27272a 0%, #1f1f23 100%); border: 1px solid #3f3f46; border-radius: 10px; padding: 20px; margin: 24px 0;">
           
@@ -79,7 +81,9 @@ export function buildEventEmail(
             <span style="font-size: 15px; font-weight: 700; color: ${heroColor}; text-transform: uppercase; letter-spacing: 0.5px;">📅 DETALLES DEL EVENTO</span>
           </div>
           
-          ${config.eventDate ? `
+          ${
+            config.eventDate
+              ? `
           <!-- Fecha -->
           <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 10px 0;">
             <tr>
@@ -93,9 +97,13 @@ export function buildEventEmail(
               </td>
             </tr>
           </table>
-          ` : ''}
+          `
+              : ""
+          }
           
-          ${config.eventLocation ? `
+          ${
+            config.eventLocation
+              ? `
           <!-- Ubicación -->
           <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 10px 0;">
             <tr>
@@ -108,9 +116,13 @@ export function buildEventEmail(
               </td>
             </tr>
           </table>
-          ` : ''}
+          `
+              : ""
+          }
           
-          ${config.eventDetails?.meetingPoint ? `
+          ${
+            config.eventDetails?.meetingPoint
+              ? `
           <!-- Punto de encuentro -->
           <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 10px 0;">
             <tr>
@@ -123,9 +135,13 @@ export function buildEventEmail(
               </td>
             </tr>
           </table>
-          ` : ''}
+          `
+              : ""
+          }
           
-          ${config.eventDetails?.duration ? `
+          ${
+            config.eventDetails?.duration
+              ? `
           <!-- Duración -->
           <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 10px 0;">
             <tr>
@@ -138,9 +154,13 @@ export function buildEventEmail(
               </td>
             </tr>
           </table>
-          ` : ''}
+          `
+              : ""
+          }
           
-          ${config.eventDetails?.difficulty ? `
+          ${
+            config.eventDetails?.difficulty
+              ? `
           <!-- Nivel -->
           <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 10px 0;">
             <tr>
@@ -153,9 +173,13 @@ export function buildEventEmail(
               </td>
             </tr>
           </table>
-          ` : ''}
+          `
+              : ""
+          }
           
-          ${config.eventDetails?.requiredEquipment ? `
+          ${
+            config.eventDetails?.requiredEquipment
+              ? `
           <!-- Material -->
           <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 10px 0;">
             <tr>
@@ -168,9 +192,13 @@ export function buildEventEmail(
               </td>
             </tr>
           </table>
-          ` : ''}
+          `
+              : ""
+          }
           
-          ${calendarLinks ? `
+          ${
+            calendarLinks
+              ? `
           <!-- CALENDAR CTAs -->
           <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 16px;">
             <tr>
@@ -199,7 +227,7 @@ export function buildEventEmail(
                   </a>
                   
                   <!-- Apple Calendar -->
-                  <a href="${calendarLinks.icsUrl}" download="${config.eventName.toLowerCase().replace(/\s+/g, '-')}.ics" style="display: block; padding: 12px 16px; text-decoration: none; border-bottom: 1px solid #3f3f46;">
+                  <a href="${calendarLinks.icsUrl}" download="${config.eventName.toLowerCase().replace(/\s+/g, "-")}.ics" style="display: block; padding: 12px 16px; text-decoration: none; border-bottom: 1px solid #3f3f46;">
                     <table cellpadding="0" cellspacing="0" border="0" width="100%">
                       <tr>
                         <td width="32" valign="middle">
@@ -235,19 +263,27 @@ export function buildEventEmail(
               </td>
             </tr>
           </table>
-          ` : ''}
+          `
+              : ""
+          }
         </div>
-        ` : ''}
+        `
+            : ""
+        }
         
         <!-- PARTICIPANT DETAILS -->
         <div style="background: #27272a; border-radius: 8px; padding: 16px; margin: 20px 0;">
           ${buildParticipantDetails(participant, config, heroColor)}
         </div>
         
-        ${config.features && config.features.length > 0 ? `
+        ${
+          config.features && config.features.length > 0
+            ? `
         <!-- FEATURES -->
         <div style="margin: 24px 0;">
-          ${config.features.map(feature => `
+          ${config.features
+            .map(
+              (feature) => `
             <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 10px 0;">
               <tr>
                 <td width="28" valign="top">
@@ -255,30 +291,40 @@ export function buildEventEmail(
                 </td>
                 <td>
                   <div style="color: #fafafa; font-weight: 600; font-size: 14px; margin-bottom: 2px;">${feature.title}</div>
-                  ${feature.description ? `<div style="color: #a1a1aa; font-size: 12px; line-height: 1.4;">${feature.description}</div>` : ''}
+                  ${feature.description ? `<div style="color: #a1a1aa; font-size: 12px; line-height: 1.4;">${feature.description}</div>` : ""}
                 </td>
               </tr>
             </table>
-          `).join('')}
+          `,
+            )
+            .join("")}
         </div>
-        ` : ''}
+        `
+            : ""
+        }
         
-        ${config.whatsappLink ? `
+        ${
+          config.whatsappLink
+            ? `
         <!-- WHATSAPP -->
         <div style="background: linear-gradient(135deg, #065f46 0%, #047857 100%); border-radius: 10px; padding: 20px; text-align: center; margin: 24px 0;">
           <h3 style="color: #ffffff; font-size: 16px; margin: 0 0 8px 0; font-weight: 700;">💬 Grupo de WhatsApp</h3>
-          <p style="color: #d1fae5; margin: 0 0 16px 0; font-size: 13px; line-height: 1.5;">${config.whatsappMessage || 'Únete al grupo para recibir actualizaciones.'}</p>
+          <p style="color: #d1fae5; margin: 0 0 16px 0; font-size: 13px; line-height: 1.5;">${config.whatsappMessage || "Únete al grupo para recibir actualizaciones."}</p>
           <a href="${config.whatsappLink}" style="display: inline-block; background-color: #25D366; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px;">Unirse →</a>
         </div>
-        ` : ''}
+        `
+            : ""
+        }
         
-        ${config.importantNote ? `
+        ${
+          config.importantNote
+            ? `
         <!-- ALERT -->
         <div style="background: #422006; border: 1px solid #7c2d12; border-left: 3px solid ${heroColor}; border-radius: 8px; padding: 16px; margin: 24px 0;">
           <table cellpadding="0" cellspacing="0" border="0" width="100%">
             <tr>
               <td width="28" valign="top">
-                <span style="font-size: 20px;">${config.importantNote.icon || '⚠️'}</span>
+                <span style="font-size: 20px;">${config.importantNote.icon || "⚠️"}</span>
               </td>
               <td>
                 <div style="color: #fbbf24; font-weight: 700; font-size: 14px; margin-bottom: 6px;">${config.importantNote.title}</div>
@@ -287,7 +333,9 @@ export function buildEventEmail(
             </tr>
           </table>
         </div>
-        ` : ''}
+        `
+            : ""
+        }
         
         <!-- CLOSING -->
         <p style="margin: 32px 0 0 0; color: #fafafa; font-size: 14px; text-align: center;">¡Nos vemos pronto! 🏔️</p>
@@ -316,20 +364,20 @@ export function buildEventEmail(
 function buildParticipantDetails(
   participant: BaseEventEmailData,
   config: EventEmailConfig,
-  heroColor: string
+  heroColor: string,
 ): string {
   const details = [
-    { label: 'Nombre', value: participant.name },
-    { label: 'Email', value: participant.email },
-    { label: 'Teléfono', value: participant.phone },
+    { label: "Nombre", value: participant.name },
+    { label: "Email", value: participant.email },
+    { label: "Teléfono", value: participant.phone },
   ];
 
   if (participant.dni) {
-    details.push({ label: 'DNI/NIE', value: participant.dni });
+    details.push({ label: "DNI/NIE", value: participant.dni });
   }
 
   if (participant.shirtSize) {
-    details.push({ label: 'Talla', value: participant.shirtSize });
+    details.push({ label: "Talla", value: participant.shirtSize });
   }
 
   if (config.customDetails) {
@@ -337,17 +385,17 @@ function buildParticipantDetails(
   }
 
   details.push({
-    label: 'Importe',
+    label: "Importe",
     value: `${(participant.amount / 100).toFixed(2)}€`,
   });
 
   return details
     .map((detail, index) => {
       const isLast = index === details.length - 1;
-      const isAmount = detail.label === 'Importe';
-      const borderStyle = isLast ? 'none' : '1px solid #3f3f46';
-      const color = isAmount ? heroColor : '#fafafa';
-      const fontSize = isAmount ? '16px' : '13px';
+      const isAmount = detail.label === "Importe";
+      const borderStyle = isLast ? "none" : "1px solid #3f3f46";
+      const color = isAmount ? heroColor : "#fafafa";
+      const fontSize = isAmount ? "16px" : "13px";
 
       return `
         <div style="padding: 8px 0; border-bottom: ${borderStyle};">
@@ -360,33 +408,33 @@ function buildParticipantDetails(
         </div>
       `;
     })
-    .join('');
+    .join("");
 }
 
 function adjustBrightness(hex: string, percent: number): string {
-  const num = parseInt(hex.replace('#', ''), 16);
+  const num = parseInt(hex.replace("#", ""), 16);
   const r = Math.max(0, Math.min(255, (num >> 16) + percent));
   const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00ff) + percent));
   const b = Math.max(0, Math.min(255, (num & 0x0000ff) + percent));
-  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
 }
 
 function formatEventDate(date: Date): string {
-  return date.toLocaleDateString('es-ES', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
+  return date.toLocaleDateString("es-ES", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 }
 
 function formatEventTime(date: Date): string {
   return (
-    date.toLocaleTimeString('es-ES', {
-      hour: '2-digit',
-      minute: '2-digit',
+    date.toLocaleTimeString("es-ES", {
+      hour: "2-digit",
+      minute: "2-digit",
       hour12: false,
-    }) + 'h'
+    }) + "h"
   );
 }
 
@@ -398,32 +446,32 @@ function generateCalendarLinks(event: {
   description?: string;
   location?: string;
 }): { googleUrl: string; icsUrl: string; outlookUrl: string } {
-  const dateStr = event.date.toISOString().split('T')[0];
-  
-  const defaultStartTime = event.date.toLocaleTimeString('es-ES', { 
-    hour: '2-digit', 
-    minute: '2-digit', 
-    hour12: false 
+  const dateStr = event.date.toISOString().split("T")[0];
+
+  const defaultStartTime = event.date.toLocaleTimeString("es-ES", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
   });
   const startTime = event.startTime || defaultStartTime;
-  
+
   const endDate = new Date(event.date);
   endDate.setHours(endDate.getHours() + 4);
-  const defaultEndTime = endDate.toLocaleTimeString('es-ES', { 
-    hour: '2-digit', 
-    minute: '2-digit', 
-    hour12: false 
+  const defaultEndTime = endDate.toLocaleTimeString("es-ES", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
   });
   const endTime = event.endTime || defaultEndTime;
-  
-  const description = event.description || '';
-  const location = event.location || '';
-  
-  const startDateTime = `${dateStr.replace(/-/g, '')}T${startTime.replace(/:/g, '')}00`;
-  const endDateTime = `${dateStr.replace(/-/g, '')}T${endTime.replace(/:/g, '')}00`;
-  
+
+  const description = event.description || "";
+  const location = event.location || "";
+
+  const startDateTime = `${dateStr.replace(/-/g, "")}T${startTime.replace(/:/g, "")}00`;
+  const endDateTime = `${dateStr.replace(/-/g, "")}T${endTime.replace(/:/g, "")}00`;
+
   const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${startDateTime}/${endDateTime}&details=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}`;
-  
+
   const icsContent = `BEGIN:VCALENDAR
     VERSION:2.0
     PRODID:-//Proyecto Cumbre//ES
@@ -431,15 +479,15 @@ function generateCalendarLinks(event: {
     SUMMARY:${event.title}
     DTSTART:${startDateTime}
     DTEND:${endDateTime}
-    DESCRIPTION:${description.replace(/\n/g, '\\n')}
+    DESCRIPTION:${description.replace(/\n/g, "\\n")}
     LOCATION:${location}
     STATUS:CONFIRMED
     END:VEVENT
     END:VCALENDAR`;
-  
+
   const icsUrl = `data:text/calendar;charset=utf8,${encodeURIComponent(icsContent)}`;
-  
+
   const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(event.title)}&startdt=${dateStr}T${startTime}&enddt=${dateStr}T${endTime}&body=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}`;
-  
+
   return { googleUrl, icsUrl, outlookUrl };
 }
