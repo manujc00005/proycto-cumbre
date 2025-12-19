@@ -258,7 +258,7 @@ export async function POST(request: NextRequest) {
         id: true,
         slug: true,
         name: true,
-        event_date: true,
+        event_date: true, // ✅ Incluir fecha para email
         price: true,
         currency: true,
         max_participants: true,
@@ -376,7 +376,7 @@ export async function POST(request: NextRequest) {
 
     const descriptionParts = [`Inscripción para ${name}`];
     if (shirtSize) descriptionParts.push(`Talla: ${shirtSize}`);
-    if (isMember) descriptionParts.push("Socio");
+    if (isMember) descriptionParts.push(`Socio`);
     const productDescription = descriptionParts.join(" · ");
 
     const publicUrl = process.env.NEXT_PUBLIC_URL;

@@ -76,12 +76,15 @@ export interface EventEmailConfig {
   whatsappLink?: string;
   whatsappMessage?: string;
   
-  // ✅ NUEVO: Detalles del evento
+  // ✅ Detalles del evento
   eventDetails?: {
     meetingPoint?: string;      // Punto de encuentro
     duration?: string;           // Duración estimada
     difficulty?: string;         // Nivel/dificultad
     requiredEquipment?: string;  // Material obligatorio
+    startTime?: string;          // Hora inicio (HH:MM) para calendario
+    endTime?: string;            // Hora fin (HH:MM) para calendario
+    description?: string;        // Descripción adicional para calendario
   };
   
   // Detalles personalizados

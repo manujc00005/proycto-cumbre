@@ -304,7 +304,7 @@ async function processEventPayment(session: Stripe.Checkout.Session) {
           select: { 
             name: true, 
             slug: true,
-            event_date: true
+            event_date: true 
           } 
         } 
       }

@@ -33,9 +33,12 @@ export const EVENT_EMAIL_CONFIGS: Record<string, EventConfigBuilder> = {
     
     eventDetails: {
       meetingPoint: 'Se revelará 2h antes por WhatsApp',
-      duration: '1-2 horas (trail nocturno)',
+      duration: '3-4 horas (trail nocturno)',
       difficulty: 'Media-Alta (trail running)',
-      requiredEquipment: 'Frontal, ropa deportiva, hidratación'
+      requiredEquipment: 'Frontal, ropa deportiva, hidratación',
+      startTime: '19:00',
+      endTime: '23:00',
+      description: 'Trail running nocturno secreto MISA™. Coordenadas reveladas 2h antes.'
     },
     
     whatsappLink: process.env.MISA_WHATSAPP_GROUP || 'https://chat.whatsapp.com/grupo-misa',
