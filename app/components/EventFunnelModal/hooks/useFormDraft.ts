@@ -9,7 +9,7 @@ import { useEffect, useRef } from 'react';
 export function useFormDraft(
   eventId: string,
   formData: Record<string, any>,
-  enabled: boolean = true
+  enabled = true
 ) {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const storageKey = `event-funnel-draft-${eventId}`;
