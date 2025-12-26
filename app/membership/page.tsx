@@ -416,7 +416,7 @@ export default function MembershipPage() {
               </p>
 
               <div className="bg-zinc-800 rounded-lg p-4 my-6">
-                <p className="text-zinc-500 text-sm mb-1">Monto pagado</p>
+                <p className="text-zinc-500 text-sm mb-1">Importe pagado</p>
                 <p className="text-orange-500 text-4xl font-bold">{total}€</p>
               </div>
 
@@ -939,7 +939,7 @@ export default function MembershipPage() {
                   onChange={handleChange}
                   maxLength={5}
                   className="w-full px-4 py-3 bg-zinc-800 border-2 border-zinc-700 focus:border-orange-500 rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all"
-                  placeholder="18001"
+                  placeholder="29006"
                 />
               </div>
 
@@ -954,7 +954,7 @@ export default function MembershipPage() {
                   value={formData.city}
                   onChange={handleChange}
                   className="w-full px-4 py-3 bg-zinc-800 border-2 border-zinc-700 focus:border-orange-500 rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all"
-                  placeholder="Granada"
+                  placeholder="Málaga"
                 />
               </div>
 
@@ -971,7 +971,7 @@ export default function MembershipPage() {
                   onBlur={() => handleBlur('province')}
                   className={`w-full px-4 py-3 bg-zinc-800 border-2 ${errors.province ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
                     } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
-                  placeholder="Granada"
+                  placeholder="Málaga"
                 />
                 {errors.province && (
                   <p className="mt-2 text-sm text-red-400 flex items-center gap-1">

@@ -81,17 +81,31 @@ export function useFunnelState(hasRules: boolean) {
   const canGoNext = useCallback(() => {
     switch (state.currentStep) {
       case 'form':
-        // Validar que haya datos mínimos Y consentimientos aceptados
-        const hasFormData = Object.keys(state.formData).length > 0;
-        const hasConsents = state.formData.consents?.privacy_accepted === true && 
-                           state.formData.consents?.whatsapp_consent === true;
-        return hasFormData && hasConsents;
+        // ✅ Validar campos obligatorios específicos
+        const hasRequiredFields = !!(
+          state.formData.name &&
+          state.formData.email &&
+          state.formData.phone &&
+          state.formData.dni &&
+          state.formData.shirtSize // ← Validar talla de camiseta
+        );
+        
+        // ✅ Validar consentimientos
+        const hasConsents = 
+          state.formData.consents?.privacy_accepted === true && 
+          state.formData.consents?.whatsapp_consent === true;
+        
+        return hasRequiredFields && hasConsents;
+      
       case 'waiver':
         return state.waiverAccepted;
+      
       case 'rules':
         return state.rulesAccepted;
+      
       case 'payment':
         return true;
+      
       default:
         return false;
     }

@@ -1,6 +1,6 @@
 // ========================================
-// COMPONENTE: StepperFooter
-// Botones de navegación
+// COMPONENTE: StepperFooter (CON DESCUENTOS)
+// ✅ Descuento alineado a la derecha
 // components/EventFunnelModal/StepperFooter.tsx
 // ========================================
 
@@ -14,6 +14,8 @@ interface StepperFooterProps {
   onNext: () => void;
   isSubmitting: boolean;
   paymentAmount?: number;
+  discountAmount?: number;
+  finalAmount?: number;
 }
 
 export default function StepperFooter({
@@ -24,11 +26,16 @@ export default function StepperFooter({
   onNext,
   isSubmitting,
   paymentAmount,
+  discountAmount = 0,
+  finalAmount,
 }: StepperFooterProps) {
   
   const formatAmount = (cents: number) => {
     return (cents / 100).toFixed(2);
   };
+
+  const displayAmount = finalAmount || paymentAmount || 0;
+  const hasDiscount = discountAmount > 0;
 
   return (
     <div className="border-t border-zinc-800 bg-zinc-900/50 backdrop-blur p-6">
@@ -50,59 +57,69 @@ export default function StepperFooter({
           <div /> // Spacer
         )}
 
-        {/* Botón Siguiente/Pagar */}
-        <button
-          onClick={onNext}
-          disabled={!canGoNext || isSubmitting}
-          className={`
-            flex items-center justify-center gap-2 px-8 py-3 font-bold rounded-xl transition-all
-            disabled:cursor-not-allowed disabled:opacity-50
-            ${isLastStep 
-              ? 'bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/30' 
-              : 'bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/30'
-            }
-          `}
-        >
-          {isSubmitting ? (
-            <>
-              <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        {/* ✅ NUEVO: Contenedor para botón + descuento */}
+        <div className="flex flex-col items-end gap-2">
+          {/* Badge de descuento (encima del botón) */}
+          {isLastStep && hasDiscount && (
+            <div className="flex items-center gap-2 text-xs text-green-400">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
               </svg>
-              Procesando...
-            </>
-          ) : isLastStep ? (
-            <>
-               Pagar ahora ·
-              {paymentAmount && (
-                <span className="text-2xl font-black">
-                  {formatAmount(paymentAmount)}€
-                </span>
-              )}
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </>
-          ) : (
-            <>
-              Siguiente
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </>
+              <span>Descuento aplicado · Ahorras {formatAmount(discountAmount)}€</span>
+            </div>
           )}
-        </button>
-      </div>
 
-      {/* Badge de seguridad */}
-      {/* {isLastStep && (
-        <div className="mt-4 flex items-center justify-center gap-2 text-xs text-green-400">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-          <span>Pago 100% seguro con Stripe</span>
+          {/* Botón Siguiente/Pagar */}
+          <button
+            onClick={onNext}
+            disabled={!canGoNext || isSubmitting}
+            className={`
+              flex items-center justify-center gap-2 px-8 py-3 font-bold rounded-xl transition-all
+              disabled:cursor-not-allowed disabled:opacity-50
+              ${isLastStep 
+                ? 'bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/30' 
+                : 'bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/30'
+              }
+            `}
+          >
+            {isSubmitting ? (
+              <>
+                <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Procesando...
+              </>
+            ) : isLastStep ? (
+              <>
+                Pagar ahora ·
+                <div className="flex flex-col items-end leading-tight">
+                  {/* Precio con descuento */}
+                  {hasDiscount && paymentAmount && (
+                    <span className="text-xs line-through text-white/50">
+                      {formatAmount(paymentAmount)}€
+                    </span>
+                  )}
+                  {/* Precio final */}
+                  <span className="text-2xl font-black">
+                    {formatAmount(displayAmount)}€
+                  </span>
+                </div>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </>
+            ) : (
+              <>
+                Siguiente
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </>
+            )}
+          </button>
         </div>
-      )} */}
+      </div>
     </div>
   );
 }

@@ -1,17 +1,18 @@
 // ========================================
 // TIPOS PARA EVENT FUNNEL STEPPER
+// ✅ Refactorizado para ser genérico y reutilizable
 // lib/funnels/types.ts
 // ========================================
 
 import { WaiverEvent, WaiverAcceptancePayload } from '@/lib/waivers/types';
 
-export type FieldType = 
-  | 'text' 
-  | 'email' 
-  | 'tel' 
-  | 'dni' 
-  | 'select' 
-  | 'date' 
+export type FieldType =
+  | 'text'
+  | 'email'
+  | 'tel'
+  | 'dni'
+  | 'select'
+  | 'date'
   | 'checkbox';
 
 export interface FormField {
@@ -27,6 +28,22 @@ export interface FormField {
   pattern?: string;
 }
 
+// ========================================
+// ✅ NUEVO: Configuración de pricing
+// ========================================
+export interface PricingConfig {
+  amount: number;           // Precio en centavos
+  currency: string;         // 'EUR', 'USD', etc
+  description: string;      // Descripción para Stripe
+  
+  // Descuento para socios (opcional)
+  memberDiscount?: {
+    discountPercent: number;          // 20 para 20%
+    requiresActiveMembership: boolean; // Solo socios activos
+    description?: string;              // Ej: "Descuento para socios"
+  };
+}
+
 export interface FunnelStep {
   id: string;
   title: string;
@@ -36,46 +53,55 @@ export interface FunnelStep {
   onComplete?: () => Promise<void>;
 }
 
+// ========================================
+// ✅ ACTUALIZADO: Config simplificada
+// ========================================
 export interface EventFunnelConfig {
+  // Identificadores del evento
   eventId: string;           // UUID del evento
   eventSlug: string;         // Slug para URLs (ej: 'misa')
   eventName: string;         // Nombre mostrado en UI
-  
+
+  // ✅ NUEVO: Pricing unificado
+  pricing: PricingConfig;
+
   // Paso 1: Formulario
   formFields: FormField[];
-  
+
   // Paso 2: Pliego (siempre obligatorio)
   waiver: {
     event: WaiverEvent;
     required: true;
   };
-  
+
   // Paso 3: Reglamento (opcional)
   rules?: {
-    url: string;
-    requireAcceptance: boolean;
+    url?: string;
     text?: string;
+    requireAcceptance: boolean;
   };
-  
-  // Paso 4: Pago
-  payment: {
-    amount: number;
-    currency: string;
-    description: string;
-    checkoutUrl: string;
-  };
-  
+
   // Configuración RGPD
   gdpr: {
     includeWhatsApp: boolean;
     whatsappRequired: boolean;
     whatsappContext: 'club' | 'event';
   };
-  
-  // Callbacks
-  onFormDraft?: (data: any) => void;
-  onWaiverAccept?: (payload: WaiverAcceptancePayload) => Promise<{ acceptanceId: string }>;
-  onPaymentStart?: (data: any) => Promise<{ url: string }>;
+
+  // ❌ ELIMINADO: Callbacks específicos (ahora son genéricos)
+  // ❌ ELIMINADO: payment.checkoutUrl (ahora es genérico)
+}
+
+// ========================================
+// ✅ NUEVO: Backward compatibility
+// ========================================
+export interface EventFunnelConfigWithPayment extends EventFunnelConfig {
+  payment: {
+    amount: number;
+    currency: string;
+    description: string;
+    checkoutUrl?: string; // Opcional para backward compatibility
+  };
 }
 
 export type StepId = 'form' | 'waiver' | 'rules' | 'payment';

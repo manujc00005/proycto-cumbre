@@ -1,7 +1,7 @@
 // ========================================
-// COMPONENTE: FormStep (MEJORADO)
-// ❌ NO guarda en BD hasta completar pago
-// ✅ Solo guarda en localStorage (borrador)
+// COMPONENTE: FormStep (SOLUCIÓN COMPLETA)
+// ✅ Ambos useEffect controlados correctamente
+// ✅ Sin infinite loops
 // components/EventFunnelModal/steps/FormStep.tsx
 // ========================================
 
@@ -30,10 +30,10 @@ export default function FormStep({ fields, data, onChange, gdpr, attemptedNext: 
   const [consents, setConsents] = useState({ privacyPolicy: false, whatsapp: false });
   const [attemptedNext, setAttemptedNext] = useState(false);
   
-  const prevConsentsRef = useRef({ privacyPolicy: false, whatsapp: false });
-  const isUpdatingRef = useRef(false);
-  
   const { validateField, validateAll } = useStepValidation(fields);
+  
+  // ✅ Ref para evitar validación en mount inicial
+  const isInitialMount = useRef(true);
 
   // Sincronizar con prop externa
   useEffect(() => {
@@ -42,46 +42,14 @@ export default function FormStep({ fields, data, onChange, gdpr, attemptedNext: 
     }
   }, [attemptedNextProp, attemptedNext]);
 
-  // ========================================
-  // ✅ CORRECCIÓN LEGAL: Solo guardar timestamps cuando aceptan
-  // ========================================
+  // ✅ FIX: Validar SOLO cuando attemptedNext cambia, NO cuando data cambia
   useEffect(() => {
-    if (isUpdatingRef.current) return;
+    // Ignorar en mount inicial
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
 
-    const privacyChanged = prevConsentsRef.current.privacyPolicy !== consents.privacyPolicy;
-    const whatsappChanged = prevConsentsRef.current.whatsapp !== consents.whatsapp;
-
-    if (!privacyChanged && !whatsappChanged) return;
-
-    isUpdatingRef.current = true;
-    prevConsentsRef.current = { ...consents };
-
-    const prev = data.consents || {};
-    
-    // ✅ Solo guardar timestamp si está aceptado
-    const nextConsents = {
-      privacy_accepted: consents.privacyPolicy,
-      privacy_accepted_at: consents.privacyPolicy 
-        ? (prev.privacy_accepted_at || new Date().toISOString()) 
-        : null,
-      whatsapp_consent: consents.whatsapp,
-      whatsapp_consent_at: consents.whatsapp 
-        ? (prev.whatsapp_consent_at || new Date().toISOString()) 
-        : null,
-      // ❌ Marketing NO es obligatorio
-      marketing_consent: false,
-      marketing_consent_at: null,
-    };
-
-    onChange({ ...data, consents: nextConsents });
-    
-    setTimeout(() => {
-      isUpdatingRef.current = false;
-    }, 0);
-  }, [consents.privacyPolicy, consents.whatsapp]);
-
-  // Validar cuando intenta avanzar
-  useEffect(() => {
     if (attemptedNext) {
       const newErrors = validateAll(data);
       setErrors(newErrors);
@@ -92,7 +60,7 @@ export default function FormStep({ fields, data, onChange, gdpr, attemptedNext: 
       });
       setTouched(allTouched);
     }
-  }, [attemptedNext, data, fields, validateAll]);
+  }, [attemptedNext]); // ✅ SOLO attemptedNext en deps
 
   const handleChange = (field: FormField, value: any) => {
     if (attemptedNext) {
@@ -102,6 +70,7 @@ export default function FormStep({ fields, data, onChange, gdpr, attemptedNext: 
     const newData = { ...data, [field.id]: value };
     onChange(newData);
 
+    // ✅ Validar inline si el campo ya fue tocado
     if (touched[field.id]) {
       const error = validateField(field, value);
       setErrors((prev) => ({
@@ -121,15 +90,35 @@ export default function FormStep({ fields, data, onChange, gdpr, attemptedNext: 
     }));
   };
 
+  // ✅ Manejar consentimientos sin useEffect
   const handleConsentChange = useCallback(
     (next: { privacyPolicy: boolean; whatsapp: boolean }) => {
-      setConsents(prev =>
-        prev.privacyPolicy === next.privacyPolicy && prev.whatsapp === next.whatsapp
-          ? prev
-          : next
-      );
+      setConsents(next);
+      
+      const prev = data.consents || {};
+      
+      const nextConsents = {
+        privacy_accepted: next.privacyPolicy,
+        privacy_accepted_at: next.privacyPolicy 
+          ? (prev.privacy_accepted_at || new Date().toISOString()) 
+          : null,
+        whatsapp_consent: next.whatsapp,
+        whatsapp_consent_at: next.whatsapp 
+          ? (prev.whatsapp_consent_at || new Date().toISOString()) 
+          : null,
+        marketing_consent: false,
+        marketing_consent_at: null,
+      };
+
+      const hasChanges = 
+        prev.privacy_accepted !== nextConsents.privacy_accepted ||
+        prev.whatsapp_consent !== nextConsents.whatsapp_consent;
+
+      if (hasChanges) {
+        onChange({ ...data, consents: nextConsents });
+      }
     },
-    []
+    [data, onChange]
   );
 
   const renderField = (field: FormField) => {
@@ -219,7 +208,6 @@ export default function FormStep({ fields, data, onChange, gdpr, attemptedNext: 
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
-        {/* ✅ Copy más emocional */}
         <h3 className="text-2xl font-bold text-white mb-2">
           👉 Estás a un paso de participar
         </h3>

@@ -131,10 +131,10 @@ function ConfirmacionContent() {
             Tu plaza en MISA 2026 está asegurada 🏔️
           </p>
 
-          {/* Monto pagado */}
+          {/* Importe pagado */}
           <div className="bg-zinc-800 rounded-xl p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-zinc-500 text-sm">Monto pagado</span>
+              <span className="text-zinc-500 text-sm">Importe pagado</span>
               <span className="text-orange-500 text-3xl md:text-4xl font-bold">
                 {amount}€
               </span>

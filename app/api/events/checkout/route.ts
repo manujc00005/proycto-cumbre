@@ -1,7 +1,7 @@
 // ========================================
-// API CHECKOUT EVENTOS - CON MÉTODO GENÉRICO
-// ✅ Un solo método para TODOS los eventos
-// ✅ Config automática por slug
+// API CHECKOUT EVENTOS - CON DESCUENTOS
+// ✅ Aplica descuentos de socios en Stripe
+// ✅ Calcula precio final antes de crear sesión
 // app/api/events/checkout/route.ts
 // ========================================
 
@@ -33,7 +33,23 @@ const BodySchema = z.object({
   }),
   waiver_acceptance_id: z.string().uuid().optional(),
   custom_fields: z.record(z.string(), z.unknown()).optional(),
+  // ✅ NUEVO: Información de descuento
+  discount: z.object({
+    applied: z.boolean(),
+    percent: z.number().optional(),
+    amount: z.number().optional(),
+    finalAmount: z.number().optional(),
+    memberNumber: z.string().optional(),
+  }).optional(),
 });
+
+// ========================================
+// ✅ NUEVO: Registro de descuentos por evento
+// ========================================
+const EVENT_DISCOUNTS: Record<string, number> = {
+  'misa': 20, // 20% descuento
+  // Añadir más eventos aquí
+};
 
 function normalizePhone(phone: string) {
   return phone.replace(/\s+/g, "");
@@ -45,6 +61,32 @@ function getClientIp(request: NextRequest) {
     request.headers.get("x-real-ip") ||
     "unknown"
   );
+}
+
+// ========================================
+// ✅ NUEVO: Calcular precio con descuento
+// ========================================
+function calculateFinalPrice(
+  originalPrice: number,
+  isMember: boolean,
+  eventSlug: string
+): { finalPrice: number; discountPercent: number; discountAmount: number } {
+  if (!isMember || !EVENT_DISCOUNTS[eventSlug]) {
+    return {
+      finalPrice: originalPrice,
+      discountPercent: 0,
+      discountAmount: 0,
+    };
+  }
+
+  const discountPercent = EVENT_DISCOUNTS[eventSlug];
+  const discountAmount = Math.round((originalPrice * discountPercent) / 100);
+  const finalPrice = originalPrice - discountAmount;
+
+  logger.log(`💰 Descuento aplicado: ${discountPercent}% = ${discountAmount / 100}€`);
+  logger.log(`   Original: ${originalPrice / 100}€ → Final: ${finalPrice / 100}€`);
+
+  return { finalPrice, discountPercent, discountAmount };
 }
 
 // ========================================
@@ -63,6 +105,9 @@ async function createDirectRegistration(params: {
   consents: any;
   waiverAcceptanceId?: string;
   clientIp: string;
+  finalAmount: number; // ✅ Precio con descuento
+  discountPercent: number;
+  discountAmount: number;
 }) {
   const {
     event,
@@ -77,15 +122,20 @@ async function createDirectRegistration(params: {
     consents,
     waiverAcceptanceId,
     clientIp,
+    finalAmount,
+    discountPercent,
+    discountAmount,
   } = params;
 
   const fakeSessionId = `test_${crypto.randomBytes(16).toString('hex')}`;
-  const testAmount = parseInt(process.env.TEST_PAYMENT_AMOUNT || '500');
 
   logger.log('🧪 MODO TEST - Creando registro directo');
   logger.log(`   Email: ${email}`);
   logger.log(`   Evento: ${event.name} (${event.slug})`);
-  logger.log(`   Monto: ${testAmount / 100}€`);
+  logger.log(`   Monto final: ${finalAmount / 100}€`);
+  if (discountAmount > 0) {
+    logger.log(`   Descuento: ${discountPercent}% (-${discountAmount / 100}€)`);
+  }
 
   const result = await prisma.$transaction(async (tx) => {
     const payment = await tx.payment.create({
@@ -93,7 +143,7 @@ async function createDirectRegistration(params: {
         payment_type: PaymentType.event,
         member_id: memberId,
         stripe_session_id: fakeSessionId,
-        amount: testAmount,
+        amount: finalAmount, // ✅ Precio con descuento
         currency: event.currency ?? "eur",
         status: PaymentStatus.completed,
         description: `🧪 TEST - ${event.name} - ${name}${isMember ? " (Socio)" : ""}`,
@@ -110,6 +160,11 @@ async function createDirectRegistration(params: {
           is_member: isMember,
           waiver_acceptance_id: waiverAcceptanceId,
           is_test_payment: true,
+          
+          // ✅ NUEVO: Metadata de descuento
+          original_amount: event.price.toString(),
+          discount_percent: discountPercent.toString(),
+          discount_amount: discountAmount.toString(),
           
           privacy_accepted: true,
           privacy_accepted_at: consents.privacy_accepted_at || new Date().toISOString(),
@@ -166,30 +221,22 @@ async function createDirectRegistration(params: {
   });
 
   logger.log('✅ Registro directo completado');
-  logger.log('   Payment ID:', result.payment.id);
-  logger.log('   Registration ID:', result.registration.id);
 
-  // ========================================
-  // 📧 ENVIAR EMAIL INMEDIATAMENTE (TEST USER)
-  // ========================================
+  // Enviar email con precio final
   try {
-    logger.log('📧 Enviando email de confirmación (test user)...');
-    
-    // ✅ Método genérico único para TODOS los eventos
     await EmailService.sendEventConfirmation(event.slug, {
       email: email,
       name: name,
       phone: phone,
       dni: dni,
       shirtSize: shirtSize,
-      amount: testAmount,
+      amount: finalAmount, // ✅ Precio con descuento
       eventName: event.name,
-      eventDate: event.date, // Pasar la fecha del evento si existe
+      eventDate: event.event_date,
     });
     
     logger.log('✅ Email enviado correctamente');
   } catch (emailError: any) {
-    // No es crítico, pero logueamos el error
     logger.error('[TEST] Error enviando email:', emailError.message);
   }
 
@@ -221,6 +268,7 @@ export async function POST(request: NextRequest) {
       consents,
       waiver_acceptance_id,
       custom_fields,
+      discount: discountFromFrontend, // ✅ Info del frontend (solo referencial)
     } = parsed.data;
 
     const normalizedEmail = email.toLowerCase().trim();
@@ -258,7 +306,7 @@ export async function POST(request: NextRequest) {
         id: true,
         slug: true,
         name: true,
-        event_date: true, // ✅ Incluir fecha para email
+        event_date: true,
         price: true,
         currency: true,
         max_participants: true,
@@ -322,6 +370,15 @@ export async function POST(request: NextRequest) {
       logger.log("✅ Usuario es socio activo:", existingMember.member_number);
     }
 
+    // ========================================
+    // ✅ CALCULAR PRECIO FINAL CON DESCUENTO
+    // ========================================
+    const { finalPrice, discountPercent, discountAmount } = calculateFinalPrice(
+      event.price,
+      isMember,
+      event.slug
+    );
+
     const customData: Record<string, any> = {};
     if (shirtSize) customData.shirt_size = shirtSize;
     if (custom_fields) Object.assign(customData, custom_fields);
@@ -342,13 +399,17 @@ export async function POST(request: NextRequest) {
         consents,
         waiverAcceptanceId: waiver_acceptance_id,
         clientIp,
+        finalAmount: finalPrice, // ✅ Precio con descuento
+        discountPercent,
+        discountAmount,
       });
 
       logger.apiSuccess("Checkout TEST completado", {
         eventSlug: event.slug,
         payment_id: result.payment.id,
         registration_id: result.registration.id,
-        email_sent: true,
+        finalAmount: finalPrice,
+        discount: discountAmount > 0 ? `${discountPercent}%` : 'ninguno',
       });
 
       const publicUrl = process.env.NEXT_PUBLIC_URL;
@@ -370,13 +431,13 @@ export async function POST(request: NextRequest) {
     }
 
     // ========================================
-    // 💳 FLUJO NORMAL: Con Stripe
+    // 💳 FLUJO NORMAL: Con Stripe (CON DESCUENTO)
     // ========================================
     const stripe = getStripe();
 
     const descriptionParts = [`Inscripción para ${name}`];
     if (shirtSize) descriptionParts.push(`Talla: ${shirtSize}`);
-    if (isMember) descriptionParts.push(`Socio`);
+    if (isMember) descriptionParts.push(`Socio${discountPercent > 0 ? ` (${discountPercent}% desc)` : ''}`);
     const productDescription = descriptionParts.join(" · ");
 
     const publicUrl = process.env.NEXT_PUBLIC_URL;
@@ -400,7 +461,7 @@ export async function POST(request: NextRequest) {
                 name: event.name,
                 description: productDescription,
               },
-              unit_amount: event.price,
+              unit_amount: finalPrice, // ✅ Precio CON descuento
             },
             quantity: 1,
           },
@@ -421,6 +482,12 @@ export async function POST(request: NextRequest) {
           shirt_size: shirtSize ?? "",
           custom_data: JSON.stringify(customData),
           
+          // ✅ NUEVO: Metadata de descuento
+          original_amount: event.price.toString(),
+          discount_percent: discountPercent.toString(),
+          discount_amount: discountAmount.toString(),
+          member_number: existingMember?.member_number ?? "",
+          
           privacy_accepted: "true",
           privacy_accepted_at: consents.privacy_accepted_at || new Date().toISOString(),
           whatsapp_consent: "true",
@@ -434,13 +501,17 @@ export async function POST(request: NextRequest) {
     );
 
     logger.log("✅ Sesión de Stripe creada:", session.id);
+    logger.log(`   Monto final: ${finalPrice / 100}€`);
+    if (discountAmount > 0) {
+      logger.log(`   Descuento aplicado: ${discountPercent}% (-${discountAmount / 100}€)`);
+    }
 
     await prisma.payment.create({
       data: {
         payment_type: PaymentType.event,
         member_id: memberId,
         stripe_session_id: session.id,
-        amount: event.price,
+        amount: finalPrice, // ✅ Precio con descuento
         currency: event.currency ?? "eur",
         status: PaymentStatus.pending,
         description: `${event.name} - ${name}${isMember ? " (Socio)" : ""}`,
@@ -457,6 +528,12 @@ export async function POST(request: NextRequest) {
           is_member: isMember,
           waiver_acceptance_id: waiver_acceptance_id,
           
+          // ✅ NUEVO: Metadata de descuento
+          original_amount: event.price.toString(),
+          discount_percent: discountPercent.toString(),
+          discount_amount: discountAmount.toString(),
+          member_number: existingMember?.member_number ?? "",
+          
           privacy_accepted: true,
           privacy_accepted_at: consents.privacy_accepted_at || new Date().toISOString(),
           whatsapp_consent: true,
@@ -466,12 +543,14 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    logger.log("✅ Payment creado (pending)");
+    logger.log("✅ Payment creado (pending) con descuento aplicado");
 
     logger.apiSuccess("Checkout completado", {
       eventSlug: event.slug,
       session_id: session.id,
       is_member: isMember,
+      finalAmount: finalPrice,
+      discount: discountAmount > 0 ? `${discountPercent}%` : 'ninguno',
     });
 
     return NextResponse.json({

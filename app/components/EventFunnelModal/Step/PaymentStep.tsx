@@ -1,18 +1,21 @@
 // ========================================
-// COMPONENTE: PaymentStep (SIN BOTÓN)
-// ✅ Sin sticky footer propio
-// ✅ Usa StepperFooter del modal
+// COMPONENTE: PaymentStep (REFACTORIZADO)
+// ✅ Usa PricingConfig
+// ✅ Muestra datos correctamente
+// ✅ Descuento alineado con botón
 // components/EventFunnelModal/steps/PaymentStep.tsx
 // ========================================
 
 'use client';
 
+import { useMemberDiscount } from '../hooks/useMemberDiscount';
+import { Loader2 } from 'lucide-react';
+import { PricingConfig } from '@/lib/funnels/types';
+
 interface PaymentStepProps {
   data: Record<string, any>;
-  amount: number;
+  pricing: PricingConfig; // ✅ NUEVO
   eventSlug: string;
-  currency: string;
-  description: string;
   onPay: () => void;
   isSubmitting: boolean;
 }
@@ -20,21 +23,30 @@ interface PaymentStepProps {
 export default function PaymentStep({
   eventSlug,
   data,
-  amount,
-  currency,
-  description,
+  pricing,
 }: PaymentStepProps) {
   const waiverHref = `/${eventSlug}/descargo`;
   const termsHref = `/${eventSlug}/terminos-y-condiciones`;
+
+  // ✅ ACTUALIZADO: Usa pricing directamente
+  const discount = useMemberDiscount(
+    pricing,
+    data.email,
+    data.dni
+  );
+
+  const formatAmount = (cents: number) => {
+    return (cents / 100).toFixed(2);
+  };
 
   return (
     <div className="max-w-2xl mx-auto px-4">
       <div className="mb-5">
         <h3 className="text-xl font-bold text-white mb-1">
-          👉 Todo listo para {description.split(' - ')[0]}
+          Estás a un paso de confirmar tu plaza
         </h3>
         <p className="text-xs text-white/60">
-          Revisa tus datos antes de confirmar
+          Revisa tus datos antes de confirmar el pago
         </p>
       </div>
 
@@ -49,13 +61,91 @@ export default function PaymentStep({
             </div>
             <div className="flex-1">
               <h4 className="text-base font-bold text-white mb-0.5">
-                {description}
+                {pricing.description}
               </h4>
               <p className="text-xs text-white/70">
                 Inscripción completa al evento deportivo
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Badge de verificación de socio */}
+        {discount.isChecking && (
+          <div className="bg-zinc-800/50 border border-zinc-700 rounded-xl p-4">
+            <div className="flex items-center gap-3">
+              <Loader2 className="w-5 h-5 text-orange-500 animate-spin" />
+              <span className="text-sm text-white/70">
+                Verificando membresía...
+              </span>
+            </div>
+          </div>
+        )}
+
+        {discount.isMember && !discount.isChecking && (
+          <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/30 rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h4 className="text-sm font-bold text-green-400 mb-0.5">
+                  🎉 ¡Descuento aplicado!
+                </h4>
+                <p className="text-xs text-white/70">
+                  Socio del club · {discount.discountPercent}% de descuento
+                </p>
+                {discount.memberInfo?.memberNumber && (
+                  <p className="text-xs text-white/50 mt-1 font-mono">
+                    Nº Socio: {discount.memberInfo.memberNumber}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Desglose de precios */}
+        <div className="bg-zinc-800/50 border border-zinc-700 rounded-xl p-4">
+          <h5 className="text-xs font-semibold text-white/90 mb-3 flex items-center gap-2">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            Desglose del pago
+          </h5>
+          
+          <div className="space-y-2">
+            {/* Precio original */}
+            <div className="flex justify-between text-sm">
+              <span className="text-zinc-400">Precio de inscripción:</span>
+              <span className={`font-medium ${discount.isMember ? 'line-through text-zinc-500' : 'text-white'}`}>
+                {formatAmount(discount.originalAmount)}€
+              </span>
+            </div>
+
+            {/* Descuento aplicado */}
+            {discount.isMember && discount.discountAmount > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-green-400">
+                  Descuento socio ({discount.discountPercent}%):
+                </span>
+                <span className="font-medium text-green-400">
+                  -{formatAmount(discount.discountAmount)}€
+                </span>
+              </div>
+            )}
+
+            {/* Total */}
+            <div className="flex justify-between text-base pt-2 border-t border-zinc-700">
+              <span className="text-white font-bold">Total a pagar:</span>
+              <span className="text-white font-bold text-lg">
+                {formatAmount(discount.finalAmount)}€
+              </span>
+            </div>
+          </div>
+
         </div>
 
         {/* Resumen de datos */}
@@ -68,36 +158,34 @@ export default function PaymentStep({
           </h5>
           
           <div className="space-y-2">
-            {data.name && (
-              <div className="flex justify-between text-xs">
-                <span className="text-zinc-400">Nombre:</span>
-                <span className="text-white font-medium">{data.name}</span>
-              </div>
-            )}
-            {data.email && (
-              <div className="flex justify-between text-xs">
-                <span className="text-zinc-400">Email:</span>
-                <span className="text-white font-medium truncate ml-2">{data.email}</span>
-              </div>
-            )}
-            {data.phone && (
-              <div className="flex justify-between text-xs">
-                <span className="text-zinc-400">Móvil:</span>
-                <span className="text-white font-medium">{data.phone}</span>
-              </div>
-            )}
-            {data.dni && (
-              <div className="flex justify-between text-xs">
-                <span className="text-zinc-400">DNI/NIE:</span>
-                <span className="text-white font-medium font-mono">{data.dni}</span>
-              </div>
-            )}
-            {data.shirtSize && (
-              <div className="flex justify-between text-xs">
-                <span className="text-zinc-400">Talla:</span>
-                <span className="text-white font-medium">{data.shirtSize}</span>
-              </div>
-            )}
+            <div className="flex justify-between text-xs">
+              <span className="text-zinc-400">Nombre:</span>
+              <span className="text-white font-medium">{data.name || 'N/A'}</span>
+            </div>
+            
+            <div className="flex justify-between text-xs">
+              <span className="text-zinc-400">Email:</span>
+              <span className="text-white font-medium truncate ml-2 max-w-[220px]">
+                {data.email || 'N/A'}
+              </span>
+            </div>
+            
+            <div className="flex justify-between text-xs">
+              <span className="text-zinc-400">Móvil:</span>
+              <span className="text-white font-medium">{data.phone || 'N/A'}</span>
+            </div>
+            
+            <div className="flex justify-between text-xs">
+              <span className="text-zinc-400">DNI/NIE:</span>
+              <span className="text-white font-medium font-mono">
+                {data.dni || 'N/A'}
+              </span>
+            </div>
+            
+            <div className="flex justify-between text-xs">
+              <span className="text-zinc-400">Talla:</span>
+              <span className="text-white font-medium">{data.shirtSize || 'N/A'}</span>
+            </div>
           </div>
         </div>
 

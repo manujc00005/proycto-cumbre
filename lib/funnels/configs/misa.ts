@@ -1,19 +1,37 @@
 // ========================================
 // CONFIGURACIÓN FUNNEL PARA MISA 2026
+// ✅ Refactorizado con pricing y callbacks genéricos
 // ========================================
 
 import { EventFunnelConfig } from '../types';
 import { MISA_EVENT_v1 } from '@/lib/waivers/pliegos/misa.v1';
-
+import { createEventCallbacks } from '../callbacks';
 
 export const MISA_EVENT_ID = 'ba063181-9a20-466d-9400-246842b547a0';
 export const MISA_SLUG = 'misa';
 export const MISA_NAME = 'MISA - Ritual Furtivo';
 
+// ========================================
+// ✅ CONFIGURACIÓN PRINCIPAL (SOLO DATOS)
+// ========================================
 export const MISA_FUNNEL: EventFunnelConfig = {
   eventId: MISA_EVENT_ID,
   eventSlug: MISA_SLUG,
   eventName: MISA_NAME,
+
+  // ✅ NUEVO: Pricing unificado
+  pricing: {
+    amount: 2000, // 20€
+    currency: 'EUR',
+    description: 'MISA - Ritual Furtivo 2026',
+    
+    // ✅ Descuento para socios
+    memberDiscount: {
+      discountPercent: 20,
+      requiresActiveMembership: true,
+      description: 'Descuento para socios del club',
+    },
+  },
   
   // ========================================
   // PASO 1: FORMULARIO
@@ -89,16 +107,6 @@ export const MISA_FUNNEL: EventFunnelConfig = {
   },
   
   // ========================================
-  // PASO 3: PAGO
-  // ========================================
-  payment: {
-    amount: 2000, // 20€ en céntimos
-    currency: 'EUR',
-    description: 'MISA - Ritual Furtivo 2026',
-    checkoutUrl: '/api/events/checkout', // ← Ruta genérica
-  },
-  
-  // ========================================
   // RGPD
   // ========================================
   gdpr: {
@@ -106,48 +114,19 @@ export const MISA_FUNNEL: EventFunnelConfig = {
     whatsappRequired: true,
     whatsappContext: 'event',
   },
-  
-  // ========================================
-  // CALLBACKS
-  // ========================================
-  onFormDraft: (data) => {
-    console.log('📝 Borrador actualizado', Object.keys(data));
-  },
-  
-  onWaiverAccept: async (payload) => {
-    const response = await fetch('/api/events/waiver-acceptance', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...payload,
-        eventId: 'ba063181-9a20-466d-9400-246842b547a0', // UUID del evento
-      }),
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Error al guardar aceptación');
-    }
-    
-    const result = await response.json();
-    return { acceptanceId: result.acceptanceId };
-  },
-  
-  onPaymentStart: async (data) => {
-    const response = await fetch('/api/events/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...data,
-        eventId: 'ba063181-9a20-466d-9400-246842b547a0', // UUID del evento
-      }),
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Error al procesar el pago');
-    }
-    
-    return response.json();
+};
+
+// ========================================
+// ✅ EXPORTAR CON CALLBACKS GENÉRICOS
+// ========================================
+export const MISA_FUNNEL_WITH_CALLBACKS = {
+  ...MISA_FUNNEL,
+  ...createEventCallbacks(MISA_EVENT_ID, MISA_SLUG),
+  // Backward compatibility para "payment"
+  payment: {
+    amount: MISA_FUNNEL.pricing.amount,
+    currency: MISA_FUNNEL.pricing.currency,
+    description: MISA_FUNNEL.pricing.description,
+    checkoutUrl: '/api/events/checkout',
   },
 };
