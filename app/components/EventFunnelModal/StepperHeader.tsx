@@ -8,7 +8,7 @@
 
 import { StepId } from '@/lib/funnels/types';
 
-interface StepperHeaderProps {
+interface StepperHeaderProps {    
   eventName: string;
   steps: StepId[];
   currentStep: StepId;
