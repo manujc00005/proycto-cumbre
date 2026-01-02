@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Carousel, { CarouselItem } from './components/Carrusel';
 import Lightbox from './components/Lightbox';
 import EventsSection from './components/Events/EventsSection';
@@ -9,6 +9,7 @@ import HeaderSection from './components/Sections/HeaderSection';
 import MerchantSection from './components/Sections/MerchantSection';
 import Link from 'next/link';
 import ContactForm from './components/ContactForm';
+import MisaPromoModal from './misa/MisaPromoModal';
 
 
 export default function Home() {
@@ -23,6 +24,29 @@ export default function Home() {
   const [productLightboxOpen, setProductLightboxOpen] = useState(false);
   const [currentProductImages, setCurrentProductImages] = useState<string[]>([]);
   const [currentProductImageIndex, setCurrentProductImageIndex] = useState(0);
+
+   // Estados para el modal de MISA
+  const [showMisaModal, setShowMisaModal] = useState(false);
+
+  // ========================================
+  // ✅ MODAL AUTOMÁTICO AL CARGAR LA PÁGINA
+  // ========================================
+  useEffect(() => {
+    // Verificar si ya se mostró hoy usando localStorage
+    const modalShownToday = localStorage.getItem('misaModalShown');
+    const today = new Date().toDateString();
+    
+    if (modalShownToday !== today) {
+      // Mostrar modal después de 1 segundo
+      const timer = setTimeout(() => {
+        setShowMisaModal(true);
+        // Guardar que se mostró hoy
+        localStorage.setItem('misaModalShown', today);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   // Define los datos del carrusel del equipo
   const teamMembers: CarouselItem[] = [
@@ -165,6 +189,11 @@ export default function Home() {
   return (
     <div className="bg-zinc-950 text-white min-h-screen">
 
+      <MisaPromoModal 
+        isOpen={showMisaModal}
+        onClose={() => setShowMisaModal(false)}
+      />
+
       {/* Header / Navigation */}
       <HeaderSection />
 
@@ -268,9 +297,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-
-
 
       {/* Section 2 - Quiénes somos */}
       <section id="quienes-somos" className="py-16 md:py-24 bg-zinc-900/50">
