@@ -375,7 +375,7 @@ function NextStepsEvent({ eventSlug }: { eventSlug?: string }) {
         </StepItem>
         
         <StepItem number={3} icon="3" color="blue">
-          Recibirás el <strong>track GPS</strong> y punto de encuentro 48h antes del evento
+          Recibirás el <strong>track GPS</strong> y punto de encuentro 2h antes del evento
         </StepItem>
         
         {eventSlug && (
