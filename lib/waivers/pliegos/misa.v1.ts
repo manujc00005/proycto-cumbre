@@ -14,7 +14,7 @@ export const MISA_META: EventMeta = {
   eventName: 'MISA - Ritual Furtivo',
   eventDateISO: '2026-01-23',
   eventLocation: 'Málaga, Andalucía',
-  modalityName: '11K Trail Nocturno',
+  modalityName: '10K Trail Nocturno',
   rulesUrl: 'https://proyecto-cumbre.es/misa-reglamento.pdf',
 };
 

@@ -27,16 +27,16 @@ export const EVENT_EMAIL_CONFIGS: Record<string, EventConfigBuilder> = {
   // ========================================
   'misa': (data) => ({
     eventName: 'MISA™',
-    eventDate: new Date('2026-01-23T19:00:00'),
-    eventLocation: 'Málaga, España',
+    eventDate: new Date('2026-01-23T19:30:00'),
+    eventLocation: 'Málaga, Frontera Alhaurín!',
     heroColor: '#f97316',
     
     eventDetails: {
       meetingPoint: 'Se revelará 2h antes por WhatsApp',
-      duration: '3-4 horas (trail nocturno)',
-      difficulty: 'Media-Alta (trail running)',
+      duration: '1-3 horas (trail nocturno)',
+      difficulty: 'Media (trail running)',
       requiredEquipment: 'Frontal, ropa deportiva, hidratación',
-      startTime: '19:00',
+      startTime: '19:30',
       endTime: '23:00',
       description: 'Trail running nocturno secreto MISA™. Coordenadas reveladas 2h antes.'
     },

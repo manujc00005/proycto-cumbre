@@ -95,9 +95,7 @@ export default function MisaPage() {
           transition={{ duration: 1.2 }}
         >
           
-          {/* ========================================
-              LOGO - MÁS GRANDE Y LLAMATIVO
-              ======================================== */}
+          {/* LOGO */}
           <motion.div
             className={`
               ${isMobile 
@@ -120,7 +118,7 @@ export default function MisaPage() {
             />
           </motion.div>
 
-          {/* Fecha */}
+          {/* Fecha y hora */}
           <motion.p 
             className={`
               font-bold tracking-[0.2em] uppercase text-white/90
@@ -130,7 +128,7 @@ export default function MisaPage() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
-            23 ENERO 2026 · 19:00
+            23 ENERO 2026 · 19:30
           </motion.p>
 
           {/* Countdown */}
@@ -189,9 +187,7 @@ export default function MisaPage() {
             </div>
           </motion.div>
 
-          {/* ========================================
-              INFO BOX - CORREGIDO PARA VERSE
-              ======================================== */}
+          {/* Info Box */}
           <motion.div
             className={`
               mx-auto bg-zinc-900/70 backdrop-blur-md border border-white/20 rounded-xl
@@ -204,24 +200,25 @@ export default function MisaPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9, duration: 0.6 }}
           >
-           <ul className="space-y-3 text-left">
-                {[
-                  { icon: '👕', text: 'Camiseta exclusiva corredores' },
-                  { icon: '🖤', text: 'Dress code negro'},
-                  { icon: '📍', text: 'Coordenadas 2h antes' },
-                  { icon: '📲', text: 'Track 1h antes' },
-                  { icon: '🔒', text: 'Plazas limitadas' },
-                  { icon: '🍻', text: 'Post clandestino' },
-                ].map((item, i) => (
-                  <li 
-                    key={i}
-                    className="flex items-start gap-3 text-white/90 text-sm"
-                  >
-                    <span className="text-xl w-6 flex-shrink-0">{item.icon}</span>
-                    <span className="tracking-wide">{item.text}</span>
-                  </li>
-                ))}
-              </ul>
+            <ul className="space-y-3 text-left">
+              {[
+                { icon: '🏃', text: 'Distancia: 10 kilómetros' }, // ✅ Primera línea
+                { icon: '👕', text: 'Camiseta exclusiva corredores' },
+                { icon: '🖤', text: 'Dress code negro'},
+                { icon: '📍', text: 'Coordenadas 2h antes' },
+                { icon: '📲', text: 'Track 1h antes' },
+                { icon: '🔒', text: 'Plazas limitadas' },
+                { icon: '🍻', text: 'Post clandestino' },
+              ].map((item, i) => (
+                <li 
+                  key={i}
+                  className="flex items-start gap-3 text-white/90 text-sm"
+                >
+                  <span className="text-xl w-6 flex-shrink-0">{item.icon}</span>
+                  <span className="tracking-wide">{item.text}</span>
+                </li>
+              ))}
+            </ul>
           </motion.div>
 
           {/* Precio + CTA */}
