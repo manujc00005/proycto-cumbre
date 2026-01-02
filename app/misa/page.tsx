@@ -118,104 +118,90 @@ export default function MisaPage() {
             />
           </motion.div>
 
-          {/* Fecha y hora */}
-          <motion.p 
-            className={`
-              font-bold tracking-[0.2em] uppercase text-white/90
-              ${isMobile ? 'text-sm mb-8' : 'text-2xl mb-20'}
-            `}
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.5 }}
+             {/* ========================================
+              INFO ESENCIAL - SOLO 3 DATOS
+              ======================================== */}
+          <motion.div
+            className={`inline-flex items-center gap-2.5 bg-zinc-900/40 backdrop-blur-sm border border-white/10 rounded-full mb-8 ${isMobile ? 'px-6 py-2.5 text-sm' : 'px-8 py-3 text-base'}`}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.8, type: 'spring', stiffness: 150 }}
           >
-            23 ENERO 2026 · 19:30
-          </motion.p>
-
-          {/* Countdown */}
-          <motion.div 
-            className={`flex ${isMobile ? 'gap-2 mb-6' : 'gap-6 mb-16'}`}
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.7 }}
-          >
-            <div className="text-center flex-1">
-              <div className={`font-black text-orange-500 leading-none ${isMobile ? 'text-4xl mb-1' : 'text-5xl md:text-6xl mb-1'}`}>
-                {String(timeLeft.days).padStart(2, '0')}
-              </div>
-              <div className={`text-white/40 tracking-wider uppercase ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
-                DÍAS
-              </div>
-            </div>
-            
-            <div className={`font-black text-white/20 self-start ${isMobile ? 'text-3xl pt-1' : 'text-5xl md:text-6xl'}`}>:</div>
-            
-            <div className="text-center flex-1">
-              <div className={`font-black text-orange-500 leading-none ${isMobile ? 'text-4xl mb-1' : 'text-5xl md:text-6xl mb-1'}`}>
-                {String(timeLeft.hours).padStart(2, '0')}
-              </div>
-              <div className={`text-white/40 tracking-wider uppercase ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
-                HRS
-              </div>
-            </div>
-            
-            <div className={`font-black text-white/20 self-start ${isMobile ? 'text-3xl pt-1' : 'text-5xl md:text-6xl'}`}>:</div>
-            
-            <div className="text-center flex-1">
-              <div className={`font-black text-orange-500 leading-none ${isMobile ? 'text-4xl mb-1' : 'text-5xl md:text-6xl mb-1'}`}>
-                {String(timeLeft.minutes).padStart(2, '0')}
-              </div>
-              <div className={`text-white/40 tracking-wider uppercase ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
-                MIN
-              </div>
-            </div>
-
-            <div className={`font-black text-white/20 self-start ${isMobile ? 'text-3xl pt-1' : 'text-5xl md:text-6xl'}`}>:</div>
-
-            <div className="text-center flex-1">
-              <motion.div 
-                key={timeLeft.seconds}
-                initial={{ scale: 1.1, opacity: 0.7 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.3 }}
-                className={`font-black text-orange-500 leading-none ${isMobile ? 'text-4xl mb-1' : 'text-5xl md:text-6xl mb-1'}`}
-              >
-                {String(timeLeft.seconds).padStart(2, '0')}
-              </motion.div>
-              <div className={`text-white/40 tracking-wider uppercase ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
-                SEG
-              </div>
-            </div>
+            <span className="text-orange-500 font-bold">10K</span>
+            <span className="text-white/20">·</span>
+            <span className="text-white/70">23 ENERO</span>
+            <span className="text-white/20">·</span>
+            <span className="text-white/70">19:30</span>
           </motion.div>
 
-          {/* Info Box */}
+          {/* ========================================
+              COUNTDOWN COMPACTO
+              ======================================== */}
           <motion.div
-            className={`
-              mx-auto bg-zinc-900/70 backdrop-blur-md border border-white/20 rounded-xl
-              ${isMobile 
-                ? 'max-w-[90%] p-4 mb-6' 
-                : 'max-w-md p-8 mb-10'
-              }
-            `}
+            className={`flex items-center gap-2 mb-14 font-mono ${isMobile ? 'text-xl' : 'text-2xl'}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1 }}
+          >
+            <span className="text-orange-500 font-black">{String(timeLeft.days).padStart(2, '0')}</span>
+            <span className="text-white/30 text-sm">d</span>
+            <span className="text-white/20 mx-1">·</span>
+            <span className="text-orange-500 font-black">{String(timeLeft.hours).padStart(2, '0')}</span>
+            <span className="text-white/30 text-sm">h</span>
+            <span className="text-white/20 mx-1">·</span>
+            <motion.span 
+              key={timeLeft.minutes}
+              initial={{ scale: 1.1, opacity: 0.7 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="text-orange-500 font-black"
+            >
+              {String(timeLeft.minutes).padStart(2, '0')}
+            </motion.span>
+            <span className="text-white/30 text-sm">m</span>
+          </motion.div>
+
+           {/* ========================================
+              NORMAS DEL RITUAL (Minimalista)
+              ======================================== */}
+          <motion.div
+            className={`bg-zinc-900/30 backdrop-blur-sm border border-white/10 rounded-xl mb-12 ${isMobile ? 'max-w-[85%] p-5' : 'max-w-sm p-7'}`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9, duration: 0.6 }}
+            transition={{ delay: 1.2 }}
           >
-            <ul className="space-y-3 text-left">
+            {/* Sección 1: Normas del ritual */}
+            <h3 className="text-white/90 font-semibold mb-4 text-sm uppercase tracking-wide">
+              Normas del ritual
+            </h3>
+            <ul className="space-y-2.5 text-left mb-8">
               {[
-                { icon: '🏃', text: 'Distancia: 10 kilómetros' }, // ✅ Primera línea
-                { icon: '👕', text: 'Camiseta exclusiva corredores' },
-                { icon: '🖤', text: 'Dress code negro'},
-                { icon: '📍', text: 'Coordenadas 2h antes' },
-                { icon: '📲', text: 'Track 1h antes' },
-                { icon: '🔒', text: 'Plazas limitadas' },
-                { icon: '🍻', text: 'Post clandestino' },
-              ].map((item, i) => (
-                <li 
-                  key={i}
-                  className="flex items-start gap-3 text-white/90 text-sm"
-                >
-                  <span className="text-xl w-6 flex-shrink-0">{item.icon}</span>
-                  <span className="tracking-wide">{item.text}</span>
+                'Dress code negro',
+                'Coordenadas 2h antes',
+                'Track 1h antes',
+                'Plazas muy limitadas',
+              ].map((rule, i) => (
+                <li key={i} className="flex items-start gap-2.5 text-white/60 text-sm">
+                  <span className="text-orange-500/50 mt-0.5">–</span>
+                  <span>{rule}</span>
+                </li>
+              ))}
+            </ul>
+
+            {/* Separador visual */}
+            <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-8"></div>
+
+            {/* Sección 2: Después del ritual */}
+            <h3 className="text-white/90 font-semibold mb-4 text-sm uppercase tracking-wide">
+              Después del ritual
+            </h3>
+            <ul className="space-y-2.5 text-left">
+              {[
+                'Algo que no se vende',
+                'Algo que no se repite'
+              ].map((rule, i) => (
+                <li key={i} className="flex items-start gap-2.5 text-white/60 text-sm">
+                  <span className="text-orange-500/50 mt-0.5">–</span>
+                  <span>{rule}</span>
                 </li>
               ))}
             </ul>
@@ -228,35 +214,35 @@ export default function MisaPage() {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 1.1, duration: 0.5 }}
           >
-            {/* Precio */}
-            <div className={`
-              inline-flex items-baseline gap-2 bg-gradient-to-r from-orange-600/30 to-orange-700/30 
-              border-2 border-orange-600/60 rounded-xl backdrop-blur-sm
-              ${isMobile ? 'px-6 py-3' : 'px-8 py-4'}
-            `}>
-              <span className={`font-black text-orange-500 ${isMobile ? 'text-5xl' : 'text-5xl'}`}>20€</span>
-              <span className={`text-orange-300/80 tracking-wide ${isMobile ? 'text-sm' : 'text-sm'}`}>/ persona</span>
-            </div>
+           
 
             {/* CTA Button */}
-            <button
-              onClick={() => setShowFunnelModal(true)}
-              className={`
-                group relative bg-orange-500 hover:bg-orange-600 text-white font-bold 
-                tracking-wider uppercase rounded-xl overflow-hidden transition-all 
-                hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/50
-                ${isMobile ? 'px-10 py-4 text-base' : 'px-14 py-5 text-lg'}
-              `}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-              
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                RESERVA TU PLAZA
-                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </span>
-            </button>
+             <button
+                onClick={() => setShowFunnelModal(true)}
+                className={`
+                  group relative bg-white hover:bg-white/90 text-black font-bold 
+                  tracking-wider uppercase rounded-lg overflow-hidden transition-all 
+                  hover:scale-105 hover:shadow-2xl hover:shadow-white/20
+                  ${isMobile ? 'px-12 py-4 text-sm' : 'px-16 py-5 text-base'}
+                `}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  Acceder al ritual
+                  <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </span>
+              </button>
+            {/* Precio discreto */}
+            <div className="flex items-center gap-2 text-xs text-white/40">
+              <span>Acceso al ritual</span>
+              <span className="text-white/20">·</span>
+              <span className="text-orange-500/70 font-semibold">20€</span>
+              <span className="text-white/20">·</span>
+              <span>Solo corredores</span>
+            </div>
+
           </motion.div>
 
           {/* Footer */}
@@ -275,14 +261,16 @@ export default function MisaPage() {
             </p>
 
             {/* Urgencia badge */}
-            <div className={`
-              inline-flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 rounded-full
-              ${isMobile ? 'px-5 py-2' : 'px-6 py-3'}
-            `}>
-              <span className={`font-bold tracking-widest uppercase text-orange-400 ${isMobile ? 'text-xs' : 'text-base'}`}>
+            {timeLeft.days < 30 && (
+              <motion.p
+                className="text-orange-500/40 text-xs font-mono"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.8 }}
+              >
                 🔥 Plazas limitadas
-              </span>
-            </div>
+              </motion.p>
+            )}
           </motion.div>
 
         </motion.div>
