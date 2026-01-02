@@ -1,7 +1,36 @@
+// EventsData.ts - Con CTA genérico
+
 import { Event } from '../types';
 
 export const eventsData: { events: Event[] } = {
   events: [
+    // ========================================
+    // ✅ EVENTO CON CTA PERSONALIZADO - MISA
+    // ========================================
+    {
+      id: 7,
+      date: '23 Enero 2026',
+      title: 'MISA™️',
+      description: 'Secret track - Secret location - 10km',
+      icon: 'mountain',
+      iconColor: 'orange',
+      tags: [
+        { label: 'noche', color: 'orange' },
+        { label: 'trail', color: 'yellow' }
+      ],
+      // ✅ NUEVO: CTA con feature flag
+      cta: {
+        text: 'ACCEDER AL RITUAL',
+        link: '/misa',
+        style: 'ritual',
+        enabled: true,  // ← Cambiar a false para deshabilitar
+        disabledText: 'INSCRIPCIONES CERRADAS'
+      }
+    },
+
+    // ========================================
+    // OTROS EVENTOS (sin CTA)
+    // ========================================
     {
       id: 1,
       date: '27 Noviembre 2025',
@@ -66,6 +95,42 @@ export const eventsData: { events: Event[] } = {
   ]
 };
 
+// ========================================
+// EJEMPLOS DE OTROS EVENTOS CON CTA
+// ========================================
 
+/* 
+// Evento con CTA estándar
+{
+  id: 8,
+  date: '15 Febrero 2026',
+  title: 'ULTRA TRAIL 50K',
+  description: 'Desafío extremo de montaña',
+  icon: 'mountain',
+  iconColor: 'orange',
+  cta: {
+    text: 'INSCRIBIRSE',
+    link: '/eventos/ultra-trail-50k',
+    style: 'primary',
+    enabled: true,
+    disabledText: 'PLAZAS AGOTADAS'
+  }
+}
 
-
+// Evento exclusivo con CTA especial
+{
+  id: 9,
+  date: '01 Marzo 2026',
+  title: 'BLACK OPS NIGHT RUN',
+  description: 'Solo para miembros VIP',
+  icon: 'runner',
+  iconColor: 'orange',
+  cta: {
+    text: 'SOLICITAR ACCESO',
+    link: '/eventos/black-ops',
+    style: 'exclusive',
+    enabled: false,  // Cerrado
+    disabledText: 'EVENTO PRIVADO'
+  }
+}
+*/

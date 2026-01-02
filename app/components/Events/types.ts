@@ -1,19 +1,8 @@
-// app/components/types.ts
+// types.ts actualizados
 
-import { EventColor, IconType, EventStatus } from '@/lib/events-constants';
-
-export interface EventTag {
-  label: string;
-  color: EventColor;
-}
-
-export interface CalendarEvent {
-  title: string;
-  startDate: string;
-  endDate: string;
-  description: string;
-  location: string;
-}
+export type EventStatus = 'upcoming' | 'cancelled' | 'completed';
+export type EventColor = 'orange' | 'red' | 'blue' | 'green' | 'yellow' | 'purple' | 'cyan';
+export type IconType = 'runner' | 'mountain' | 'calendar' | 'climbing' | 'bike' | 'volleyball' | 'beer' | 'beach' | 'weights' | 'hyrox' | 'swimming' | 'hiking' | 'yoga' | 'soccer' | 'paddle' | 'crossfit';
 
 export interface EventTag {
   label: string;
@@ -29,20 +18,16 @@ export interface EventCTA {
   disabledText?: string;  // Texto cuando está deshabilitado
 }
 
-
 export interface Event {
   id: number;
   date: string;
   title: string;
   description?: string;
-  location?: string;
+  cancelled?: boolean;
+  cancelReason?: string;
   icon?: IconType;
   iconColor?: EventColor;
   tags?: EventTag[];
-  cancelled?: boolean;
-  cancelReason?: string;
-  calendar?: CalendarEvent;
+  // ✅ NUEVO: CTA opcional
   cta?: EventCTA;
 }
-
-
