@@ -44,5 +44,3 @@ export interface Event {
   calendar?: CalendarEvent;
   cta?: EventCTA;
 }
-
-

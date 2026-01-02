@@ -2,11 +2,12 @@
 
 import { AddToCalendar } from './AddToCalendar';
 import EventIcon from './EventIcon';
-import { Event, EventStatus } from '../types';
+import { Event } from '../types';
 import { getEventStatus, shouldShowEventDetails } from './Eventutils';
 import EventTag from './EventTag';
 import { generateCalendarData } from '@/lib/calendar-utils';
 import Link from 'next/link';
+import { EventStatus } from '@/lib/events-constants';
 
 interface EventCardProps {
   event: Event;

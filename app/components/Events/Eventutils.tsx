@@ -1,4 +1,5 @@
-import { Event, EventStatus } from '../types';
+import { EventStatus } from '@/lib/events-constants';
+import { Event } from '../types';
 
 const monthMap: { [key: string]: number } = {
   'Enero': 0,
