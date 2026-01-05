@@ -10,7 +10,7 @@ import styles from './page.module.css';
 import React from 'react';
 import GDPRConsentEvent from '../components/gdpr/gdpr-consent-event';
 
-const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+const SHIRT_SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
 const PANTS_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 export default function MembershipPage() {

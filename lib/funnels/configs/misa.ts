@@ -88,7 +88,6 @@ export const MISA_FUNNEL: EventFunnelConfig = {
       label: 'Talla de camiseta',
       required: true,
       options: [
-        { value: 'XS', label: 'XS' },
         { value: 'S', label: 'S' },
         { value: 'M', label: 'M' },
         { value: 'L', label: 'L' },
