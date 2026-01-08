@@ -1,8 +1,6 @@
 // ========================================
-// EMAIL SERVICE - CON REGISTRO DE EVENTOS
-// ✅ Un solo método para todos los eventos
-// ✅ Configuración automática por slug
-// lib/email/email-service.ts
+// EMAIL SERVICE - CON EMAILS DE PEDIDOS ACTUALIZADOS
+// lib/email/email-service.ts (ACTUALIZACIÓN)
 // ========================================
 
 import { Resend } from 'resend';
@@ -68,7 +66,7 @@ export default class EmailService {
   }
 
   // ========================================
-  // MEMBERSHIP EMAILS
+  // MEMBERSHIP EMAILS (mantener sin cambios)
   // ========================================
 
   static async sendWelcomeWithPaymentStatus(data: MembershipEmailData) {
@@ -95,31 +93,21 @@ export default class EmailService {
   }
 
   // ========================================
-  // EVENT EMAILS - MÉTODO ÚNICO
+  // EVENT EMAILS (mantener sin cambios)
   // ========================================
 
-  /**
-   * Enviar email de confirmación de evento
-   * ✅ Automáticamente usa la config correcta según el slug
-   * 
-   * @param eventSlug - Slug del evento ('misa', 'trail-nocturno', etc.)
-   * @param data - Datos del participante
-   */
   static async sendEventConfirmation(
     eventSlug: string,
     data: BaseEventEmailData
   ) {
-    // ✅ Obtener config automáticamente por slug
     const config = getEventEmailConfig(eventSlug, {
       shirtSize: data.shirtSize,
       eventDate: data.eventDate,
       eventName: data.eventName,
     });
 
-    // ✅ Generar HTML
     const html = buildEventEmail(data, config);
 
-    // ✅ Enviar
     return this.send({
       to: data.email,
       subject: `✅ Plaza confirmada - ${config.eventName}`,
@@ -128,9 +116,13 @@ export default class EmailService {
   }
 
   // ========================================
-  // ORDER/SHOP EMAILS
+  // 🆕 ORDER/SHOP EMAILS - ACTUALIZADOS
   // ========================================
 
+  /**
+   * Email inicial de confirmación de pedido
+   * Se envía cuando se completa el checkout
+   */
   static async sendOrderConfirmation(data: OrderEmailData) {
     return this.send({
       to: data.email,
@@ -139,6 +131,30 @@ export default class EmailService {
     });
   }
 
+  /**
+   * 🆕 Email cuando el pedido pasa a procesamiento
+   * Estado: paid → processing
+   */
+  static async sendOrderProcessing(data: {
+    email: string;
+    name: string;
+    orderNumber: string;
+    items: Array<{
+      name: string;
+      quantity: number;
+    }>;
+  }) {
+    return this.send({
+      to: data.email,
+      subject: `⚙️ Preparando tu pedido #${data.orderNumber}`,
+      html: EmailTemplates.orderProcessing(data),
+    });
+  }
+
+  /**
+   * Email cuando el pedido ha sido enviado
+   * Estado: processing → shipped
+   */
   static async sendOrderShipped(data: {
     email: string;
     name: string;
@@ -149,13 +165,47 @@ export default class EmailService {
   }) {
     return this.send({
       to: data.email,
-      subject: `📦 Tu pedido #${data.orderNumber} está en camino`,
+      subject: `🚚 Tu pedido #${data.orderNumber} está en camino`,
       html: EmailTemplates.orderShipped(data),
     });
   }
 
+  /**
+   * 🆕 Email cuando el pedido ha sido entregado
+   * Estado: shipped → delivered
+   */
+  static async sendOrderDelivered(data: {
+    email: string;
+    name: string;
+    orderNumber: string;
+  }) {
+    return this.send({
+      to: data.email,
+      subject: `✅ ¡Tu pedido #${data.orderNumber} ha llegado!`,
+      html: EmailTemplates.orderDelivered(data),
+    });
+  }
+
+  /**
+   * 🆕 Email cuando el pedido ha sido cancelado
+   * Estado: cualquier → cancelled
+   */
+  static async sendOrderCancelled(data: {
+    email: string;
+    name: string;
+    orderNumber: string;
+    reason?: string;
+    refundInfo?: string;
+  }) {
+    return this.send({
+      to: data.email,
+      subject: `❌ Pedido #${data.orderNumber} cancelado`,
+      html: EmailTemplates.orderCancelled(data),
+    });
+  }
+
   // ========================================
-  // CONTACT FORM
+  // CONTACT FORM (mantener sin cambios)
   // ========================================
 
   static async sendContactForm(data: ContactFormData) {

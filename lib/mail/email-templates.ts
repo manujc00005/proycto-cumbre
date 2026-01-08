@@ -1,5 +1,6 @@
 // ========================================
-// EMAIL TEMPLATES - LEGACY (Memberships & Orders)
+// EMAIL TEMPLATES - MINIMAL PROFESSIONAL
+// Maquetación correcta con TABLES (email-safe)
 // lib/email/email-templates.ts
 // ========================================
 
@@ -14,7 +15,7 @@ import {
 
 export default class EmailTemplates {
   // ========================================
-  // MEMBERSHIP TEMPLATES
+  // MEMBERSHIP TEMPLATES (sin cambios)
   // ========================================
   
   static membershipSuccess(data: MembershipEmailData): string {
@@ -110,9 +111,13 @@ export default class EmailTemplates {
   }
 
   // ========================================
-  // ORDER/SHOP TEMPLATES
+  // 🆕 ORDER/SHOP TEMPLATES - MINIMAL PROFESSIONAL
+  // Maquetación correcta con TABLES
   // ========================================
 
+  /**
+   * Email de confirmación inicial (sin cambios)
+   */
   static orderConfirmation(data: OrderEmailData): string {
     return new EmailTemplateBuilder().build(`
       <div class="success-box">
@@ -182,6 +187,127 @@ export default class EmailTemplates {
     `);
   }
 
+  /**
+   * 🆕 Email cuando el pedido está siendo procesado
+   * MAQUETACIÓN CORRECTA CON TABLES
+   */
+  static orderProcessing(data: {
+    email: string;
+    name: string;
+    orderNumber: string;
+    items: Array<{
+      name: string;
+      quantity: number;
+    }>;
+  }): string {
+    return new EmailTemplateBuilder().build(`
+      <!-- HEADER MINIMALISTA CON TABLE -->
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; margin-bottom: 32px;">
+        <tr>
+          <td style="padding: 32px; text-align: center;">
+            <!-- Emoji en círculo -->
+            <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 16px auto;">
+              <tr>
+                <td style="width: 48px; height: 48px; background: #27272a; border-radius: 50%; text-align: center; vertical-align: middle;">
+                  <span style="font-size: 20px; line-height: 48px;">⚙️</span>
+                </td>
+              </tr>
+            </table>
+            <!-- Título -->
+            <h2 style="color: #fafafa; font-size: 20px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.5px;">Preparando tu pedido</h2>
+            <p style="color: #71717a; font-size: 14px; margin: 0; font-family: 'Courier New', monospace;">Pedido #${data.orderNumber}</p>
+          </td>
+        </tr>
+      </table>
+
+      <p style="color: #fafafa; font-size: 16px; margin-bottom: 8px;">
+        Hola <strong>${data.name}</strong>,
+      </p>
+
+      <p style="color: #a1a1aa; font-size: 15px; line-height: 1.6; margin-bottom: 32px;">
+        Tu pago ha sido confirmado y ya estamos preparando tu pedido para el envío.
+      </p>
+
+      <!-- PRODUCTOS CON TABLE -->
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; margin-bottom: 32px;">
+        <tr>
+          <td style="padding: 24px;">
+            <h3 style="color: #e4e4e7; font-size: 14px; font-weight: 600; margin: 0 0 20px 0; text-transform: uppercase; letter-spacing: 0.5px;">Productos en preparación</h3>
+            ${data.items.map((item, index) => `
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: ${index < data.items.length - 1 ? '12px' : '0'}; ${index < data.items.length - 1 ? 'border-bottom: 1px solid #27272a; padding-bottom: 12px;' : ''}">
+                <tr>
+                  <td style="color: #a1a1aa; font-size: 14px; padding: 0;">${item.quantity}× ${item.name}</td>
+                  <td style="color: #52525b; font-size: 18px; text-align: right; padding: 0;">✓</td>
+                </tr>
+              </table>
+            `).join('')}
+          </td>
+        </tr>
+      </table>
+
+      <!-- TIMELINE CON TABLE -->
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; margin-bottom: 32px;">
+        <tr>
+          <td style="padding: 24px;">
+            <h3 style="color: #e4e4e7; font-size: 14px; font-weight: 600; margin: 0 0 20px 0; text-transform: uppercase; letter-spacing: 0.5px;">Próximos pasos</h3>
+            
+            <!-- Step 1 -->
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 20px;">
+              <tr>
+                <td style="width: 32px; padding-right: 16px; vertical-align: top;">
+                  <div style="width: 20px; height: 20px; background: #27272a; border: 2px solid #52525b; border-radius: 50%;"></div>
+                </td>
+                <td style="vertical-align: top;">
+                  <div style="color: #e4e4e7; font-size: 13px; font-weight: 600; margin-bottom: 4px;">Procesamiento</div>
+                  <div style="color: #a1a1aa; font-size: 13px;">24-48 horas</div>
+                </td>
+              </tr>
+            </table>
+            
+            <!-- Connector 1 -->
+            <div style="width: 2px; height: 16px; background: #27272a; margin-left: 10px; margin-bottom: 4px;"></div>
+            
+            <!-- Step 2 -->
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 20px;">
+              <tr>
+                <td style="width: 32px; padding-right: 16px; vertical-align: top;">
+                  <div style="width: 20px; height: 20px; background: #18181b; border: 2px solid #27272a; border-radius: 50%;"></div>
+                </td>
+                <td style="vertical-align: top;">
+                  <div style="color: #a1a1aa; font-size: 13px; font-weight: 600; margin-bottom: 4px;">Envío con tracking</div>
+                  <div style="color: #71717a; font-size: 13px;">Recibirás el número de seguimiento</div>
+                </td>
+              </tr>
+            </table>
+            
+            <!-- Connector 2 -->
+            <div style="width: 2px; height: 16px; background: #27272a; margin-left: 10px; margin-bottom: 4px;"></div>
+            
+            <!-- Step 3 -->
+            <table cellpadding="0" cellspacing="0" border="0" width="100%">
+              <tr>
+                <td style="width: 32px; padding-right: 16px; vertical-align: top;">
+                  <div style="width: 20px; height: 20px; background: #18181b; border: 2px solid #27272a; border-radius: 50%;"></div>
+                </td>
+                <td style="vertical-align: top;">
+                  <div style="color: #a1a1aa; font-size: 13px; font-weight: 600; margin-bottom: 4px;">Entrega</div>
+                  <div style="color: #71717a; font-size: 13px;">3-5 días laborables</div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+      <p style="margin-top: 40px; color: #71717a; font-size: 14px;">Gracias por tu paciencia,</p>
+      <p style="color: #f97316; font-weight: 600; font-size: 14px; margin-top: 4px;">Equipo Proyecto Cumbre</p>
+    `);
+  }
+
+  /**
+   * 🆕 Email cuando el pedido ha sido enviado
+   * MAQUETACIÓN CORRECTA CON TABLES
+   */
   static orderShipped(data: {
     email: string;
     name: string;
@@ -191,47 +317,250 @@ export default class EmailTemplates {
     carrier: string;
   }): string {
     return new EmailTemplateBuilder().build(`
-      <div class="success-box">
-        <div class="success-icon">📦</div>
-        <div class="success-title">¡TU PEDIDO ESTÁ EN CAMINO!</div>
-        <div class="success-subtitle">Pedido #${data.orderNumber}</div>
-      </div>
+      <!-- HEADER CON TABLE -->
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; margin-bottom: 32px;">
+        <tr>
+          <td style="padding: 32px; text-align: center;">
+            <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 16px auto;">
+              <tr>
+                <td style="width: 48px; height: 48px; background: #27272a; border-radius: 50%; text-align: center; vertical-align: middle;">
+                  <span style="font-size: 20px; line-height: 48px;">📦</span>
+                </td>
+              </tr>
+            </table>
+            <h2 style="color: #fafafa; font-size: 20px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.5px;">Pedido en camino</h2>
+            <p style="color: #71717a; font-size: 14px; margin: 0; font-family: 'Courier New', monospace;">Pedido #${data.orderNumber}</p>
+          </td>
+        </tr>
+      </table>
 
-      <p style="color: #fafafa; font-size: 18px; margin-bottom: 20px;">
+      <p style="color: #fafafa; font-size: 16px; margin-bottom: 8px;">
         Hola <strong>${data.name}</strong>,
       </p>
 
-      <p>Tu pedido ya ha sido enviado y está en camino. Puedes seguir su estado en tiempo real.</p>
+      <p style="color: #a1a1aa; font-size: 15px; line-height: 1.6; margin-bottom: 32px;">
+        Tu pedido ya ha salido de nuestro almacén y está en camino.
+      </p>
 
-      <div class="info-box">
-        <h3>🚚 Información de envío</h3>
-        <div class="info-row">
-          <span class="info-label">Transportista</span>
-          <span class="info-value">${data.carrier}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Número de seguimiento</span>
-          <span class="info-value">${data.trackingNumber}</span>
-        </div>
-      </div>
+      <!-- INFO ENVÍO CON TABLE -->
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; margin-bottom: 24px;">
+        <tr>
+          <td style="padding: 24px;">
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-bottom: 1px solid #27272a; padding-bottom: 12px; margin-bottom: 12px;">
+              <tr>
+                <td style="color: #71717a; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Transportista</td>
+                <td style="color: #e4e4e7; font-size: 14px; font-weight: 600; text-align: right;">${data.carrier}</td>
+              </tr>
+            </table>
+            <table cellpadding="0" cellspacing="0" border="0" width="100%">
+              <tr>
+                <td style="color: #71717a; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Nº seguimiento</td>
+                <td style="color: #e4e4e7; font-size: 14px; font-weight: 600; text-align: right; font-family: 'Courier New', monospace;">${data.trackingNumber}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
 
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="${data.trackingUrl}" class="cta-button">
-          Seguir mi pedido →
-        </a>
-      </div>
+      <!-- CTA BOTÓN -->
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 32px 0;">
+        <tr>
+          <td style="text-align: center;">
+            <a href="${data.trackingUrl}" style="display: inline-block; background: #fafafa; color: #09090b; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; letter-spacing: 0.3px;">
+              Seguir mi pedido →
+            </a>
+          </td>
+        </tr>
+      </table>
 
-      <div class="alert-box">
-        <p><strong>⏰ Tiempo estimado de entrega</strong></p>
-        <p>Tu pedido llegará en 3-5 días laborables. Recibirás una notificación cuando esté próximo a entregarse.</p>
-      </div>
+      <!-- TIEMPO ESTIMADO -->
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; margin-bottom: 32px;">
+        <tr>
+          <td style="padding: 20px; text-align: center;">
+            <p style="color: #71717a; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 8px 0;">Tiempo estimado</p>
+            <p style="color: #e4e4e7; font-size: 16px; font-weight: 600; margin: 0;">3-5 días laborables</p>
+          </td>
+        </tr>
+      </table>
 
-      <p style="margin-top: 40px; color: #f97316; font-weight: 600;">Equipo Proyecto Cumbre</p>
+      <!-- CONSEJOS -->
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #18181b; border-left: 2px solid #3f3f46; border-radius: 4px; margin-bottom: 32px;">
+        <tr>
+          <td style="padding: 16px 20px;">
+            <p style="color: #a1a1aa; font-size: 13px; line-height: 1.7; margin: 0 0 8px 0;">• Mantén tu teléfono a mano</p>
+            <p style="color: #a1a1aa; font-size: 13px; line-height: 1.7; margin: 0 0 8px 0;">• Asegúrate de que alguien pueda recibir el paquete</p>
+            <p style="color: #a1a1aa; font-size: 13px; line-height: 1.7; margin: 0;">• Revisa el paquete al recibirlo</p>
+          </td>
+        </tr>
+      </table>
+
+      <p style="margin-top: 40px; color: #71717a; font-size: 14px;">Gracias por tu compra,</p>
+      <p style="color: #f97316; font-weight: 600; font-size: 14px; margin-top: 4px;">Equipo Proyecto Cumbre</p>
+    `);
+  }
+
+  /**
+   * 🆕 Email cuando el pedido ha sido entregado
+   * MAQUETACIÓN CORRECTA CON TABLES
+   */
+  static orderDelivered(data: {
+    email: string;
+    name: string;
+    orderNumber: string;
+  }): string {
+    return new EmailTemplateBuilder().build(`
+      <!-- HEADER CON TABLE -->
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; margin-bottom: 32px;">
+        <tr>
+          <td style="padding: 32px; text-align: center;">
+            <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 16px auto;">
+              <tr>
+                <td style="width: 48px; height: 48px; background: #27272a; border-radius: 50%; text-align: center; vertical-align: middle;">
+                  <span style="font-size: 24px; line-height: 48px;">✓</span>
+                </td>
+              </tr>
+            </table>
+            <h2 style="color: #fafafa; font-size: 20px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.5px;">Pedido entregado</h2>
+            <p style="color: #71717a; font-size: 14px; margin: 0; font-family: 'Courier New', monospace;">Pedido #${data.orderNumber}</p>
+          </td>
+        </tr>
+      </table>
+
+      <p style="color: #fafafa; font-size: 16px; margin-bottom: 8px;">
+        Hola <strong>${data.name}</strong>,
+      </p>
+
+      <p style="color: #a1a1aa; font-size: 15px; line-height: 1.6; margin-bottom: 32px;">
+        Tu pedido ha sido entregado correctamente. Esperamos que disfrutes de tus productos.
+      </p>
+
+      <!-- TODO CORRECTO -->
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; margin-bottom: 24px;">
+        <tr>
+          <td style="padding: 24px;">
+            <h3 style="color: #e4e4e7; font-size: 14px; font-weight: 600; margin: 0 0 12px 0;">¿Todo correcto?</h3>
+            <p style="color: #a1a1aa; font-size: 13px; line-height: 1.7; margin: 0 0 20px 0;">
+              Si hay algún problema con tu pedido, contáctanos en las próximas 48 horas.
+            </p>
+            <table cellpadding="0" cellspacing="0" border="0" width="100%">
+              <tr>
+                <td style="text-align: center;">
+                  <a href="mailto:info@proyecto-cumbre.es" style="display: inline-block; background: #27272a; color: #fafafa; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 13px;">
+                    Contactar soporte
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+      <!-- FEEDBACK -->
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; margin-bottom: 32px;">
+        <tr>
+          <td style="padding: 24px;">
+            <h3 style="color: #e4e4e7; font-size: 14px; font-weight: 600; margin: 0 0 12px 0;">¿Te ha gustado tu experiencia?</h3>
+            <p style="color: #a1a1aa; font-size: 13px; line-height: 1.7; margin: 0;">
+              Tu opinión es muy importante para nosotros. Si estás satisfecho con tu compra, nos encantaría que compartieras tu experiencia.
+            </p>
+          </td>
+        </tr>
+      </table>
+
+      <p style="margin-top: 40px; color: #71717a; font-size: 14px;">Nos vemos en la montaña,</p>
+      <p style="color: #f97316; font-weight: 600; font-size: 14px; margin-top: 4px;">Equipo Proyecto Cumbre</p>
+    `);
+  }
+
+  /**
+   * 🆕 Email cuando el pedido ha sido cancelado
+   * MAQUETACIÓN CORRECTA CON TABLES
+   */
+  static orderCancelled(data: {
+    email: string;
+    name: string;
+    orderNumber: string;
+    reason?: string;
+    refundInfo?: string;
+  }): string {
+    return new EmailTemplateBuilder().build(`
+      <!-- HEADER CON TABLE -->
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #18181b; border: 1px solid #3f3f46; border-radius: 12px; margin-bottom: 32px;">
+        <tr>
+          <td style="padding: 32px; text-align: center;">
+            <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto 16px auto;">
+              <tr>
+                <td style="width: 48px; height: 48px; background: #27272a; border-radius: 50%; text-align: center; vertical-align: middle;">
+                  <span style="font-size: 24px; line-height: 48px; color: #fafafa;">×</span>
+                </td>
+              </tr>
+            </table>
+            <h2 style="color: #fafafa; font-size: 20px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.5px;">Pedido cancelado</h2>
+            <p style="color: #71717a; font-size: 14px; margin: 0; font-family: 'Courier New', monospace;">Pedido #${data.orderNumber}</p>
+          </td>
+        </tr>
+      </table>
+
+      <p style="color: #fafafa; font-size: 16px; margin-bottom: 8px;">
+        Hola <strong>${data.name}</strong>,
+      </p>
+
+      <p style="color: #a1a1aa; font-size: 15px; line-height: 1.6; margin-bottom: 32px;">
+        Te confirmamos que tu pedido <strong>#${data.orderNumber}</strong> ha sido cancelado.
+      </p>
+
+      ${data.reason ? `
+      <!-- MOTIVO -->
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; margin-bottom: 24px;">
+        <tr>
+          <td style="padding: 24px;">
+            <h3 style="color: #e4e4e7; font-size: 14px; font-weight: 600; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 0.5px;">Motivo</h3>
+            <p style="color: #a1a1aa; font-size: 14px; line-height: 1.7; margin: 0;">${data.reason}</p>
+          </td>
+        </tr>
+      </table>
+      ` : ''}
+
+      <!-- REEMBOLSO -->
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; margin-bottom: 24px;">
+        <tr>
+          <td style="padding: 24px;">
+            <h3 style="color: #e4e4e7; font-size: 14px; font-weight: 600; margin: 0 0 12px 0; text-transform: uppercase; letter-spacing: 0.5px;">Reembolso</h3>
+            <p style="color: #a1a1aa; font-size: 13px; line-height: 1.7; margin: 0;">
+              ${data.refundInfo || 'Si realizaste el pago, se procesará el reembolso automáticamente en los próximos 5-10 días laborables.'}
+            </p>
+          </td>
+        </tr>
+      </table>
+
+      <!-- AYUDA -->
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; margin-bottom: 32px;">
+        <tr>
+          <td style="padding: 24px;">
+            <h3 style="color: #e4e4e7; font-size: 14px; font-weight: 600; margin: 0 0 12px 0;">¿Necesitas ayuda?</h3>
+            <p style="color: #a1a1aa; font-size: 13px; line-height: 1.7; margin: 0 0 20px 0;">
+              Si tienes alguna pregunta sobre la cancelación o el reembolso, contáctanos.
+            </p>
+            <table cellpadding="0" cellspacing="0" border="0" width="100%">
+              <tr>
+                <td style="text-align: center;">
+                  <a href="mailto:info@proyecto-cumbre.es" style="display: inline-block; background: #27272a; color: #fafafa; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 13px;">
+                    Contactar soporte
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+      <p style="margin-top: 40px; color: #71717a; font-size: 14px;">Lamentamos las molestias,</p>
+      <p style="color: #f97316; font-weight: 600; font-size: 14px; margin-top: 4px;">Equipo Proyecto Cumbre</p>
     `);
   }
 
   // ========================================
-  // CONTACT FORM
+  // CONTACT FORM (sin cambios)
   // ========================================
   
   static contactForm(data: ContactFormData): string {

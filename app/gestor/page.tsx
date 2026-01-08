@@ -4,7 +4,7 @@
 // ========================================
 
 import GestorAuth from "./gestor-auth-component";
-import GestorPage from "./gestor-page-protected";
+import GestorPage from "./gestor-page";
 
 
 export const metadata = {

@@ -18,9 +18,20 @@ export async function POST(request: NextRequest) {
 
     logger.log('📝 Procesando licencia para:', memberId);
 
-    // Buscar el socio ANTES de actualizar para tener todos sus datos
+    // 🔥 BUSCAR EL SOCIO Y SU PAGO ANTES DE ACTUALIZAR
     const member = await prisma.member.findUnique({
-      where: { id: memberId }
+      where: { id: memberId },
+      include: {
+        payments: {
+          where: {
+            payment_type: 'membership',
+          },
+          orderBy: {
+            created_at: 'desc',
+          },
+          take: 1,
+        },
+      },
     });
 
     if (!member) {
@@ -30,7 +41,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Extraer el año del member_number (MAL-2025-0001 -> 2025)
+    // 🔥 VALIDAR QUE EL PAGO ESTÉ COMPLETADO
+    const latestPayment = member.payments[0];
+    
+    if (!latestPayment) {
+      return NextResponse.json(
+        { error: 'No se encontró ningún pago asociado a este socio' },
+        { status: 400 }
+      );
+    }
+
+    if (latestPayment.status !== 'completed') {
+      return NextResponse.json(
+        { 
+          error: 'No se puede procesar la licencia',
+          details: `El pago está en estado "${latestPayment.status}". Debe estar completado primero.`
+        },
+        { status: 400 }
+      );
+    }
+
+    // Extraer el año del member_number
     let year = new Date().getFullYear();
     if (memberNumber) {
       const parts = memberNumber.split('-');
@@ -41,26 +72,16 @@ export async function POST(request: NextRequest) {
         }
       }
     }
-    const membershipStartDate = new Date();
 
+    const membershipStartDate = new Date();
     const currentYear = membershipStartDate.getFullYear();
     const currentMonth = membershipStartDate.getMonth();
-    const endYear = currentMonth === 11
-        ? currentYear + 1
-        : currentYear;
-    const membershipEndDate = new Date(
-        endYear,
-        11, // diciembre
-        31,
-        23,
-        59,
-        59,
-        999
-      );
+    const endYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+    const membershipEndDate = new Date(endYear, 11, 31, 23, 59, 59, 999);
 
     logger.log('📅 Inicio:', membershipStartDate.toISOString());
     logger.log('📅 Fin:', membershipEndDate.toISOString());
-    logger.log('📅 Año calculado:', year);
+    logger.log('💳 Estado del pago:', latestPayment.status);
 
     // Actualizar el socio
     const updatedMember = await prisma.member.update({
@@ -76,7 +97,7 @@ export async function POST(request: NextRequest) {
 
     logger.log('✅ Licencia procesada exitosamente');
 
-    // 🔥 ENVIAR EMAIL DE LICENCIA ACTIVA (solo si tiene licencia)
+    // Enviar email de licencia activa
     if (updatedMember.license_type && updatedMember.license_type !== 'none') {
       try {
         await EmailService.sendLicenseActivated({
@@ -88,9 +109,7 @@ export async function POST(request: NextRequest) {
         });
         logger.apiSuccess('Email de licencia activa enviado');
       } catch (emailError: any) {
-        // No romper el proceso si falla el email
         logger.error('⚠️ Error enviando email de licencia activa:', emailError);
-        // Registrar en admin_notes
         await prisma.member.update({
           where: { id: memberId },
           data: {
