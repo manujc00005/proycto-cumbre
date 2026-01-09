@@ -1,25 +1,8 @@
 // ========================================
-// EVENT EMAIL TEMPLATE - 100% FLEXIBLE & REUSABLE
-// Dark theme guaranteed across all clients
-// Supports any event type with props-driven content
+// EVENT EMAIL TEMPLATE - NEUTRAL (LIGHT/DARK SAFE)
+// Confirmación de plaza para cualquier tipo de evento
 // lib/mail/templates/event-mail-template.ts
 // ========================================
-
-import {
-  emailBase,
-  contentWrapper,
-  greetingSection,
-  contentBox,
-  detailRow,
-  whatsAppBlock,
-  eventDetailRow,
-  featureItem,
-  infoBox,
-  primaryButton,
-  secondaryButton,
-  emailFooter,
-  escapeHtml,
-} from '../email-components';
 
 export interface EventMailProps {
   email: string;
@@ -84,10 +67,14 @@ export function buildEventMail(props: EventMailProps): {
   };
 }
 
+// ===================
+// HTML
+// ===================
+
 function generateEventHTML(props: EventMailProps): string {
   const heroColor = props.heroColor || '#f97316';
   const hasWhatsApp = !!props.whatsappLink;
-  
+
   const calendarLinks = props.eventDate
     ? generateCalendarLinks({
         title: props.eventName,
@@ -95,282 +82,533 @@ function generateEventHTML(props: EventMailProps): string {
         startTime: props.eventDetails?.startTime,
         endTime: props.eventDetails?.endTime,
         location: props.eventLocation || '',
-        description: props.eventDetails?.description || `Inscripción confirmada para ${props.eventName}`
+        description:
+          props.eventDetails?.description ||
+          `Inscripción confirmada para ${props.eventName}`,
       })
     : null;
-  
-  // Event header
-  const eventHeader = `
-<tr>
-  <td bgcolor="#0a0a0a" style="padding: 48px 40px 24px 40px; text-align: center; background-color: #0a0a0a !important;">
-    <h1 style="color: ${heroColor} !important; font-size: 32px; font-weight: 900; margin: 0; letter-spacing: 2px; text-transform: uppercase; line-height: 1.2;">${props.eventName}</h1>
-  </td>
-</tr>
-  `;
-  
-  // Payment status badge
-  const paymentBadge = `
-<tr>
-  <td bgcolor="#0a0a0a" style="padding: 0 40px 40px 40px; text-align: center; background-color: #0a0a0a !important;">
-    <div style="display: inline-block; background-color: #18181b !important; border: 1px solid #27272a; border-radius: 6px; padding: 10px 22px;">
-      <span style="color: #10b981 !important; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; line-height: 1;">✓ PAGO CONFIRMADO</span>
-    </div>
-  </td>
-</tr>
-  `;
-  
-  // Build greeting
-  const greeting = greetingSection(
-    props.name,
-    `Tu plaza para ${props.eventName} está confirmada. A continuación tienes la información esencial para el evento.`
-  );
-  
-  // WhatsApp block
-  let whatsappSection = '';
-  if (hasWhatsApp) {
-    whatsappSection = whatsAppBlock({
-      link: props.whatsappLink!,
-      message: props.whatsappMessage || 'Toda la comunicación logística del evento (coordenadas, avisos y cambios) se realizará exclusivamente a través del grupo de WhatsApp.',
-    });
+
+  // --- Greeting text ---
+  const introMessage = `Tu plaza para ${props.eventName} está confirmada. A continuación tienes la información esencial del evento.`;
+
+  // --- Event info box ---
+  let eventDetailsContent = '';
+
+  if (props.eventDate) {
+    eventDetailsContent += eventInfoRow(
+      '📅 Fecha y hora',
+      `${formatEventDate(props.eventDate)}<br />${formatEventTime(
+        props.eventDate,
+      )}`,
+    );
   }
-  
-  // Event information
-  let eventInfoSection = '';
-  if (props.eventDate || props.eventLocation || props.eventDetails) {
-    let eventDetailsContent = '';
-    
-    if (props.eventDate) {
-      eventDetailsContent += eventDetailRow(
-        '📅',
-        'Fecha y hora',
-        `${formatEventDate(props.eventDate)}<br/>${formatEventTime(props.eventDate)}`
-      );
-    }
-    
-    if (props.eventLocation) {
-      eventDetailsContent += eventDetailRow('📍', 'Ubicación', props.eventLocation);
-    }
-    
-    if (props.eventDetails?.meetingPoint) {
-      eventDetailsContent += eventDetailRow('🚩', 'Punto de encuentro', props.eventDetails.meetingPoint);
-    }
-    
-    if (props.eventDetails?.duration) {
-      eventDetailsContent += eventDetailRow('⏱️', 'Duración', props.eventDetails.duration);
-    }
-    
-    if (props.eventDetails?.difficulty) {
-      eventDetailsContent += eventDetailRow('📊', 'Nivel', props.eventDetails.difficulty);
-    }
-    
-    if (props.eventDetails?.requiredEquipment) {
-      eventDetailsContent += eventDetailRow(
-        '🎒',
-        'Material necesario',
-        props.eventDetails.requiredEquipment,
-        true
-      );
-    }
-    
-    if (eventDetailsContent) {
-      eventInfoSection = contentBox({
+
+  if (props.eventLocation) {
+    eventDetailsContent += eventInfoRow('📍 Ubicación', props.eventLocation);
+  }
+
+  if (props.eventDetails?.meetingPoint) {
+    eventDetailsContent += eventInfoRow(
+      '🚩 Punto de encuentro',
+      props.eventDetails.meetingPoint,
+    );
+  }
+
+  if (props.eventDetails?.duration) {
+    eventDetailsContent += eventInfoRow(
+      '⏱️ Duración',
+      props.eventDetails.duration,
+    );
+  }
+
+  if (props.eventDetails?.difficulty) {
+    eventDetailsContent += eventInfoRow(
+      '📊 Nivel',
+      props.eventDetails.difficulty,
+    );
+  }
+
+  if (props.eventDetails?.requiredEquipment) {
+    eventDetailsContent += eventInfoRow(
+      '🎒 Material necesario',
+      props.eventDetails.requiredEquipment,
+      true,
+    );
+  }
+
+  const hasEventInfo = !!eventDetailsContent;
+  const eventInfoBox = hasEventInfo
+    ? buildBox({
         title: 'Información del evento',
         content: eventDetailsContent,
-      });
-    }
-  }
-  
-  // Booking details
+      })
+    : '';
+
+  // --- Booking details box ---
   let bookingDetailsContent = '';
-  bookingDetailsContent += detailRow('Nombre', props.name);
-  bookingDetailsContent += detailRow('Email', props.email);
-  bookingDetailsContent += detailRow('Teléfono', props.phone);
-  
+  bookingDetailsContent += bookingRow('Nombre', props.name);
+  bookingDetailsContent += bookingRow('Email', props.email);
+  bookingDetailsContent += bookingRow('Teléfono', props.phone);
+
   if (props.dni) {
-    bookingDetailsContent += detailRow('DNI/NIE', props.dni);
+    bookingDetailsContent += bookingRow('DNI/NIE', props.dni);
   }
-  
+
   if (props.shirtSize) {
-    bookingDetailsContent += detailRow('Talla', props.shirtSize);
+    bookingDetailsContent += bookingRow('Talla', props.shirtSize);
   }
-  
+
   if (props.customDetails) {
-    props.customDetails.forEach(detail => {
-      bookingDetailsContent += detailRow(detail.label, detail.value);
+    props.customDetails.forEach((detail) => {
+      bookingDetailsContent += bookingRow(detail.label, detail.value);
     });
   }
-  
-  bookingDetailsContent += detailRow('Importe', `${(props.amount / 100).toFixed(2)}€`, {
-    valueColor: heroColor,
-    valueFontWeight: '700',
-    valueFontSize: '16px',
-    isLast: true,
-  });
-  
-  const bookingBox = contentBox({
+
+  bookingDetailsContent += bookingRow(
+    'Importe',
+    `${(props.amount / 100).toFixed(2)}€`,
+    true,
+    heroColor,
+  );
+
+  const bookingBox = buildBox({
     title: 'Tu reserva',
     content: bookingDetailsContent,
   });
-  
-  // Features section
+
+  // --- WhatsApp block ---
+  const whatsappSection =
+    hasWhatsApp && props.whatsappLink
+      ? buildWhatsAppBox(
+          props.whatsappLink,
+          props.whatsappMessage ||
+            'Toda la comunicación logística del evento (coordenadas, avisos y cambios) se realizará exclusivamente a través del grupo de WhatsApp.',
+        )
+      : '';
+
+  // --- Features section (qué incluye) ---
   let featuresSection = '';
   if (props.features && props.features.length > 0) {
-    let featuresContent = '<h3 style="color: #ffffff !important; font-size: 14px; font-weight: 700; margin: 0 0 18px 0; letter-spacing: 0.3px; line-height: 1.4;">Qué incluye</h3>';
-    
-    featuresContent += props.features.map((feature, index) => 
-      featureItem(
-        feature.icon,
-        feature.title,
-        feature.description,
-        index === props.features!.length - 1
-      )
-    ).join('');
-    
+    const items = props.features
+      .map((f) => featureRow(f.icon, f.title, f.description))
+      .join('');
+
     featuresSection = `
-<table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 0 0 32px 0;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
-    <td>
-      ${featuresContent}
+    <td style="padding:0 24px 20px 24px;">
+      <p style="margin:0 0 10px 0;font-size:13px;font-weight:600;color:#111827;">
+        Qué incluye
+      </p>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-radius:8px;border:1px solid #e5e7eb;background-color:#f9fafb;">
+        ${items}
+      </table>
     </td>
   </tr>
 </table>
-    `;
+`;
   }
-  
-  // Calendar section
+
+  // --- Calendar section ---
   let calendarSection = '';
   if (calendarLinks) {
-    calendarSection = `
-<table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#18181b" style="background-color: #18181b !important; border: 1px solid #27272a; border-radius: 8px; overflow: hidden; margin: 0 0 32px 0;">
-  <tr>
-    <td>
-      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="padding: 14px 20px; border-bottom: 1px solid #27272a;">
-        <tr>
-          <td>
-            <span style="color: #a1a1aa !important; font-size: 11px; font-weight: 600; letter-spacing: 0.8px; line-height: 1;">AÑADIR AL CALENDARIO</span>
-          </td>
-        </tr>
-      </table>
-
-      <table cellpadding="0" cellspacing="0" border="0" width="100%">
-        <tr>
-          <td style="padding: 14px 20px; border-bottom: 1px solid #27272a;">
-            <a href="${calendarLinks.googleUrl}" target="_blank" style="text-decoration: none; display: block;">
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td width="28" valign="middle">
-                    <span style="display: inline-block; width: 24px; height: 24px; background-color: #4285f4; border-radius: 5px; text-align: center; line-height: 24px; color: #ffffff !important; font-size: 13px; font-weight: 700;">G</span>
-                  </td>
-                  <td valign="middle" style="padding-left: 12px;">
-                    <span style="color: #e4e4e7 !important; font-size: 13px; font-weight: 600; line-height: 1.4;">Google Calendar</span>
-                  </td>
-                  <td width="20" valign="middle" align="right">
-                    <span style="color: #71717a !important; font-size: 15px; line-height: 1;">→</span>
-                  </td>
-                </tr>
-              </table>
-            </a>
-          </td>
-        </tr>
-      </table>
-
-      <table cellpadding="0" cellspacing="0" border="0" width="100%">
-        <tr>
-          <td style="padding: 14px 20px; border-bottom: 1px solid #27272a;">
-            <a href="${calendarLinks.icsUrl}" download="${props.eventName.toLowerCase().replace(/\s+/g, '-')}.ics" style="text-decoration: none; display: block;">
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td width="28" valign="middle">
-                    <span style="font-size: 20px; line-height: 1;">🍎</span>
-                  </td>
-                  <td valign="middle" style="padding-left: 12px;">
-                    <span style="color: #e4e4e7 !important; font-size: 13px; font-weight: 600; line-height: 1.4;">Apple / iCal</span>
-                  </td>
-                  <td width="20" valign="middle" align="right">
-                    <span style="color: #71717a !important; font-size: 15px; line-height: 1;">↓</span>
-                  </td>
-                </tr>
-              </table>
-            </a>
-          </td>
-        </tr>
-      </table>
-
-      <table cellpadding="0" cellspacing="0" border="0" width="100%">
-        <tr>
-          <td style="padding: 14px 20px;">
-            <a href="${calendarLinks.outlookUrl}" target="_blank" style="text-decoration: none; display: block;">
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <td width="28" valign="middle">
-                    <span style="display: inline-block; width: 24px; height: 24px; background-color: #0078d4; border-radius: 5px; text-align: center; line-height: 24px; color: #ffffff !important; font-size: 13px; font-weight: 700;">O</span>
-                  </td>
-                  <td valign="middle" style="padding-left: 12px;">
-                    <span style="color: #e4e4e7 !important; font-size: 13px; font-weight: 600; line-height: 1.4;">Outlook</span>
-                  </td>
-                  <td width="20" valign="middle" align="right">
-                    <span style="color: #71717a !important; font-size: 15px; line-height: 1;">→</span>
-                  </td>
-                </tr>
-              </table>
-            </a>
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>
-    `;
+    calendarSection = buildCalendarBox(calendarLinks, props.eventName);
   }
-  
-  // Important note
-  let importantNoteSection = '';
-  if (props.importantNote) {
-    importantNoteSection = infoBox({
-      icon: props.importantNote.icon || '⚠️',
-      title: props.importantNote.title,
-      message: props.importantNote.message,
-      accentColor: heroColor,
-    });
-  }
-  
-  // CTA buttons
+
+  // --- Important note ---
+  const importantNoteSection = props.importantNote
+    ? buildImportantBox(
+        props.importantNote.icon || '⚠️',
+        props.importantNote.title,
+        props.importantNote.message,
+        heroColor,
+      )
+    : '';
+
+  // --- CTA buttons ---
   let ctaSection = '';
   if (props.ctaButtons && props.ctaButtons.length > 0) {
+    const buttons = props.ctaButtons
+      .map((btn) =>
+        buildButton(
+          btn.text,
+          btn.url,
+          btn.style === 'secondary' ? 'secondary' : 'primary',
+          heroColor,
+        ),
+      )
+      .join('');
+
     ctaSection = `
-<table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 0 0 32px 0;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr>
-    <td align="center">
-      ${props.ctaButtons.map(btn => {
-        return btn.style === 'secondary'
-          ? secondaryButton(btn.text, btn.url)
-          : primaryButton(btn.text, btn.url, heroColor);
-      }).join('')}
+    <td align="center" style="padding:0 24px 24px 24px;">
+      ${buttons}
     </td>
   </tr>
 </table>
-    `;
+`;
   }
-  
-  // Assemble email
-  const content = [
-    eventHeader,
-    paymentBadge,
-    contentWrapper(
-      greeting +
-      whatsappSection +
-      eventInfoSection +
-      bookingBox +
-      featuresSection +
-      calendarSection +
-      importantNoteSection +
-      ctaSection
-    ),
-    emailFooter('Nos vemos en la montaña 🏔️', true),
-  ].join('');
-  
-  return emailBase(content);
+
+  // --- Full HTML ---
+  return `
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Plaza confirmada - ${escapeForHtml(props.eventName)}</title>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background-color: #e5e5e5;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      table {
+        border-spacing: 0;
+        border-collapse: collapse;
+      }
+      img {
+        border: 0;
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+      a {
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body style="margin:0;padding:0;background-color:#e5e5e5;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#e5e5e5;padding:24px 8px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;">
+            <tr>
+              <td style="background-color:#ffffff;border-radius:10px;border:1px solid #e5e5e5;overflow:hidden;">
+
+                <!-- HEADER EVENT NAME -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td align="center" style="padding:24px 24px 8px 24px;">
+                      <p style="margin:0 0 4px 0;font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:#9ca3af;">
+                        Plaza confirmada
+                      </p>
+                      <h1 style="margin:0;font-size:22px;line-height:1.35;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:${heroColor};">
+                        ${escapeForHtml(props.eventName)}
+                      </h1>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align="center" style="padding:6px 24px 16px 24px;">
+                      <span style="display:inline-block;padding:6px 14px;border-radius:999px;border:1px solid #bbf7d0;background-color:#ecfdf3;font-size:11px;font-weight:600;color:#166534;">
+                        ✓ Pago confirmado
+                      </span>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- GREETING -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding:0 24px 16px 24px;">
+                      <p style="margin:0 0 6px 0;font-size:15px;font-weight:600;color:#111827;">
+                        Hola ${escapeForHtml(props.name)},
+                      </p>
+                      <p style="margin:0;font-size:14px;line-height:1.6;color:#4b5563;">
+                        ${escapeForHtml(introMessage)}
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- WHATSAPP -->
+                ${whatsappSection}
+
+                <!-- EVENT INFO -->
+                ${eventInfoBox}
+
+                <!-- BOOKING BOX -->
+                ${bookingBox}
+
+                <!-- FEATURES -->
+                ${featuresSection}
+
+                <!-- CALENDAR -->
+                ${calendarSection}
+
+                <!-- IMPORTANT NOTE -->
+                ${importantNoteSection}
+
+                <!-- CTA BUTTONS -->
+                ${ctaSection}
+
+                <!-- FOOTER -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #e5e7eb;">
+                  <tr>
+                    <td align="center" style="padding:18px 24px 18px 24px;">
+                      <p style="margin:0 0 4px 0;font-size:12px;color:#9ca3af;">
+                        Nos vemos en la montaña 🏔️
+                      </p>
+                      <p style="margin:0 0 4px 0;font-size:13px;font-weight:700;letter-spacing:0.08em;color:#f97316;">
+                        PROYECTO CUMBRE
+                      </p>
+                      <p style="margin:0 0 4px 0;font-size:12px;color:#9ca3af;">
+                        📧 info@proyecto-cumbre.es
+                      </p>
+                      <p style="margin:0;font-size:11px;color:#9ca3af;">
+                        Email automático ·
+                        <a href="mailto:info@proyecto-cumbre.es" style="color:#6b7280;text-decoration:underline;">Contacto</a>
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+  `;
 }
+
+// Caja genérica tipo “card” para reservas / información
+function buildBox(params: { title: string; content: string }): string {
+  return `
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td style="padding:0 24px 20px 24px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;border:1px solid #e5e7eb;">
+        <tr>
+          <td style="padding:14px 16px 8px 16px;">
+            <p style="margin:0 0 8px 0;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#6b7280;">
+              ${escapeForHtml(params.title)}
+            </p>
+          </td>
+        </tr>
+        ${params.content}
+      </table>
+    </td>
+  </tr>
+</table>
+`;
+}
+
+// Fila de info de evento (icono + label + valor)
+function eventInfoRow(label: string, value: string, isLast?: boolean): string {
+  return `
+<tr>
+  <td style="padding:8px 16px ${isLast ? '14px' : '8px'} 16px;border-bottom:${
+    isLast ? '0' : '1px solid #e5e7eb'
+  };">
+    <p style="margin:0 0 2px 0;font-size:13px;font-weight:600;color:#111827;">
+      ${label}
+    </p>
+    <p style="margin:0;font-size:13px;line-height:1.6;color:#4b5563;">
+      ${value}
+    </p>
+  </td>
+</tr>
+`;
+}
+
+// Fila de reserva (label + value)
+function bookingRow(
+  label: string,
+  value: string,
+  isLast?: boolean,
+  accentColor?: string,
+): string {
+  return `
+<tr>
+  <td style="padding:8px 16px ${isLast ? '14px' : '8px'} 16px;border-bottom:${
+    isLast ? '0' : '1px solid #e5e7eb'
+  };">
+    <p style="margin:0 0 2px 0;font-size:12px;color:#6b7280;">
+      ${escapeForHtml(label)}
+    </p>
+    <p style="margin:0;font-size:14px;font-weight:${
+      accentColor ? '700' : '500'
+    };color:${accentColor || '#111827'};">
+      ${escapeForHtml(value)}
+    </p>
+  </td>
+</tr>
+`;
+}
+
+// Bloque WhatsApp
+function buildWhatsAppBox(link: string, message: string): string {
+  const safeLink = link;
+  return `
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td style="padding:0 24px 20px 24px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-radius:8px;border:1px solid #bbf7d0;background-color:#ecfdf3;">
+        <tr>
+          <td style="padding:14px 16px;">
+            <p style="margin:0 0 6px 0;font-size:13px;font-weight:600;color:#166534;">
+              💬 Grupo de WhatsApp del evento
+            </p>
+            <p style="margin:0 0 10px 0;font-size:13px;line-height:1.6;color:#166534;">
+              ${escapeForHtml(message)}
+            </p>
+            <a href="${safeLink}" target="_blank" style="display:inline-block;padding:7px 14px;border-radius:999px;background-color:#16a34a;color:#ffffff;font-size:12px;font-weight:600;">
+              Unirme al grupo
+            </a>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+`;
+}
+
+// Fila de “qué incluye”
+function featureRow(icon: string, title: string, description?: string): string {
+  return `
+<tr>
+  <td style="padding:10px 12px;border-bottom:1px solid #e5e7eb;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td valign="top" width="26" style="padding-right:8px;font-size:18px;">
+          ${escapeForHtml(icon)}
+        </td>
+        <td valign="top">
+          <p style="margin:0 0 2px 0;font-size:13px;font-weight:600;color:#111827;">
+            ${escapeForHtml(title)}
+          </p>
+          ${
+            description
+              ? `<p style="margin:0;font-size:12px;line-height:1.6;color:#4b5563;">${escapeForHtml(
+                  description,
+                )}</p>`
+              : ''
+          }
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+`;
+}
+
+// Caja de “nota importante”
+function buildImportantBox(
+  icon: string,
+  title: string,
+  message: string,
+  accentColor: string,
+): string {
+  return `
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td style="padding:0 24px 20px 24px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#fffbeb;border-radius:8px;border:1px solid #fed7aa;">
+        <tr>
+          <td style="padding:14px 16px;">
+            <p style="margin:0 0 4px 0;font-size:13px;font-weight:600;color:${accentColor};">
+              ${escapeForHtml(icon)} ${escapeForHtml(title)}
+            </p>
+            <p style="margin:0;font-size:13px;line-height:1.6;color:#92400e;">
+              ${escapeForHtml(message)}
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+`;
+}
+
+// Botones (primary / secondary)
+function buildButton(
+  text: string,
+  url: string,
+  variant: 'primary' | 'secondary',
+  accentColor: string,
+): string {
+  const safeUrl = url;
+  const isPrimary = variant === 'primary';
+
+  return `
+<a href="${safeUrl}" target="_blank" style="display:inline-block;margin:0 4px 6px 4px;padding:9px 16px;border-radius:999px;border:1px solid ${
+    isPrimary ? accentColor : '#d1d5db'
+  };background-color:${
+    isPrimary ? accentColor : '#ffffff'
+  };font-size:13px;font-weight:600;color:${
+    isPrimary ? '#ffffff' : '#111827'
+  };">
+  ${escapeForHtml(text)}
+</a>
+`;
+}
+
+// Caja de “Añadir al calendario”
+function buildCalendarBox(
+  links: { googleUrl: string; icsUrl: string; outlookUrl: string },
+  eventName: string,
+): string {
+  const fileName = eventName.toLowerCase().replace(/\s+/g, '-');
+
+  return `
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td style="padding:0 24px 20px 24px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f9fafb;border-radius:8px;border:1px solid #e5e7eb;">
+        <tr>
+          <td style="padding:12px 16px;border-bottom:1px solid #e5e7eb;">
+            <p style="margin:0;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#6b7280;">
+              Añadir al calendario
+            </p>
+          </td>
+        </tr>
+
+        <!-- Google Calendar -->
+        <tr>
+          <td style="padding:10px 16px;border-bottom:1px solid #e5e7eb;">
+            <a href="${links.googleUrl}" target="_blank" style="display:block;">
+              <span style="font-size:13px;font-weight:600;color:#111827;">Google Calendar</span>
+            </a>
+          </td>
+        </tr>
+
+        <!-- Apple / iCal (.ics) -->
+        <tr>
+          <td style="padding:10px 16px;border-bottom:1px solid #e5e7eb;">
+            <a href="${links.icsUrl}" download="${fileName}.ics" style="display:block;">
+              <span style="font-size:13px;font-weight:600;color:#111827;">Apple / iCal (.ics)</span>
+            </a>
+          </td>
+        </tr>
+
+        <!-- Outlook -->
+        <tr>
+          <td style="padding:10px 16px;">
+            <a href="${links.outlookUrl}" target="_blank" style="display:block;">
+              <span style="font-size:13px;font-weight:600;color:#111827;">Outlook</span>
+            </a>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+`;
+}
+
+// ===================
+// TEXT
+// ===================
 
 function generateEventText(props: EventMailProps): string {
   return `
@@ -380,26 +618,40 @@ Hola ${props.name},
 
 Tu plaza para ${props.eventName} está confirmada.
 
-${props.eventDate ? `FECHA: ${formatEventDate(props.eventDate)} - ${formatEventTime(props.eventDate)}` : ''}
-${props.eventLocation ? `UBICACIÓN: ${props.eventLocation}` : ''}
-${props.eventDetails?.meetingPoint ? `PUNTO DE ENCUENTRO: ${props.eventDetails.meetingPoint}` : ''}
+${
+  props.eventDate
+    ? `FECHA: ${formatEventDate(props.eventDate)} - ${formatEventTime(props.eventDate)}`
+    : ''
+}
+${props.eventLocation ? `UBICACIÓN: ${props.eventLocation}` : ''}${
+    props.eventDetails?.meetingPoint
+      ? `\nPUNTO DE ENCUENTRO: ${props.eventDetails.meetingPoint}`
+      : ''
+  }
 
 TU RESERVA:
 Nombre: ${props.name}
 Email: ${props.email}
 Teléfono: ${props.phone}
-${props.dni ? `DNI/NIE: ${props.dni}` : ''}
-${props.shirtSize ? `Talla: ${props.shirtSize}` : ''}
-Importe: ${(props.amount / 100).toFixed(2)}€
+${props.dni ? `DNI/NIE: ${props.dni}\n` : ''}${
+    props.shirtSize ? `Talla: ${props.shirtSize}\n` : ''
+  }Importe: ${(props.amount / 100).toFixed(2)}€
 
-${props.whatsappLink ? `\n⚠️ IMPORTANTE: Únete al grupo de WhatsApp para recibir toda la información del evento.\n${props.whatsappLink}\n` : ''}
-
+${
+  props.whatsappLink
+    ? `⚠️ IMPORTANTE: Únete al grupo de WhatsApp para recibir toda la información del evento.\n${props.whatsappLink}\n`
+    : ''
+}
 Nos vemos en la montaña 🏔️
 
 PROYECTO CUMBRE
 info@proyecto-cumbre.es
   `.trim();
 }
+
+// ===================
+// HELPERS
+// ===================
 
 function formatEventDate(date: Date): string {
   return date.toLocaleDateString('es-ES', {
@@ -411,11 +663,13 @@ function formatEventDate(date: Date): string {
 }
 
 function formatEventTime(date: Date): string {
-  return date.toLocaleTimeString('es-ES', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }) + 'h';
+  return (
+    date.toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }) + 'h'
+  );
 }
 
 function generateCalendarLinks(event: {
@@ -427,18 +681,38 @@ function generateCalendarLinks(event: {
   location?: string;
 }): { googleUrl: string; icsUrl: string; outlookUrl: string } {
   const dateStr = event.date.toISOString().split('T')[0];
-  const defaultStartTime = event.date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const defaultStartTime = event.date.toLocaleTimeString('es-ES', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
   const startTime = event.startTime || defaultStartTime;
+
   const endDate = new Date(event.date);
   endDate.setHours(endDate.getHours() + 4);
-  const defaultEndTime = endDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const defaultEndTime = endDate.toLocaleTimeString('es-ES', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
   const endTime = event.endTime || defaultEndTime;
+
   const description = event.description || '';
   const location = event.location || '';
-  const startDateTime = `${dateStr.replace(/-/g, '')}T${startTime.replace(/:/g, '')}00`;
-  const endDateTime = `${dateStr.replace(/-/g, '')}T${endTime.replace(/:/g, '')}00`;
+  const startDateTime = `${dateStr.replace(/-/g, '')}T${startTime.replace(
+    /:/g,
+    '',
+  )}00`;
+  const endDateTime = `${dateStr.replace(/-/g, '')}T${endTime.replace(
+    /:/g,
+    '',
+  )}00`;
 
-  const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${startDateTime}/${endDateTime}&details=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}`;
+  const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
+    event.title,
+  )}&dates=${startDateTime}/${endDateTime}&details=${encodeURIComponent(
+    description,
+  )}&location=${encodeURIComponent(location)}`;
 
   const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
@@ -453,8 +727,22 @@ STATUS:CONFIRMED
 END:VEVENT
 END:VCALENDAR`;
 
-  const icsUrl = `data:text/calendar;charset=utf8,${encodeURIComponent(icsContent)}`;
-  const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(event.title)}&startdt=${dateStr}T${startTime}&enddt=${dateStr}T${endTime}&body=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}`;
+  const icsUrl = `data:text/calendar;charset=utf8,${encodeURIComponent(
+    icsContent,
+  )}`;
+  const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(
+    event.title,
+  )}&startdt=${dateStr}T${startTime}&enddt=${dateStr}T${endTime}&body=${encodeURIComponent(
+    description,
+  )}&location=${encodeURIComponent(location)}`;
 
   return { googleUrl, icsUrl, outlookUrl };
+}
+
+// Escapar texto básico para HTML
+function escapeForHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
