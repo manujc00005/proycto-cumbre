@@ -1,8 +1,10 @@
 // ========================================
 // EMAIL TYPES - CENTRALIZED
-// lib/email/types.ts
+// Updated for modular template architecture
+// lib/mail/types.ts
 // ========================================
 
+// Base email options
 export interface EmailOptions {
   to: string | string[];
   subject: string;
@@ -11,6 +13,15 @@ export interface EmailOptions {
   from?: string;
 }
 
+// Contact form data (unchanged)
+export interface ContactFormData {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+// Legacy types - kept for backward compatibility during migration
 export interface MembershipEmailData {
   email: string;
   firstName: string;
@@ -28,13 +39,6 @@ export interface LicenseActivatedData {
   memberNumber: string;
   licenseType: string;
   validUntil: Date;
-}
-
-export interface ContactFormData {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
 }
 
 export interface BaseEventEmailData {
@@ -75,36 +79,34 @@ export interface EventEmailConfig {
   heroColor?: string;
   whatsappLink?: string;
   whatsappMessage?: string;
-  
-  // ✅ Detalles del evento
+
   eventDetails?: {
-    meetingPoint?: string;      // Punto de encuentro
-    duration?: string;           // Duración estimada
-    difficulty?: string;         // Nivel/dificultad
-    requiredEquipment?: string;  // Material obligatorio
-    startTime?: string;          // Hora inicio (HH:MM) para calendario
-    endTime?: string;            // Hora fin (HH:MM) para calendario
-    description?: string;        // Descripción adicional para calendario
+    meetingPoint?: string;
+    duration?: string;
+    difficulty?: string;
+    requiredEquipment?: string;
+    startTime?: string;
+    endTime?: string;
+    description?: string;
   };
-  
-  // Detalles personalizados
+
   customDetails?: Array<{
     label: string;
     value: string;
   }>;
-  
+
   features?: Array<{
     icon: string;
     title: string;
     description?: string;
   }>;
-  
+
   importantNote?: {
     icon?: string;
     title: string;
     message: string;
   };
-  
+
   ctaButtons?: Array<{
     text: string;
     url: string;

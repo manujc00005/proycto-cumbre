@@ -1,12 +1,16 @@
 // ========================================
-// EMAIL SERVICE - CON EMAILS DE PEDIDOS ACTUALIZADOS
-// lib/email/email-service.ts (ACTUALIZACIÓN)
+// EMAIL SERVICE - REFACTORED WITH MODULAR TEMPLATES
+// Uses new template-based architecture
+// lib/mail/email-service.ts
 // ========================================
 
 import { Resend } from 'resend';
 import { logger } from '@/lib/logger';
-import EmailTemplates from './email-templates';
-import { buildEventEmail } from './event-email-template';
+import { buildOrderMail, OrderMailProps } from './templates/order-mail-template';
+import { buildEventMail, EventMailProps } from './templates/event-mail-template';
+import { buildMembershipMail, MembershipMailProps } from './templates/membership-mail-template';
+import { buildLicenseMail, LicenseMailProps } from './templates/license-mail-template';
+import { buildContactMail } from './templates/contact-mail-template';
 import { getEventEmailConfig } from './event-email-configs';
 import {
   BaseEventEmailData,
@@ -25,7 +29,7 @@ export default class EmailService {
   private static isDevelopment = process.env.NODE_ENV === 'development';
 
   /**
-   * Enviar email genérico (bajo nivel)
+   * Send generic email (low-level)
    */
   static async send(options: EmailOptions) {
     const recipients = Array.isArray(options.to) ? options.to : [options.to];
@@ -66,34 +70,53 @@ export default class EmailService {
   }
 
   // ========================================
-  // MEMBERSHIP EMAILS (mantener sin cambios)
+  // MEMBERSHIP EMAILS - NEW TEMPLATE SYSTEM
   // ========================================
 
   static async sendWelcomeWithPaymentStatus(data: MembershipEmailData) {
-    const isSuccess = data.paymentStatus === 'success';
-    const html = isSuccess
-      ? EmailTemplates.membershipSuccess(data)
-      : EmailTemplates.membershipFailed(data);
+    const mailProps: MembershipMailProps = {
+      paymentStatus: data.paymentStatus,
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      memberNumber: data.memberNumber,
+      licenseType: data.licenseType,
+      amount: data.amount,
+      currency: data.currency,
+    };
+
+    const { subject, html, text } = buildMembershipMail(mailProps);
 
     return this.send({
       to: data.email,
-      subject: isSuccess
-        ? '¡Bienvenido a Proyecto Cumbre! 🏔️'
-        : '⚠️ Problema con tu pago - Proyecto Cumbre',
+      subject,
       html,
+      text,
     });
   }
 
   static async sendLicenseActivated(data: LicenseActivatedData) {
+    const mailProps: LicenseMailProps = {
+      status: 'activated',
+      email: data.email,
+      firstName: data.firstName,
+      memberNumber: data.memberNumber,
+      licenseType: data.licenseType,
+      validUntil: data.validUntil,
+    };
+
+    const { subject, html, text } = buildLicenseMail(mailProps);
+
     return this.send({
       to: data.email,
-      subject: '✅ Tu licencia FEDME está activa',
-      html: EmailTemplates.licenseActivated(data),
+      subject,
+      html,
+      text,
     });
   }
 
   // ========================================
-  // EVENT EMAILS (mantener sin cambios)
+  // EVENT EMAILS - NEW TEMPLATE SYSTEM
   // ========================================
 
   static async sendEventConfirmation(
@@ -106,34 +129,70 @@ export default class EmailService {
       eventName: data.eventName,
     });
 
-    const html = buildEventEmail(data, config);
+    const mailProps: EventMailProps = {
+      email: data.email,
+      name: data.name,
+      phone: data.phone,
+      dni: data.dni,
+      shirtSize: data.shirtSize,
+      amount: data.amount,
+      eventName: config.eventName,
+      eventDate: config.eventDate,
+      eventLocation: config.eventLocation,
+      heroColor: config.heroColor,
+      whatsappLink: config.whatsappLink,
+      whatsappMessage: config.whatsappMessage,
+      eventDetails: config.eventDetails,
+      customDetails: config.customDetails,
+      features: config.features,
+      importantNote: config.importantNote,
+      ctaButtons: config.ctaButtons,
+    };
+
+    const { subject, html, text } = buildEventMail(mailProps);
 
     return this.send({
       to: data.email,
-      subject: `✅ Plaza confirmada - ${config.eventName}`,
+      subject,
       html,
+      text,
     });
   }
 
   // ========================================
-  // 🆕 ORDER/SHOP EMAILS - ACTUALIZADOS
+  // ORDER/SHOP EMAILS - NEW TEMPLATE SYSTEM
   // ========================================
 
   /**
-   * Email inicial de confirmación de pedido
-   * Se envía cuando se completa el checkout
+   * Send order confirmation email
+   * Status: PAID
    */
   static async sendOrderConfirmation(data: OrderEmailData) {
+    const mailProps: OrderMailProps = {
+      status: 'PAID',
+      email: data.email,
+      name: data.name,
+      orderNumber: data.orderNumber,
+      items: data.items,
+      subtotal: data.subtotal,
+      shipping: data.shipping,
+      total: data.total,
+      shippingAddress: data.shippingAddress,
+    };
+
+    const { subject, html, text } = buildOrderMail(mailProps);
+
     return this.send({
       to: data.email,
-      subject: `✅ Pedido confirmado #${data.orderNumber}`,
-      html: EmailTemplates.orderConfirmation(data),
+      subject,
+      html,
+      text,
     });
   }
 
   /**
-   * 🆕 Email cuando el pedido pasa a procesamiento
-   * Estado: paid → processing
+   * Send order processing email
+   * Status: PROCESSING
    */
   static async sendOrderProcessing(data: {
     email: string;
@@ -142,18 +201,35 @@ export default class EmailService {
     items: Array<{
       name: string;
       quantity: number;
+      price?: number;
     }>;
   }) {
+    const mailProps: OrderMailProps = {
+      status: 'PROCESSING',
+      email: data.email,
+      name: data.name,
+      orderNumber: data.orderNumber,
+      items: data.items.map(item => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price || 0,
+      })),
+      total: 0,
+    };
+
+    const { subject, html, text } = buildOrderMail(mailProps);
+
     return this.send({
       to: data.email,
-      subject: `⚙️ Preparando tu pedido #${data.orderNumber}`,
-      html: EmailTemplates.orderProcessing(data),
+      subject,
+      html,
+      text,
     });
   }
 
   /**
-   * Email cuando el pedido ha sido enviado
-   * Estado: processing → shipped
+   * Send order shipped email
+   * Status: SHIPPED
    */
   static async sendOrderShipped(data: {
     email: string;
@@ -163,32 +239,59 @@ export default class EmailService {
     trackingUrl: string;
     carrier: string;
   }) {
+    const mailProps: OrderMailProps = {
+      status: 'SHIPPED',
+      email: data.email,
+      name: data.name,
+      orderNumber: data.orderNumber,
+      items: [],
+      total: 0,
+      trackingNumber: data.trackingNumber,
+      trackingUrl: data.trackingUrl,
+      carrier: data.carrier,
+    };
+
+    const { subject, html, text } = buildOrderMail(mailProps);
+
     return this.send({
       to: data.email,
-      subject: `🚚 Tu pedido #${data.orderNumber} está en camino`,
-      html: EmailTemplates.orderShipped(data),
+      subject,
+      html,
+      text,
     });
   }
 
   /**
-   * 🆕 Email cuando el pedido ha sido entregado
-   * Estado: shipped → delivered
+   * Send order delivered email
+   * Status: DELIVERED
    */
   static async sendOrderDelivered(data: {
     email: string;
     name: string;
     orderNumber: string;
   }) {
+    const mailProps: OrderMailProps = {
+      status: 'DELIVERED',
+      email: data.email,
+      name: data.name,
+      orderNumber: data.orderNumber,
+      items: [],
+      total: 0,
+    };
+
+    const { subject, html, text } = buildOrderMail(mailProps);
+
     return this.send({
       to: data.email,
-      subject: `✅ ¡Tu pedido #${data.orderNumber} ha llegado!`,
-      html: EmailTemplates.orderDelivered(data),
+      subject,
+      html,
+      text,
     });
   }
 
   /**
-   * 🆕 Email cuando el pedido ha sido cancelado
-   * Estado: cualquier → cancelled
+   * Send order cancelled email
+   * Status: CANCELLED
    */
   static async sendOrderCancelled(data: {
     email: string;
@@ -197,22 +300,39 @@ export default class EmailService {
     reason?: string;
     refundInfo?: string;
   }) {
+    const mailProps: OrderMailProps = {
+      status: 'CANCELLED',
+      email: data.email,
+      name: data.name,
+      orderNumber: data.orderNumber,
+      items: [],
+      total: 0,
+      reason: data.reason,
+      refundInfo: data.refundInfo,
+    };
+
+    const { subject, html, text } = buildOrderMail(mailProps);
+
     return this.send({
       to: data.email,
-      subject: `❌ Pedido #${data.orderNumber} cancelado`,
-      html: EmailTemplates.orderCancelled(data),
+      subject,
+      html,
+      text,
     });
   }
 
   // ========================================
-  // CONTACT FORM (mantener sin cambios)
+  // CONTACT FORM - NEW TEMPLATE SYSTEM
   // ========================================
 
   static async sendContactForm(data: ContactFormData) {
+    const { subject, html, text } = buildContactMail(data);
+
     return this.send({
       to: this.adminEmail,
-      subject: `[Contacto Web] ${data.subject}`,
-      html: EmailTemplates.contactForm(data),
+      subject,
+      html,
+      text,
     });
   }
 }

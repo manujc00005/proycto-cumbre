@@ -1,29 +1,85 @@
 // ========================================
-// EVENT EMAIL TEMPLATE - PRO MINIMAL
-// 🎯 SIEMPRE oscuro (forzado)
-// 💎 Elegante y profesional
-// 📍 1 solo CTA fuerte (no 3)
-// ♻️ Genérico para todos los eventos
-// lib/email/event-email-template.ts
+// EVENT EMAIL TEMPLATE - 100% FLEXIBLE & REUSABLE
+// Always-black dark theme enforced
+// Supports any event type with props-driven content
+// lib/mail/templates/event-mail-template.ts
 // ========================================
 
-import { BaseEventEmailData, EventEmailConfig } from './types';
+export interface EventMailProps {
+  email: string;
+  name: string;
+  phone: string;
+  dni?: string;
+  shirtSize?: string;
+  amount: number;
+  eventName: string;
+  eventDate?: Date;
+  eventLocation?: string;
+  heroColor?: string;
 
-export function buildEventEmail(
-  participant: BaseEventEmailData,
-  config: EventEmailConfig
-): string {
-  const heroColor = config.heroColor || '#f97316';
-  const hasWhatsApp = !!config.whatsappLink;
+  whatsappLink?: string;
+  whatsappMessage?: string;
 
-  const calendarLinks = config.eventDate 
+  eventDetails?: {
+    meetingPoint?: string;
+    duration?: string;
+    difficulty?: string;
+    requiredEquipment?: string;
+    startTime?: string;
+    endTime?: string;
+    description?: string;
+  };
+
+  customDetails?: Array<{
+    label: string;
+    value: string;
+  }>;
+
+  features?: Array<{
+    icon: string;
+    title: string;
+    description?: string;
+  }>;
+
+  importantNote?: {
+    icon?: string;
+    title: string;
+    message: string;
+  };
+
+  ctaButtons?: Array<{
+    text: string;
+    url: string;
+    style?: 'primary' | 'secondary';
+  }>;
+}
+
+export function buildEventMail(props: EventMailProps): {
+  subject: string;
+  html: string;
+  text: string;
+} {
+  const subject = `✅ Plaza confirmada - ${props.eventName}`;
+
+  return {
+    subject,
+    html: generateEventHTML(props),
+    text: generateEventText(props),
+  };
+}
+
+function generateEventHTML(props: EventMailProps): string {
+  const heroColor = props.heroColor || '#f97316';
+  const hasWhatsApp = !!props.whatsappLink;
+
+  const calendarLinks = props.eventDate
     ? generateCalendarLinks({
-        title: config.eventName,
-        date: config.eventDate,
-        startTime: config.eventDetails?.startTime,
-        endTime: config.eventDetails?.endTime,
-        location: config.eventLocation || '',
-        description: `Inscripción confirmada para ${config.eventName}`
+        title: props.eventName,
+        date: props.eventDate,
+        startTime: props.eventDetails?.startTime,
+        endTime: props.eventDetails?.endTime,
+        location: props.eventLocation || '',
+        description: props.eventDetails?.description || `Inscripción confirmada para ${props.eventName}`
       })
     : null;
 
@@ -36,31 +92,36 @@ export function buildEventEmail(
   <meta name="color-scheme" content="dark only">
   <meta name="supported-color-schemes" content="dark">
   <style>
-    @media (prefers-color-scheme: dark) {
-      :root { color-scheme: dark only; }
-      body { background-color: #000000 !important; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      color-scheme: dark only !important;
     }
-    * { color-scheme: dark only !important; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #000000 !important;
+      margin: 0;
+      padding: 0;
+    }
   </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #000000 !important;">
-  
-  <!-- WRAPPER -->
+<body style="margin: 0; padding: 0; background-color: #000000 !important;">
+
   <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #000000 !important; padding: 40px 20px;">
     <tr>
       <td align="center">
-        
-        <!-- CONTAINER -->
+
         <table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 600px; background-color: #0a0a0a !important;">
-          
-          <!-- LOGO / NOMBRE EVENTO -->
+
+          <!-- EVENT NAME -->
           <tr>
             <td style="padding: 48px 40px 32px 40px; text-align: center;">
-              <h1 style="color: ${heroColor} !important; font-size: 36px; font-weight: 900; margin: 0; letter-spacing: 2px; text-transform: uppercase;">${config.eventName}</h1>
+              <h1 style="color: ${heroColor} !important; font-size: 36px; font-weight: 900; margin: 0; letter-spacing: 2px; text-transform: uppercase;">${props.eventName}</h1>
             </td>
           </tr>
-          
-          <!-- ESTADO PAGO -->
+
+          <!-- PAYMENT STATUS -->
           <tr>
             <td style="padding: 0 40px 40px 40px; text-align: center;">
               <div style="display: inline-block; background-color: #18181b !important; border: 1px solid #27272a; border-radius: 6px; padding: 12px 24px;">
@@ -68,30 +129,28 @@ export function buildEventEmail(
               </div>
             </td>
           </tr>
-          
+
           <!-- CONTENT -->
           <tr>
             <td style="padding: 0 40px 48px 40px;">
-              
+
               <!-- GREETING -->
-              <p style="color: #ffffff !important; font-size: 16px; margin: 0 0 8px 0; font-weight: 600;">Hola ${participant.name},</p>
-              <p style="color: #a1a1aa !important; font-size: 15px; margin: 0 0 48px 0; line-height: 1.7;">Tu plaza para ${config.eventName} está confirmada. A continuación tienes la información esencial para el evento.</p>
-              
+              <p style="color: #ffffff !important; font-size: 16px; margin: 0 0 8px 0; font-weight: 600;">Hola ${props.name},</p>
+              <p style="color: #a1a1aa !important; font-size: 15px; margin: 0 0 48px 0; line-height: 1.7;">Tu plaza para ${props.eventName} está confirmada. A continuación tienes la información esencial para el evento.</p>
+
               ${hasWhatsApp ? `
-              <!-- ========================================
-                  💬 BLOQUE WHATSAPP ELEGANTE
-                  ======================================== -->
+              <!-- WHATSAPP BLOCK -->
               <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #18181b !important; border: 2px solid #27272a; border-radius: 12px; padding: 32px; margin: 0 0 48px 0;">
                 <tr>
                   <td>
                     <h3 style="color: #ffffff !important; font-size: 15px; font-weight: 700; margin: 0 0 16px 0; letter-spacing: 0.5px;">Información importante</h3>
                     <p style="color: #e4e4e7 !important; font-size: 14px; line-height: 1.8; margin: 0 0 24px 0;">
-                      ${config.whatsappMessage || 'Toda la comunicación logística del evento (coordenadas, avisos y cambios) se realizará exclusivamente a través del grupo de WhatsApp.'}
+                      ${props.whatsappMessage || 'Toda la comunicación logística del evento (coordenadas, avisos y cambios) se realizará exclusivamente a través del grupo de WhatsApp.'}
                     </p>
                     <p style="color: #a1a1aa !important; font-size: 13px; line-height: 1.7; margin: 0 0 28px 0;">
                       Es necesario unirse para poder participar correctamente.
                     </p>
-                    <a href="${config.whatsappLink}" style="display: inline-block; background-color: #16a34a !important; color: #ffffff !important; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px; letter-spacing: 0.3px;">
+                    <a href="${props.whatsappLink}" style="display: inline-block; background-color: #16a34a !important; color: #ffffff !important; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px; letter-spacing: 0.3px;">
                       Unirme al grupo de WhatsApp
                     </a>
                     <p style="color: #71717a !important; font-size: 12px; margin: 12px 0 0 0; line-height: 1.6;">
@@ -101,15 +160,15 @@ export function buildEventEmail(
                 </tr>
               </table>
               ` : ''}
-              
-              ${config.eventDate || config.eventLocation || config.eventDetails ? `
-              <!-- INFORMACIÓN DEL EVENTO -->
+
+              ${props.eventDate || props.eventLocation || props.eventDetails ? `
+              <!-- EVENT INFORMATION -->
               <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #18181b !important; border: 1px solid #27272a; border-radius: 12px; padding: 32px; margin: 0 0 32px 0;">
                 <tr>
                   <td>
                     <h3 style="color: #ffffff !important; font-size: 15px; font-weight: 700; margin: 0 0 24px 0; letter-spacing: 0.5px;">Información del evento</h3>
-                    
-                    ${config.eventDate ? `
+
+                    ${props.eventDate ? `
                     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 0 0 20px 0;">
                       <tr>
                         <td width="24" valign="top" style="padding-right: 16px;">
@@ -117,14 +176,14 @@ export function buildEventEmail(
                         </td>
                         <td>
                           <div style="color: #71717a !important; font-size: 12px; margin-bottom: 4px;">Fecha y hora</div>
-                          <div style="color: #ffffff !important; font-size: 14px; font-weight: 600; line-height: 1.5;">${formatEventDate(config.eventDate)}</div>
-                          <div style="color: #ffffff !important; font-size: 14px; font-weight: 600;">${formatEventTime(config.eventDate)}</div>
+                          <div style="color: #ffffff !important; font-size: 14px; font-weight: 600; line-height: 1.5;">${formatEventDate(props.eventDate)}</div>
+                          <div style="color: #ffffff !important; font-size: 14px; font-weight: 600;">${formatEventTime(props.eventDate)}</div>
                         </td>
                       </tr>
                     </table>
                     ` : ''}
-                    
-                    ${config.eventLocation ? `
+
+                    ${props.eventLocation ? `
                     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 0 0 20px 0;">
                       <tr>
                         <td width="24" valign="top" style="padding-right: 16px;">
@@ -132,13 +191,13 @@ export function buildEventEmail(
                         </td>
                         <td>
                           <div style="color: #71717a !important; font-size: 12px; margin-bottom: 4px;">Ubicación</div>
-                          <div style="color: #ffffff !important; font-size: 14px; font-weight: 600;">${config.eventLocation}</div>
+                          <div style="color: #ffffff !important; font-size: 14px; font-weight: 600;">${props.eventLocation}</div>
                         </td>
                       </tr>
                     </table>
                     ` : ''}
-                    
-                    ${config.eventDetails?.meetingPoint ? `
+
+                    ${props.eventDetails?.meetingPoint ? `
                     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 0 0 20px 0;">
                       <tr>
                         <td width="24" valign="top" style="padding-right: 16px;">
@@ -146,13 +205,13 @@ export function buildEventEmail(
                         </td>
                         <td>
                           <div style="color: #71717a !important; font-size: 12px; margin-bottom: 4px;">Punto de encuentro</div>
-                          <div style="color: #ffffff !important; font-size: 14px; font-weight: 600;">${config.eventDetails.meetingPoint}</div>
+                          <div style="color: #ffffff !important; font-size: 14px; font-weight: 600;">${props.eventDetails.meetingPoint}</div>
                         </td>
                       </tr>
                     </table>
                     ` : ''}
-                    
-                    ${config.eventDetails?.duration ? `
+
+                    ${props.eventDetails?.duration ? `
                     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 0 0 20px 0;">
                       <tr>
                         <td width="24" valign="top" style="padding-right: 16px;">
@@ -160,13 +219,13 @@ export function buildEventEmail(
                         </td>
                         <td>
                           <div style="color: #71717a !important; font-size: 12px; margin-bottom: 4px;">Duración</div>
-                          <div style="color: #ffffff !important; font-size: 14px; font-weight: 600;">${config.eventDetails.duration}</div>
+                          <div style="color: #ffffff !important; font-size: 14px; font-weight: 600;">${props.eventDetails.duration}</div>
                         </td>
                       </tr>
                     </table>
                     ` : ''}
-                    
-                    ${config.eventDetails?.difficulty ? `
+
+                    ${props.eventDetails?.difficulty ? `
                     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 0 0 20px 0;">
                       <tr>
                         <td width="24" valign="top" style="padding-right: 16px;">
@@ -174,13 +233,13 @@ export function buildEventEmail(
                         </td>
                         <td>
                           <div style="color: #71717a !important; font-size: 12px; margin-bottom: 4px;">Nivel</div>
-                          <div style="color: #ffffff !important; font-size: 14px; font-weight: 600;">${config.eventDetails.difficulty}</div>
+                          <div style="color: #ffffff !important; font-size: 14px; font-weight: 600;">${props.eventDetails.difficulty}</div>
                         </td>
                       </tr>
                     </table>
                     ` : ''}
-                    
-                    ${config.eventDetails?.requiredEquipment ? `
+
+                    ${props.eventDetails?.requiredEquipment ? `
                     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 0;">
                       <tr>
                         <td width="24" valign="top" style="padding-right: 16px;">
@@ -188,7 +247,7 @@ export function buildEventEmail(
                         </td>
                         <td>
                           <div style="color: #71717a !important; font-size: 12px; margin-bottom: 4px;">Material necesario</div>
-                          <div style="color: #ffffff !important; font-size: 14px; font-weight: 600;">${config.eventDetails.requiredEquipment}</div>
+                          <div style="color: #ffffff !important; font-size: 14px; font-weight: 600;">${props.eventDetails.requiredEquipment}</div>
                         </td>
                       </tr>
                     </table>
@@ -197,24 +256,24 @@ export function buildEventEmail(
                 </tr>
               </table>
               ` : ''}
-              
-              <!-- TU RESERVA -->
+
+              <!-- YOUR BOOKING -->
               <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #18181b !important; border: 1px solid #27272a; border-radius: 12px; padding: 32px; margin: 0 0 32px 0;">
                 <tr>
                   <td>
                     <h3 style="color: #ffffff !important; font-size: 15px; font-weight: 700; margin: 0 0 24px 0; letter-spacing: 0.5px;">Tu reserva</h3>
-                    ${buildParticipantDetailsMinimal(participant, config, heroColor)}
+                    ${buildParticipantDetails(props, heroColor)}
                   </td>
                 </tr>
               </table>
-              
-              ${config.features && config.features.length > 0 ? `
-              <!-- QUÉ INCLUYE -->
+
+              ${props.features && props.features.length > 0 ? `
+              <!-- WHAT'S INCLUDED -->
               <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 0 0 32px 0;">
                 <tr>
                   <td>
                     <h3 style="color: #ffffff !important; font-size: 15px; font-weight: 700; margin: 0 0 20px 0; letter-spacing: 0.5px;">Qué incluye</h3>
-                    ${config.features.map((feature, index) => `
+                    ${props.features.map((feature, index) => `
                     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: ${index === 0 ? '0' : '16px'} 0 0 0;">
                       <tr>
                         <td width="24" valign="top" style="padding-right: 16px;">
@@ -231,9 +290,9 @@ export function buildEventEmail(
                 </tr>
               </table>
               ` : ''}
-              
+
               ${calendarLinks ? `
-              <!-- CALENDARIO -->
+              <!-- CALENDAR -->
               <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #18181b !important; border: 1px solid #27272a; border-radius: 12px; overflow: hidden; margin: 0 0 32px 0;">
                 <tr>
                   <td>
@@ -244,8 +303,7 @@ export function buildEventEmail(
                         </td>
                       </tr>
                     </table>
-                    
-                    <!-- Google -->
+
                     <table cellpadding="0" cellspacing="0" border="0" width="100%">
                       <tr>
                         <td style="padding: 16px 24px; border-bottom: 1px solid #27272a;">
@@ -267,12 +325,11 @@ export function buildEventEmail(
                         </td>
                       </tr>
                     </table>
-                    
-                    <!-- Apple -->
+
                     <table cellpadding="0" cellspacing="0" border="0" width="100%">
                       <tr>
                         <td style="padding: 16px 24px; border-bottom: 1px solid #27272a;">
-                          <a href="${calendarLinks.icsUrl}" download="${config.eventName.toLowerCase().replace(/\s+/g, '-')}.ics" style="text-decoration: none;">
+                          <a href="${calendarLinks.icsUrl}" download="${props.eventName.toLowerCase().replace(/\s+/g, '-')}.ics" style="text-decoration: none;">
                             <table cellpadding="0" cellspacing="0" border="0" width="100%">
                               <tr>
                                 <td width="32" valign="middle">
@@ -290,8 +347,7 @@ export function buildEventEmail(
                         </td>
                       </tr>
                     </table>
-                    
-                    <!-- Outlook -->
+
                     <table cellpadding="0" cellspacing="0" border="0" width="100%">
                       <tr>
                         <td style="padding: 16px 24px;">
@@ -317,20 +373,38 @@ export function buildEventEmail(
                 </tr>
               </table>
               ` : ''}
-              
-              ${config.importantNote ? `
-              <!-- NOTA IMPORTANTE -->
+
+              ${props.importantNote ? `
+              <!-- IMPORTANT NOTE -->
               <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #18181b !important; border-left: 3px solid ${heroColor}; border-radius: 8px; padding: 24px; margin: 0 0 48px 0;">
                 <tr>
                   <td>
-                    <h4 style="color: #ffffff !important; font-size: 13px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: 0.5px; text-transform: uppercase;">${config.importantNote.title}</h4>
-                    <p style="color: #a1a1aa !important; font-size: 13px; line-height: 1.7; margin: 0;">${config.importantNote.message}</p>
+                    <h4 style="color: #ffffff !important; font-size: 13px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: 0.5px; text-transform: uppercase;">${props.importantNote.icon ? `${props.importantNote.icon} ` : ''}${props.importantNote.title}</h4>
+                    <p style="color: #a1a1aa !important; font-size: 13px; line-height: 1.7; margin: 0;">${props.importantNote.message}</p>
                   </td>
                 </tr>
               </table>
               ` : ''}
-              
-              <!-- FOOTER LIMPIO -->
+
+              ${props.ctaButtons && props.ctaButtons.length > 0 ? `
+              <!-- CTA BUTTONS -->
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 0 0 32px 0;">
+                <tr>
+                  <td style="text-align: center;">
+                    ${props.ctaButtons.map(btn => {
+                      const isPrimary = btn.style !== 'secondary';
+                      return `
+                        <a href="${btn.url}" style="display: inline-block; background-color: ${isPrimary ? heroColor : '#27272a'} !important; color: #ffffff !important; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px; letter-spacing: 0.3px; margin: 8px;">
+                          ${btn.text}
+                        </a>
+                      `;
+                    }).join('')}
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+
+              <!-- FOOTER -->
               <table cellpadding="0" cellspacing="0" border="0" width="100%" style="padding-top: 32px; border-top: 1px solid #27272a;">
                 <tr>
                   <td style="text-align: center;">
@@ -340,40 +414,61 @@ export function buildEventEmail(
                   </td>
                 </tr>
               </table>
-              
+
             </td>
           </tr>
-          
+
         </table>
-        
+
       </td>
     </tr>
   </table>
-  
+
 </body>
 </html>
   `;
 }
 
-// ========================================
-// HELPER FUNCTIONS
-// ========================================
+function generateEventText(props: EventMailProps): string {
+  return `
+PLAZA CONFIRMADA - ${props.eventName.toUpperCase()}
 
-function buildParticipantDetailsMinimal(
-  participant: BaseEventEmailData,
-  config: EventEmailConfig,
-  heroColor: string
-): string {
+Hola ${props.name},
+
+Tu plaza para ${props.eventName} está confirmada.
+
+${props.eventDate ? `FECHA: ${formatEventDate(props.eventDate)} - ${formatEventTime(props.eventDate)}` : ''}
+${props.eventLocation ? `UBICACIÓN: ${props.eventLocation}` : ''}
+${props.eventDetails?.meetingPoint ? `PUNTO DE ENCUENTRO: ${props.eventDetails.meetingPoint}` : ''}
+
+TU RESERVA:
+Nombre: ${props.name}
+Email: ${props.email}
+Teléfono: ${props.phone}
+${props.dni ? `DNI/NIE: ${props.dni}` : ''}
+${props.shirtSize ? `Talla: ${props.shirtSize}` : ''}
+Importe: ${(props.amount / 100).toFixed(2)}€
+
+${props.whatsappLink ? `\n⚠️ IMPORTANTE: Únete al grupo de WhatsApp para recibir toda la información del evento.\n${props.whatsappLink}\n` : ''}
+
+Nos vemos en la montaña 🏔️
+
+PROYECTO CUMBRE
+info@proyecto-cumbre.es
+  `.trim();
+}
+
+function buildParticipantDetails(props: EventMailProps, heroColor: string): string {
   const details = [
-    { label: 'Nombre', value: participant.name },
-    { label: 'Email', value: participant.email },
-    { label: 'Teléfono', value: participant.phone },
+    { label: 'Nombre', value: props.name },
+    { label: 'Email', value: props.email },
+    { label: 'Teléfono', value: props.phone },
   ];
 
-  if (participant.dni) details.push({ label: 'DNI/NIE', value: participant.dni });
-  if (participant.shirtSize) details.push({ label: 'Talla', value: participant.shirtSize });
-  if (config.customDetails) details.push(...config.customDetails);
-  details.push({ label: 'Importe', value: `${(participant.amount / 100).toFixed(2)}€` });
+  if (props.dni) details.push({ label: 'DNI/NIE', value: props.dni });
+  if (props.shirtSize) details.push({ label: 'Talla', value: props.shirtSize });
+  if (props.customDetails) details.push(...props.customDetails);
+  details.push({ label: 'Importe', value: `${(props.amount / 100).toFixed(2)}€` });
 
   return details.map((detail, index) => {
     const isLast = index === details.length - 1;
@@ -429,9 +524,9 @@ function generateCalendarLinks(event: {
   const location = event.location || '';
   const startDateTime = `${dateStr.replace(/-/g, '')}T${startTime.replace(/:/g, '')}00`;
   const endDateTime = `${dateStr.replace(/-/g, '')}T${endTime.replace(/:/g, '')}00`;
-  
+
   const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${startDateTime}/${endDateTime}&details=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}`;
-  
+
   const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Proyecto Cumbre//ES
@@ -444,9 +539,9 @@ LOCATION:${location}
 STATUS:CONFIRMED
 END:VEVENT
 END:VCALENDAR`;
-  
+
   const icsUrl = `data:text/calendar;charset=utf8,${encodeURIComponent(icsContent)}`;
   const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(event.title)}&startdt=${dateStr}T${startTime}&enddt=${dateStr}T${endTime}&body=${encodeURIComponent(description)}&location=${encodeURIComponent(location)}`;
-  
+
   return { googleUrl, icsUrl, outlookUrl };
 }
