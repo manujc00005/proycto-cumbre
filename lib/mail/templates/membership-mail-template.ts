@@ -1,11 +1,22 @@
 // ========================================
-// MEMBERSHIP EMAIL TEMPLATE - FLEXIBLE
-// Always-black dark theme enforced
-// Handles success/failed payment states
+// MEMBERSHIP EMAIL TEMPLATE - MODULAR
+// Dark theme guaranteed across all clients
+// Handles success/failed/pending payment states
 // lib/mail/templates/membership-mail-template.ts
 // ========================================
 
 import { formatShortLicenseType } from '@/lib/constants';
+import {
+  emailBase,
+  emailHeader,
+  statusBadge,
+  contentWrapper,
+  greetingSection,
+  contentBox,
+  detailRow,
+  infoBox,
+  emailFooter,
+} from '../email-components';
 
 export type MembershipPaymentStatus = 'success' | 'failed' | 'pending';
 
@@ -42,272 +53,116 @@ export function buildMembershipMail(props: MembershipMailProps): {
 
 function generateSuccessHTML(props: MembershipMailProps): string {
   const hasLicense = props.licenseType && props.licenseType !== 'none';
-
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <meta name="color-scheme" content="dark">
-  <meta name="supported-color-schemes" content="dark">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    html, body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: #000000 !important;
-      margin: 0;
-      padding: 0;
-    }
-  </style>
-</head>
-<body bgcolor="#000000" style="margin: 0; padding: 0; background-color: #000000 !important;">
-
-  <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #000000 !important; padding: 40px 20px;">
-    <tr>
-      <td align="center">
-
-        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 600px; background-color: #0a0a0a !important;">
-
-          <!-- HEADER -->
-          <tr>
-            <td style="padding: 48px 40px 32px 40px; text-align: center; background-color: #0a0a0a !important;">
-              <h1 style="color: #f97316 !important; font-size: 28px; font-weight: 900; margin: 0 0 8px 0; letter-spacing: 1px;">PROYECTO CUMBRE</h1>
-              <p style="color: #52525b !important; font-size: 12px; margin: 0; letter-spacing: 0.5px;">CLUB DE MONTAÑA</p>
-            </td>
-          </tr>
-
-          <!-- SUCCESS BADGE -->
-          <tr>
-            <td style="padding: 0 40px 40px 40px; text-align: center; background-color: #0a0a0a !important;">
-              <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
-                <tr>
-                  <td style="background-color: #18181b !important; border: 1px solid #27272a; border-radius: 12px; padding: 24px 32px; text-align: center;">
-                    <div style="font-size: 32px; margin-bottom: 12px;">✓</div>
-                    <h2 style="color: #fafafa !important; font-size: 18px; font-weight: 700; margin: 0 0 4px 0; letter-spacing: -0.5px;">Pago completado</h2>
-                    <p style="color: #a1a1aa !important; font-size: 14px; margin: 0;">Tu membresía está activa</p>
-                    ${props.amount ? `
-                      <p style="color: #10b981 !important; font-size: 22px; font-weight: 700; margin: 16px 0 0 0;">${(props.amount / 100).toFixed(2)}€</p>
-                    ` : ''}
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- CONTENT -->
-          <tr>
-            <td style="padding: 0 40px 48px 40px; background-color: #0a0a0a !important;">
-
-              <p style="color: #fafafa !important; font-size: 16px; margin: 0 0 8px 0; font-weight: 600;">Hola ${props.firstName},</p>
-              <p style="color: #a1a1aa !important; font-size: 15px; margin: 0 0 32px 0; line-height: 1.7;">¡Gracias por unirte a nuestro club de montaña! Estamos encantados de tenerte como socio.</p>
-
-              <!-- MEMBERSHIP DETAILS -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #18181b !important; border: 1px solid #27272a; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
-                <tr>
-                  <td>
-                    <h3 style="color: #e4e4e7 !important; font-size: 14px; font-weight: 600; margin: 0 0 20px 0; text-transform: uppercase; letter-spacing: 0.5px;">Detalles de tu membresía</h3>
-
-                    ${props.memberNumber ? `
-                    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #27272a;">
-                      <tr>
-                        <td style="color: #71717a !important; font-size: 13px;">Número de Socio</td>
-                        <td style="color: #fafafa !important; font-size: 14px; font-weight: 600; text-align: right;">${props.memberNumber}</td>
-                      </tr>
-                    </table>
-                    ` : ''}
-
-                    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #27272a;">
-                      <tr>
-                        <td style="color: #71717a !important; font-size: 13px;">Nombre</td>
-                        <td style="color: #fafafa !important; font-size: 14px; font-weight: 600; text-align: right;">${props.firstName} ${props.lastName}</td>
-                      </tr>
-                    </table>
-
-                    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: ${hasLicense ? '16px' : '0'}; ${hasLicense ? 'padding-bottom: 16px; border-bottom: 1px solid #27272a;' : ''}">
-                      <tr>
-                        <td style="color: #71717a !important; font-size: 13px;">Estado</td>
-                        <td style="color: #10b981 !important; font-size: 14px; font-weight: 600; text-align: right;">ACTIVO</td>
-                      </tr>
-                    </table>
-
-                    ${hasLicense && props.licenseType ? `
-                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                      <tr>
-                        <td style="color: #71717a !important; font-size: 13px;">Licencia FEDME</td>
-                        <td style="color: #fafafa !important; font-size: 14px; font-weight: 600; text-align: right;">${formatShortLicenseType(props.licenseType)}</td>
-                      </tr>
-                    </table>
-                    ` : ''}
-                  </td>
-                </tr>
-              </table>
-
-              ${hasLicense ? `
-              <!-- LICENSE NOTE -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #18181b !important; border-left: 3px solid #f97316; border-radius: 8px; padding: 20px; margin-bottom: 32px;">
-                <tr>
-                  <td>
-                    <p style="color: #fafafa !important; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">📋 Sobre tu licencia federativa</p>
-                    <p style="color: #a1a1aa !important; font-size: 13px; line-height: 1.7; margin: 0;">Tu licencia FEDME será procesada en 48-72 horas. Te notificaremos cuando esté activa.</p>
-                  </td>
-                </tr>
-              </table>
-              ` : ''}
-
-              <p style="color: #a1a1aa !important; font-size: 15px; line-height: 1.7; margin: 0 0 32px 0;">Ya puedes participar en todas nuestras actividades. ¡Nos vemos en la montaña!</p>
-
-              <!-- FOOTER -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="padding-top: 32px; border-top: 1px solid #27272a;">
-                <tr>
-                  <td style="text-align: center;">
-                    <p style="color: #71717a !important; font-size: 13px; margin: 0 0 8px 0;">Bienvenido al club</p>
-                    <p style="color: #f97316 !important; font-size: 14px; font-weight: 700; margin: 0 0 24px 0; letter-spacing: 0.5px;">EQUIPO PROYECTO CUMBRE</p>
-                    <p style="color: #52525b !important; font-size: 11px; margin: 0;">Email automático · <a href="mailto:info@proyecto-cumbre.es" style="color: #71717a !important; text-decoration: none;">Contacto</a></p>
-                  </td>
-                </tr>
-              </table>
-
-            </td>
-          </tr>
-
-        </table>
-
-      </td>
-    </tr>
-  </table>
-
-</body>
-</html>
-  `;
+  
+  // Build membership details
+  let detailsContent = '';
+  
+  if (props.memberNumber) {
+    detailsContent += detailRow('Número de Socio', props.memberNumber);
+  }
+  
+  detailsContent += detailRow('Nombre', `${props.firstName} ${props.lastName}`);
+  detailsContent += detailRow('Estado', 'ACTIVO', {
+    valueColor: '#10b981',
+    isLast: !hasLicense,
+  });
+  
+  if (hasLicense && props.licenseType) {
+    detailsContent += detailRow(
+      'Licencia FEDME',
+      formatShortLicenseType(props.licenseType),
+      { isLast: true }
+    );
+  }
+  
+  // Build content sections
+  const greeting = greetingSection(
+    props.firstName,
+    '¡Gracias por unirte a nuestro club de montaña! Estamos encantados de tenerte como socio.'
+  );
+  
+  const membershipBox = contentBox({
+    title: 'Detalles de tu membresía',
+    content: detailsContent,
+  });
+  
+  let licenseInfoBox = '';
+  if (hasLicense) {
+    licenseInfoBox = infoBox({
+      icon: '📋',
+      title: 'Sobre tu licencia federativa',
+      message: 'Tu licencia FEDME será procesada en 48-72 horas. Te notificaremos cuando esté activa.',
+    });
+  }
+  
+  const closingMessage = '<p style="color: #a1a1aa !important; font-size: 14px; line-height: 1.7; margin: 0 0 32px 0;">Ya puedes participar en todas nuestras actividades. ¡Nos vemos en la montaña!</p>';
+  
+  // Assemble email
+  const content = [
+    emailHeader('CLUB DE MONTAÑA'),
+    statusBadge({
+      icon: '✓',
+      title: 'Pago completado',
+      subtitle: 'Tu membresía está activa',
+      accentColor: '#10b981',
+      amount: props.amount ? `${(props.amount / 100).toFixed(2)}€` : undefined,
+    }),
+    contentWrapper(
+      greeting +
+      membershipBox +
+      licenseInfoBox +
+      closingMessage
+    ),
+    emailFooter('Bienvenido al club', true),
+  ].join('');
+  
+  return emailBase(content);
 }
 
 function generateFailedHTML(props: MembershipMailProps): string {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="dark only">
-  <meta name="supported-color-schemes" content="dark">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      color-scheme: dark only !important;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: #000000 !important;
-      margin: 0;
-      padding: 0;
-    }
-  </style>
-</head>
-<body style="margin: 0; padding: 0; background-color: #000000 !important;">
-
- <table
-  cellpadding="0"
-  cellspacing="0"
-  border="0"
-  width="100%"
-  bgcolor="#000000"
-  style="background-color: #000000 !important; padding: 40px 20px;">
-    <tr>
-      <td align="center">
-
-       <table
-        cellpadding="0"
-        cellspacing="0"
-        border="0"
-        width="100%"
-        bgcolor="#0a0a0a"
-        style="max-width: 600px; background-color: #0a0a0a !important;">
-
-          <!-- HEADER -->
-          <tr>
-            <td style="padding: 48px 40px 32px 40px; text-align: center; background-color: #0a0a0a !important;">
-              <h1 style="color: #f97316 !important; font-size: 28px; font-weight: 900; margin: 0 0 8px 0; letter-spacing: 1px;">PROYECTO CUMBRE</h1>
-              <p style="color: #52525b !important; font-size: 12px; margin: 0; letter-spacing: 0.5px;">CLUB DE MONTAÑA</p>
-            </td>
-          </tr>
-
-          <!-- ERROR BADGE -->
-          <tr>
-            <td style="padding: 0 40px 40px 40px; text-align: center; background-color: #0a0a0a !important;">
-              <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
-                <tr>
-                  <td style="background-color: #18181b !important; border: 1px solid #3f3f46; border-radius: 12px; padding: 24px 32px; text-align: center;">
-                    <div style="font-size: 32px; margin-bottom: 12px;">⚠️</div>
-                    <h2 style="color: #fafafa !important; font-size: 18px; font-weight: 700; margin: 0 0 4px 0; letter-spacing: -0.5px;">No se pudo completar el pago</h2>
-                    <p style="color: #a1a1aa !important; font-size: 14px; margin: 0;">Tu membresía no ha sido activada</p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- CONTENT -->
-          <tr>
-            <td style="padding: 0 40px 48px 40px; background-color: #0a0a0a !important;">
-
-              <p style="color: #fafafa !important; font-size: 16px; margin: 0 0 8px 0; font-weight: 600;">Hola ${props.firstName},</p>
-              <p style="color: #a1a1aa !important; font-size: 15px; margin: 0 0 32px 0; line-height: 1.7;">Hemos recibido tu solicitud de membresía, pero hay un problema con el procesamiento del pago.</p>
-
-              <!-- ERROR INFO -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #18181b !important; border: 1px solid #27272a; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
-                <tr>
-                  <td>
-                    <p style="color: #fafafa !important; font-size: 14px; font-weight: 600; margin: 0 0 16px 0;">Qué ha ocurrido:</p>
-                    <p style="color: #a1a1aa !important; font-size: 13px; line-height: 1.7; margin: 0 0 8px 0;">• El pago fue rechazado o cancelado por tu banco</p>
-                    <p style="color: #a1a1aa !important; font-size: 13px; line-height: 1.7; margin: 0 0 8px 0;">• Tu membresía no ha sido activada</p>
-                    <p style="color: #a1a1aa !important; font-size: 13px; line-height: 1.7; margin: 0;">• No se te ha realizado ningún cargo</p>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- SOLUTIONS -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #18181b !important; border: 1px solid #27272a; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
-                <tr>
-                  <td>
-                    <h3 style="color: #e4e4e7 !important; font-size: 14px; font-weight: 600; margin: 0 0 16px 0; text-transform: uppercase; letter-spacing: 0.5px;">¿Qué puedes hacer?</h3>
-                    <p style="color: #a1a1aa !important; font-size: 13px; line-height: 1.7; margin: 0 0 8px 0;">• <strong style="color: #fafafa !important;">Reintentar el pago</strong> desde nuestra web usando otra tarjeta</p>
-                    <p style="color: #a1a1aa !important; font-size: 13px; line-height: 1.7; margin: 0 0 8px 0;">• <strong style="color: #fafafa !important;">Contactarnos</strong> si crees que hay un error: info@proyecto-cumbre.es</p>
-                    <p style="color: #a1a1aa !important; font-size: 13px; line-height: 1.7; margin: 0;">• <strong style="color: #fafafa !important;">Verificar con tu banco</strong> que la tarjeta permite pagos online internacionales</p>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- FOOTER -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="padding-top: 32px; border-top: 1px solid #27272a;">
-                <tr>
-                  <td style="text-align: center;">
-                    <p style="color: #71717a !important; font-size: 13px; margin: 0 0 8px 0;">Estamos aquí para ayudarte</p>
-                    <p style="color: #f97316 !important; font-size: 14px; font-weight: 700; margin: 0 0 8px 0;">📧 info@proyecto-cumbre.es</p>
-                    <p style="color: #f97316 !important; font-size: 14px; font-weight: 700; margin: 0 0 24px 0; letter-spacing: 0.5px;">EQUIPO PROYECTO CUMBRE</p>
-                    <p style="color: #52525b !important; font-size: 11px; margin: 0;">Email automático · <a href="mailto:info@proyecto-cumbre.es" style="color: #71717a !important; text-decoration: none;">Contacto</a></p>
-                  </td>
-                </tr>
-              </table>
-
-            </td>
-          </tr>
-
-        </table>
-
-      </td>
-    </tr>
-  </table>
-
-</body>
-</html>
+  const greeting = greetingSection(
+    props.firstName,
+    'Hemos recibido tu solicitud de membresía, pero hay un problema con el procesamiento del pago.'
+  );
+  
+  const errorInfoContent = `
+    <p style="color: #fafafa !important; font-size: 13px; font-weight: 600; margin: 0 0 14px 0; line-height: 1.4;">Qué ha ocurrido:</p>
+    <p style="color: #a1a1aa !important; font-size: 13px; line-height: 1.7; margin: 0 0 8px 0;">• El pago fue rechazado o cancelado por tu banco</p>
+    <p style="color: #a1a1aa !important; font-size: 13px; line-height: 1.7; margin: 0 0 8px 0;">• Tu membresía no ha sido activada</p>
+    <p style="color: #a1a1aa !important; font-size: 13px; line-height: 1.7; margin: 0;">• No se te ha realizado ningún cargo</p>
   `;
+  
+  const solutionsContent = `
+    <h3 style="color: #e4e4e7 !important; font-size: 13px; font-weight: 600; margin: 0 0 14px 0; text-transform: uppercase; letter-spacing: 0.8px; line-height: 1.3;">¿Qué puedes hacer?</h3>
+    <p style="color: #a1a1aa !important; font-size: 13px; line-height: 1.7; margin: 0 0 8px 0;">• <strong style="color: #fafafa !important;">Reintentar el pago</strong> desde nuestra web usando otra tarjeta</p>
+    <p style="color: #a1a1aa !important; font-size: 13px; line-height: 1.7; margin: 0 0 8px 0;">• <strong style="color: #fafafa !important;">Contactarnos</strong> si crees que hay un error: info@proyecto-cumbre.es</p>
+    <p style="color: #a1a1aa !important; font-size: 13px; line-height: 1.7; margin: 0;">• <strong style="color: #fafafa !important;">Verificar con tu banco</strong> que la tarjeta permite pagos online internacionales</p>
+  `;
+  
+  const content = [
+    emailHeader('CLUB DE MONTAÑA'),
+    statusBadge({
+      icon: '⚠️',
+      title: 'No se pudo completar el pago',
+      subtitle: 'Tu membresía no ha sido activada',
+      accentColor: '#71717a',
+    }),
+    contentWrapper(
+      greeting +
+      contentBox({
+        title: 'Información del error',
+        content: errorInfoContent,
+      }) +
+      contentBox({
+        title: '',
+        content: solutionsContent,
+        marginBottom: '0',
+      })
+    ),
+    emailFooter('Estamos aquí para ayudarte', true),
+  ].join('');
+  
+  return emailBase(content);
 }
 
 function generateSuccessText(props: MembershipMailProps): string {
