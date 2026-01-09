@@ -26,10 +26,13 @@ export default class EmailTemplates {
       <p>¡Gracias por unirte a nuestro club de montaña! Estamos encantados de tenerte como socio.</p>
       
       <div class="success-box">
-        <div class="success-icon">✅</div>
-        <div class="success-title">Pago Completado</div>
-        <div class="success-subtitle">Tu membresía está activa</div>
-        ${data.amount ? `<div style="font-size: 36px; font-weight: 700; color: #10b981; margin-top: 15px;">${(data.amount / 100).toFixed(2)}€</div>` : ''}
+        <div class="success-title">Pago completado</div>
+        <div class="success-subtitle">Tu membresía está activa.</div>
+        ${data.amount ? `
+          <div class="success-amount">
+            ${(data.amount / 100).toFixed(2)}€
+          </div>
+        ` : ''}
       </div>
 
       <div class="info-box">
@@ -87,8 +90,8 @@ export default class EmailTemplates {
       <p>Tu licencia FEDME ya está activa y lista para usar.</p>
       
       <div class="success-box">
-        <div style="background-color: #064e3b; color: #6ee7b7; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 18px; border: 1px solid #065f46;">
-          LICENCIA: ${formatShortLicenseType(data.licenseType)} ACTIVA ✓
+        <div class="license-status">
+          Licencia: ${formatShortLicenseType(data.licenseType)} — Activa
         </div>
       </div>
 
@@ -121,9 +124,8 @@ export default class EmailTemplates {
   static orderConfirmation(data: OrderEmailData): string {
     return new EmailTemplateBuilder().build(`
       <div class="success-box">
-        <div class="success-icon">✅</div>
-        <div class="success-title">¡PEDIDO CONFIRMADO!</div>
-        <div class="success-subtitle">Hemos recibido tu pedido correctamente</div>
+        <div class="success-title">Pedido confirmado</div>
+        <div class="success-subtitle">Hemos recibido tu pedido correctamente.</div>
       </div>
 
       <p style="color: #fafafa; font-size: 18px; margin-bottom: 20px;">

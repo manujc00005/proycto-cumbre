@@ -48,26 +48,34 @@ export const BASE_STYLES = `
     font-size: 15px;
   }
   .success-box {
-    background-color: #022c22;
-    border: 1px solid #065f46;
-    border-radius: 12px;
-    padding: 25px;
-    text-align: center;
-    margin: 30px 0;
-  }
-  .success-icon {
-    font-size: 48px;
-    margin-bottom: 10px;
+    background-color: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 10px;
+    padding: 20px 24px;
+    text-align: left;
+    margin: 24px 0;
   }
   .success-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #10b981;
-    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fafafa;
+    margin-bottom: 4px;
   }
+
   .success-subtitle {
-    color: #6ee7b7;
+    color: #a1a1aa;
     font-size: 14px;
+  }
+  .success-amount {
+    font-size: 22px;
+    font-weight: 600;
+    color: #22c55e;
+  }
+  .license-status {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fafafa;
+    padding: 12px 0;
   }
   .info-box {
     background-color: #27272a;
