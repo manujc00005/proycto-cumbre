@@ -5,7 +5,7 @@
 // lib/mail/templates/membership-mail-template.ts
 // ========================================
 
-import { formatLicenseType, formatShortLicenseType } from '@/lib/constants';
+import { formatShortLicenseType } from '@/lib/constants';
 
 export type MembershipPaymentStatus = 'success' | 'failed' | 'pending';
 
@@ -49,16 +49,15 @@ function generateSuccessHTML(props: MembershipMailProps): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="dark only">
+ <meta name="color-scheme" content="dark">
   <meta name="supported-color-schemes" content="dark">
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      color-scheme: dark only !important;
     }
-    body {
+    html, body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background-color: #000000 !important;
       margin: 0;
@@ -66,7 +65,7 @@ function generateSuccessHTML(props: MembershipMailProps): string {
     }
   </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #000000 !important;">
+<body bgcolor="#000000" style="margin: 0; padding: 0; background-color: #000000 !important;">
 
   <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #000000 !important; padding: 40px 20px;">
     <tr>
@@ -213,11 +212,23 @@ function generateFailedHTML(props: MembershipMailProps): string {
 </head>
 <body style="margin: 0; padding: 0; background-color: #000000 !important;">
 
-  <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #000000 !important; padding: 40px 20px;">
+ <table
+  cellpadding="0"
+  cellspacing="0"
+  border="0"
+  width="100%"
+  bgcolor="#000000"
+  style="background-color: #000000 !important; padding: 40px 20px;">
     <tr>
       <td align="center">
 
-        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 600px; background-color: #0a0a0a !important;">
+       <table
+        cellpadding="0"
+        cellspacing="0"
+        border="0"
+        width="100%"
+        bgcolor="#0a0a0a"
+        style="max-width: 600px; background-color: #0a0a0a !important;">
 
           <!-- HEADER -->
           <tr>
