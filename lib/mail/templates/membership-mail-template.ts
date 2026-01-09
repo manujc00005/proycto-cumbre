@@ -1,6 +1,5 @@
 // ========================================
-// MEMBERSHIP EMAIL TEMPLATE - GMAIL OPTIMIZED
-// Dark theme FORCED for Gmail iOS
+// MEMBERSHIP EMAIL TEMPLATE - NEUTRAL (LIGHT/DARK SAFE)
 // lib/mail/templates/membership-mail-template-gmail-optimized.ts
 // ========================================
 
@@ -39,227 +38,385 @@ export function buildMembershipMail(props: MembershipMailProps): {
   };
 }
 
+// ===================
+// HTML SUCCESS
+// ===================
+
 function generateSuccessHTML(props: MembershipMailProps): string {
   const hasLicense = props.licenseType && props.licenseType !== 'none';
-  
+
   return `
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="dark">
-  <meta name="supported-color-schemes" content="dark">
-  <meta name="x-apple-disable-message-reformatting">
-  <style>
-    /* Gmail dark mode fix */
-    @media (prefers-color-scheme: dark) {
-      .dark-bg { background-color: #000000 !important; }
-      .dark-container { background-color: #0a0a0a !important; }
-      .dark-box { background-color: #18181b !important; }
-      .dark-border { border-color: #27272a !important; }
-      .text-white { color: #ffffff !important; }
-      .text-light { color: #fafafa !important; }
-      .text-gray { color: #a1a1aa !important; }
-      .text-gray-dark { color: #71717a !important; }
-    }
-    /* Force dark everywhere */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-      -webkit-font-smoothing: antialiased;
-    }
-    /* Override Gmail auto-styling */
-    u + .body .dark-bg { background: #000000 !important; }
-    u + .body .dark-container { background: #0a0a0a !important; }
-    u + .body .dark-box { background: #18181b !important; }
-  </style>
-</head>
-<body class="body" bgcolor="#000000" style="margin: 0; padding: 0; background-color: #000000 !important;">
-  <!--[if mso]>
-  <style type="text/css">
-    body, table, td { font-family: Arial, Helvetica, sans-serif !important; }
-  </style>
-  <![endif]-->
-  
-  <div style="display: none; max-height: 0; overflow: hidden;">
-    ¡Bienvenido a Proyecto Cumbre! Tu membresía está activa.
-  </div>
-  
-  <table cellpadding="0" cellspacing="0" border="0" width="100%" class="dark-bg" bgcolor="#000000" style="background-color: #000000 !important; padding: 40px 20px;" role="presentation">
-    <tr>
-      <td align="center">
-        <!-- Main Container -->
-        <table cellpadding="0" cellspacing="0" border="0" width="100%" class="dark-container" bgcolor="#0a0a0a" style="max-width: 600px; background-color: #0a0a0a !important; border-radius: 0;" role="presentation">
-          
-          <!-- HEADER -->
-          <tr>
-            <td class="dark-container" bgcolor="#0a0a0a" style="padding: 48px 40px 32px 40px; text-align: center; background-color: #0a0a0a !important;">
-              <h1 class="text-white" style="color: #f97316 !important; font-size: 26px; font-weight: 900; margin: 0 0 8px 0; letter-spacing: 1.5px; line-height: 1.2;">PROYECTO CUMBRE</h1>
-              <p class="text-gray-dark" style="color: #52525b !important; font-size: 11px; margin: 0; letter-spacing: 1px; text-transform: uppercase; font-weight: 600;">CLUB DE MONTAÑA</p>
-            </td>
-          </tr>
-          
-          <!-- STATUS BADGE -->
-          <tr>
-            <td class="dark-container" bgcolor="#0a0a0a" style="padding: 0 40px 40px 40px; text-align: center; background-color: #0a0a0a !important;">
-              <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto; background-color: #18181b !important; border: 1px solid #27272a; border-radius: 8px; overflow: hidden;" class="dark-box dark-border" role="presentation">
-                <tr>
-                  <td style="padding: 24px 32px; text-align: center;">
-                    <div style="font-size: 28px; margin-bottom: 10px; line-height: 1;">✓</div>
-                    <h2 class="text-light" style="color: #fafafa !important; font-size: 17px; font-weight: 700; margin: 0 0 4px 0; letter-spacing: -0.3px; line-height: 1.3;">Pago completado</h2>
-                    <p class="text-gray" style="color: #a1a1aa !important; font-size: 13px; margin: 0; line-height: 1.4;">Tu membresía está activa</p>
-                    ${props.amount ? `<p style="color: #10b981 !important; font-size: 22px; font-weight: 700; margin: 12px 0 0 0; line-height: 1;">${(props.amount / 100).toFixed(2)}€</p>` : ''}
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          
-          <!-- CONTENT -->
-          <tr>
-            <td class="dark-container" bgcolor="#0a0a0a" style="padding: 0 40px 32px 40px; background-color: #0a0a0a !important;">
-              
-              <!-- Greeting -->
-              <p class="text-white" style="color: #ffffff !important; font-size: 15px; margin: 0 0 8px 0; font-weight: 600; line-height: 1.4;">Hola ${props.firstName},</p>
-              <p class="text-gray" style="color: #a1a1aa !important; font-size: 14px; margin: 0 0 32px 0; line-height: 1.7;">¡Gracias por unirte a nuestro club de montaña! Estamos encantados de tenerte como socio.</p>
-              
-              <!-- Membership Details Box -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%" class="dark-box dark-border" bgcolor="#18181b" style="background-color: #18181b !important; border: 1px solid #27272a; border-radius: 8px; margin-bottom: 32px;" role="presentation">
-                <tr>
-                  <td style="padding: 24px;">
-                    <h3 class="text-light" style="color: #e4e4e7 !important; font-size: 13px; font-weight: 600; margin: 0 0 16px 0; text-transform: uppercase; letter-spacing: 0.8px; line-height: 1.3;">Detalles de tu membresía</h3>
-                    
-                    ${props.memberNumber ? `
-                    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid #27272a;" class="dark-border" role="presentation">
-                      <tr>
-                        <td style="color: #71717a !important; font-size: 12px; padding-bottom: 4px; line-height: 1.4;" class="text-gray-dark">Número de Socio</td>
-                      </tr>
-                      <tr>
-                        <td style="color: #fafafa !important; font-weight: 600; font-size: 14px; line-height: 1.5;" class="text-light">${props.memberNumber}</td>
-                      </tr>
-                    </table>
-                    ` : ''}
-                    
-                    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid #27272a;" class="dark-border" role="presentation">
-                      <tr>
-                        <td style="color: #71717a !important; font-size: 12px; padding-bottom: 4px; line-height: 1.4;" class="text-gray-dark">Nombre</td>
-                      </tr>
-                      <tr>
-                        <td style="color: #fafafa !important; font-weight: 600; font-size: 14px; line-height: 1.5;" class="text-light">${props.firstName} ${props.lastName}</td>
-                      </tr>
-                    </table>
-                    
-                    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: ${hasLicense ? '14px' : '0'}; padding-bottom: ${hasLicense ? '14px' : '0'}; ${hasLicense ? 'border-bottom: 1px solid #27272a;' : ''}" class="dark-border" role="presentation">
-                      <tr>
-                        <td style="color: #71717a !important; font-size: 12px; padding-bottom: 4px; line-height: 1.4;" class="text-gray-dark">Estado</td>
-                      </tr>
-                      <tr>
-                        <td style="color: #10b981 !important; font-weight: 600; font-size: 14px; line-height: 1.5;">ACTIVO</td>
-                      </tr>
-                    </table>
-                    
-                    ${hasLicense && props.licenseType ? `
-                    <table cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation">
-                      <tr>
-                        <td style="color: #71717a !important; font-size: 12px; padding-bottom: 4px; line-height: 1.4;" class="text-gray-dark">Licencia FEDME</td>
-                      </tr>
-                      <tr>
-                        <td style="color: #fafafa !important; font-weight: 600; font-size: 14px; line-height: 1.5;" class="text-light">${formatShortLicenseType(props.licenseType)}</td>
-                      </tr>
-                    </table>
-                    ` : ''}
-                  </td>
-                </tr>
-              </table>
-              
-              ${hasLicense ? `
-              <!-- License Note -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%" class="dark-box" bgcolor="#18181b" style="background-color: #18181b !important; border-left: 3px solid #f97316; border-radius: 6px; margin-bottom: 32px;" role="presentation">
-                <tr>
-                  <td style="padding: 20px 24px;">
-                    <p class="text-light" style="color: #fafafa !important; font-size: 13px; font-weight: 600; margin: 0 0 8px 0; line-height: 1.4;">📋 Sobre tu licencia federativa</p>
-                    <p class="text-gray" style="color: #a1a1aa !important; font-size: 13px; line-height: 1.7; margin: 0;">Tu licencia FEDME será procesada en 48-72 horas. Te notificaremos cuando esté activa.</p>
-                  </td>
-                </tr>
-              </table>
-              ` : ''}
-              
-              <p class="text-gray" style="color: #a1a1aa !important; font-size: 14px; line-height: 1.7; margin: 0 0 32px 0;">Ya puedes participar en todas nuestras actividades. ¡Nos vemos en la montaña!</p>
-              
-            </td>
-          </tr>
-          
-          <!-- FOOTER -->
-          <tr>
-            <td class="dark-container" bgcolor="#0a0a0a" style="padding: 0 40px 48px 40px; background-color: #0a0a0a !important;">
-              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="padding-top: 32px; border-top: 1px solid #27272a;" class="dark-border" role="presentation">
-                <tr>
-                  <td style="text-align: center;">
-                    <p class="text-gray-dark" style="color: #71717a !important; font-size: 12px; margin: 0 0 8px 0; line-height: 1.5;">Bienvenido al club</p>
-                    <p style="color: #f97316 !important; font-size: 13px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: 0.8px; line-height: 1.3;">PROYECTO CUMBRE</p>
-                    <p class="text-gray-dark" style="color: #71717a !important; font-size: 12px; margin: 0 0 20px 0; line-height: 1.5;">📧 info@proyecto-cumbre.es</p>
-                    <p class="text-gray-dark" style="color: #52525b !important; font-size: 10px; margin: 0; line-height: 1.4;">Email automático · <a href="mailto:info@proyecto-cumbre.es" style="color: #71717a !important; text-decoration: none;">Contacto</a></p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Bienvenido a Proyecto Cumbre</title>
+    <style>
+      /* Reset básico para emails */
+      html, body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background-color: #e5e5e5;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      table {
+        border-spacing: 0;
+        border-collapse: collapse;
+      }
+      img {
+        border: 0;
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body style="margin:0;padding:0;background-color:#e5e5e5;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#e5e5e5;padding:24px 8px;">
+      <tr>
+        <td align="center">
+          <!-- Card principal -->
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;">
+            <tr>
+              <td style="background-color:#ffffff;border-radius:10px 10px 10px 10px;overflow:hidden;border:1px solid #e5e5e5;">
+                <!-- HEADER -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td align="center" style="padding:24px 24px 16px 24px;">
+                      <p style="margin:0;font-size:12px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.08em;">Club de montaña</p>
+                      <h1 style="margin:4px 0 0 0;font-size:22px;line-height:1.3;font-weight:800;letter-spacing:0.08em;color:#f97316;">PROYECTO CUMBRE</h1>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- STATUS BADGE -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td align="center" style="padding:8px 24px 0 24px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:520px;background-color:#f9fafb;border-radius:8px;border:1px solid #e5e7eb;">
+                        <tr>
+                          <td align="center" style="padding:18px 18px 16px 18px;">
+                            <div style="font-size:20px;line-height:1;margin-bottom:6px;">✓</div>
+                            <p style="margin:0 0 2px 0;font-size:16px;font-weight:600;color:#111827;">Pago completado</p>
+                            <p style="margin:0;font-size:13px;color:#6b7280;">Tu membresía está activa</p>
+                            ${
+                              props.amount
+                                ? `<p style="margin:10px 0 0 0;font-size:20px;font-weight:700;color:#059669;">${(
+                                    props.amount / 100
+                                  ).toFixed(2)}€</p>`
+                                : ''
+                            }
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- CONTENT -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding:24px 24px 8px 24px;">
+                      <p style="margin:0 0 6px 0;font-size:15px;font-weight:600;color:#111827;">
+                        Hola ${props.firstName},
+                      </p>
+                      <p style="margin:0 0 18px 0;font-size:14px;line-height:1.6;color:#4b5563;">
+                        ¡Gracias por unirte a nuestro club de montaña! Estamos encantados de tenerte como socio.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- MEMBERSHIP DETAILS CARD -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding:0 24px 24px 24px;">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;border-radius:8px;border:1px solid:#e5e7eb;">
+                        <tr>
+                          <td style="padding:18px 18px 8px 18px;">
+                            <p style="margin:0 0 10px 0;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#6b7280;">
+                              Detalles de tu membresía
+                            </p>
+                          </td>
+                        </tr>
+
+                        ${
+                          props.memberNumber
+                            ? `
+                        <tr>
+                          <td style="padding:0 18px 10px 18px;border-bottom:1px solid #e5e7eb;">
+                            <p style="margin:0 0 2px 0;font-size:12px;color:#6b7280;">Número de socio</p>
+                            <p style="margin:0;font-size:14px;font-weight:600;color:#111827;">${props.memberNumber}</p>
+                          </td>
+                        </tr>
+                        `
+                            : ''
+                        }
+
+                        <tr>
+                          <td style="padding:10px 18px;border-bottom:${
+                            hasLicense ? '1px solid #e5e7eb' : '0'
+                          };">
+                            <p style="margin:0 0 2px 0;font-size:12px;color:#6b7280;">Nombre</p>
+                            <p style="margin:0;font-size:14px;font-weight:600;color:#111827;">
+                              ${props.firstName} ${props.lastName}
+                            </p>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <td style="padding:10px 18px;border-bottom:${
+                            hasLicense ? '1px solid #e5e7eb' : '0'
+                          };">
+                            <p style="margin:0 0 2px 0;font-size:12px;color:#6b7280;">Estado</p>
+                            <p style="margin:0;font-size:14px;font-weight:600;color:#059669;">
+                              ACTIVO
+                            </p>
+                          </td>
+                        </tr>
+
+                        ${
+                          hasLicense && props.licenseType
+                            ? `
+                        <tr>
+                          <td style="padding:10px 18px 16px 18px;">
+                            <p style="margin:0 0 2px 0;font-size:12px;color:#6b7280;">Licencia FEDME</p>
+                            <p style="margin:0;font-size:14px;font-weight:600;color:#111827;">
+                              ${formatShortLicenseType(props.licenseType)}
+                            </p>
+                          </td>
+                        </tr>
+                        `
+                            : ''
+                        }
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+                ${
+                  hasLicense
+                    ? `
+                <!-- LICENSE NOTE -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding:0 24px 24px 24px;">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#fff7ed;border-radius:8px;border:1px solid #fed7aa;">
+                        <tr>
+                          <td style="padding:14px 16px;">
+                            <p style="margin:0 0 4px 0;font-size:13px;font-weight:600;color:#9a3412;">
+                              📋 Sobre tu licencia federativa
+                            </p>
+                            <p style="margin:0;font-size:13px;line-height:1.6;color:#7c2d12;">
+                              Tu licencia FEDME será procesada en 48-72 horas. Te notificaremos cuando esté activa.
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+                `
+                    : ''
+                }
+
+                <!-- Closing text -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding:0 24px 24px 24px;">
+                      <p style="margin:0 0 16px 0;font-size:14px;line-height:1.6;color:#4b5563;">
+                        Ya puedes participar en todas nuestras actividades. ¡Nos vemos en la montaña!
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- FOOTER -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #e5e7eb;">
+                  <tr>
+                    <td align="center" style="padding:18px 24px 18px 24px;">
+                      <p style="margin:0 0 4px 0;font-size:12px;color:#9ca3af;">Bienvenido al club</p>
+                      <p style="margin:0 0 4px 0;font-size:13px;font-weight:700;letter-spacing:0.08em;color:#f97316;">
+                        PROYECTO CUMBRE
+                      </p>
+                      <p style="margin:0 0 4px 0;font-size:12px;color:#9ca3af;">📧 info@proyecto-cumbre.es</p>
+                      <p style="margin:0;font-size:11px;color:#9ca3af;">
+                        Email automático ·
+                        <a href="mailto:info@proyecto-cumbre.es" style="color:#6b7280;text-decoration:underline;">Contacto</a>
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+          </table>
+          <!-- /Card principal -->
+        </td>
+      </tr>
+    </table>
+  </body>
 </html>
   `;
 }
 
+// ===================
+// HTML FAILED
+// ===================
+
 function generateFailedHTML(props: MembershipMailProps): string {
-  // Similar structure with Gmail optimization...
-  return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="dark">
-  <meta name="supported-color-schemes" content="dark">
-  <style>
-    @media (prefers-color-scheme: dark) {
-      .dark-bg { background-color: #000000 !important; }
-      .dark-container { background-color: #0a0a0a !important; }
-      .dark-box { background-color: #18181b !important; }
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-  </style>
-</head>
-<body class="body" bgcolor="#000000" style="margin: 0; padding: 0; background-color: #000000 !important;">
-  <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#000000" class="dark-bg" style="background-color: #000000 !important; padding: 40px 20px;">
-    <tr><td align="center">
-      <table cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="#0a0a0a" class="dark-container" style="max-width: 600px; background-color: #0a0a0a !important;">
-        <!-- Similar structure... -->
-        <tr><td style="padding: 48px 40px 32px 40px; text-align: center; background-color: #0a0a0a !important;">
-          <h1 style="color: #f97316 !important; font-size: 26px; font-weight: 900; margin: 0 0 8px 0;">PROYECTO CUMBRE</h1>
-          <p style="color: #52525b !important; font-size: 11px; margin: 0; text-transform: uppercase;">CLUB DE MONTAÑA</p>
-        </td></tr>
-        <tr><td style="padding: 0 40px 32px 40px;">
-          <p style="color: #ffffff !important; font-size: 15px; margin: 0 0 8px 0; font-weight: 600;">Hola ${props.firstName},</p>
-          <p style="color: #a1a1aa !important; font-size: 14px; margin: 0;">Hemos recibido tu solicitud de membresía, pero hay un problema con el procesamiento del pago.</p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`;
+  return `
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Problema con tu pago - Proyecto Cumbre</title>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background-color: #e5e5e5;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      table {
+        border-spacing: 0;
+        border-collapse: collapse;
+      }
+      img {
+        border: 0;
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body style="margin:0;padding:0;background-color:#e5e5e5;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#e5e5e5;padding:24px 8px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;">
+            <tr>
+              <td style="background-color:#ffffff;border-radius:10px 10px 10px 10px;overflow:hidden;border:1px solid #e5e5e5;">
+                <!-- HEADER -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td align="center" style="padding:24px 24px 16px 24px;">
+                      <p style="margin:0;font-size:12px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.08em;">Club de montaña</p>
+                      <h1 style="margin:4px 0 0 0;font-size:22px;line-height:1.3;font-weight:800;letter-spacing:0.08em;color:#f97316;">PROYECTO CUMBRE</h1>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- ERROR BADGE -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td align="center" style="padding:8px 24px 0 24px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:520px;background-color:#fef2f2;border-radius:8px;border:1px solid:#fecaca;">
+                        <tr>
+                          <td align="center" style="padding:18px 18px 16px 18px;">
+                            <div style="font-size:20px;line-height:1;margin-bottom:6px;">⚠️</div>
+                            <p style="margin:0 0 2px 0;font-size:16px;font-weight:600;color:#b91c1c;">No se ha podido completar el pago</p>
+                            <p style="margin:0;font-size:13px;color:#7f1d1d;">Tu membresía no ha sido activada</p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- CONTENT -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding:24px 24px 8px 24px;">
+                      <p style="margin:0 0 6px 0;font-size:15px;font-weight:600;color:#111827;">
+                        Hola ${props.firstName},
+                      </p>
+                      <p style="margin:0 0 14px 0;font-size:14px;line-height:1.6;color:#4b5563;">
+                        Hemos recibido tu solicitud de membresía, pero ha habido un problema al procesar el pago.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- INFO LIST -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding:0 24px 16px 24px;">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f9fafb;border-radius:8px;border:1px solid:#e5e7eb;">
+                        <tr>
+                          <td style="padding:14px 16px;">
+                            <p style="margin:0 0 6px 0;font-size:13px;font-weight:600;color:#111827;">Qué ha ocurrido</p>
+                            <p style="margin:0 0 4px 0;font-size:13px;line-height:1.5;color:#4b5563;">• El pago fue rechazado o cancelado por tu banco.</p>
+                            <p style="margin:0 0 4px 0;font-size:13px;line-height:1.5;color:#4b5563;">• Tu membresía no ha sido activada.</p>
+                            <p style="margin:0;font-size:13px;line-height:1.5;color:#4b5563;">• No se te ha realizado ningún cargo.</p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- ACTIONS -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding:0 24px 24px 24px;">
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#fff7ed;border-radius:8px;border:1px solid:#fed7aa;">
+                        <tr>
+                          <td style="padding:14px 16px;">
+                            <p style="margin:0 0 6px 0;font-size:13px;font-weight:600;color:#9a3412;">¿Qué puedes hacer?</p>
+                            <p style="margin:0 0 4px 0;font-size:13px;line-height:1.5;color:#7c2d12;">• Reintentar el pago desde nuestra web usando otra tarjeta.</p>
+                            <p style="margin:0 0 4px 0;font-size:13px;line-height:1.5;color:#7c2d12;">• Contactarnos si crees que hay un error: <a href="mailto:info@proyecto-cumbre.es" style="color:#9a3412;text-decoration:underline;">info@proyecto-cumbre.es</a></p>
+                            <p style="margin:0;font-size:13px;line-height:1.5;color:#7c2d12;">• Verificar con tu banco que la tarjeta permite pagos online.</p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- FOOTER -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid:#e5e7eb;">
+                  <tr>
+                    <td align="center" style="padding:18px 24px 18px 24px;">
+                      <p style="margin:0 0 4px 0;font-size:12px;color:#9ca3af;">Estamos aquí para ayudarte</p>
+                      <p style="margin:0 0 4px 0;font-size:13px;font-weight:700;letter-spacing:0.08em;color:#f97316;">
+                        PROYECTO CUMBRE
+                      </p>
+                      <p style="margin:0 0 4px 0;font-size:12px;color:#9ca3af;">📧 info@proyecto-cumbre.es</p>
+                      <p style="margin:0;font-size:11px;color:#9ca3af;">
+                        Email automático ·
+                        <a href="mailto:info@proyecto-cumbre.es" style="color:#6b7280;text-decoration:underline;">Contacto</a>
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+  `;
 }
+
+// ===================
+// TEXT VERSIONS
+// ===================
 
 function generateSuccessText(props: MembershipMailProps): string {
   const hasLicense = props.licenseType && props.licenseType !== 'none';
+
   return `
 ¡BIENVENIDO A PROYECTO CUMBRE!
 
@@ -268,14 +425,20 @@ Hola ${props.firstName},
 ¡Gracias por unirte a nuestro club de montaña! Estamos encantados de tenerte como socio.
 
 DETALLES DE TU MEMBRESÍA:
-${props.memberNumber ? `Número de Socio: ${props.memberNumber}` : ''}
-Nombre: ${props.firstName} ${props.lastName}
+${props.memberNumber ? `Número de Socio: ${props.memberNumber}\n` : ''}Nombre: ${
+    props.firstName
+  } ${props.lastName}
 Estado: ACTIVO
-${hasLicense && props.licenseType ? `Licencia FEDME: ${formatShortLicenseType(props.licenseType)}` : ''}
-${props.amount ? `Importe: ${(props.amount / 100).toFixed(2)}€` : ''}
-
-${hasLicense ? 'Tu licencia FEDME será procesada en 48-72 horas.\n' : ''}
-Ya puedes participar en todas nuestras actividades.
+${
+  hasLicense && props.licenseType
+    ? `Licencia FEDME: ${formatShortLicenseType(props.licenseType)}\n`
+    : ''
+}${props.amount ? `Importe: ${(props.amount / 100).toFixed(2)}€\n` : ''}${
+    hasLicense
+      ? '\nSobre tu licencia federativa:\nTu licencia FEDME será procesada en 48-72 horas. Te notificaremos cuando esté activa.\n'
+      : ''
+  }
+Ya puedes participar en todas nuestras actividades. ¡Nos vemos en la montaña!
 
 Equipo Proyecto Cumbre
 info@proyecto-cumbre.es
@@ -284,11 +447,23 @@ info@proyecto-cumbre.es
 
 function generateFailedText(props: MembershipMailProps): string {
   return `
-PROBLEMA CON TU PAGO
+PROBLEMA CON TU PAGO - PROYECTO CUMBRE
 
 Hola ${props.firstName},
 
-Hemos recibido tu solicitud pero hay un problema con el pago.
+Hemos recibido tu solicitud de membresía, pero hay un problema con el procesamiento del pago.
+
+QUÉ HA OCURRIDO:
+• El pago fue rechazado o cancelado por tu banco.
+• Tu membresía no ha sido activada.
+• No se te ha realizado ningún cargo.
+
+QUÉ PUEDES HACER:
+• Reintentar el pago desde nuestra web usando otra tarjeta.
+• Contactarnos si crees que hay un error: info@proyecto-cumbre.es.
+• Verificar con tu banco que la tarjeta permite pagos online.
+
+Estamos aquí para ayudarte.
 
 Equipo Proyecto Cumbre
 info@proyecto-cumbre.es
