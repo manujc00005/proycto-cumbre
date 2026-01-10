@@ -36,7 +36,8 @@ export default function MembershipPage() {
   const [formData, setFormData] = useState({
     email: '',
     firstName: '',
-    lastName: '',
+    firstSurname: '',      // 🆕 Primer apellido (obligatorio)
+    secondSurname: '',     // 🆕 Segundo apellido (opcional)
     birthDate: '',
     dni: '',
     licenseType: '',
@@ -144,8 +145,10 @@ export default function MembershipPage() {
       case 'firstName':
         if (!value) error = 'El nombre es obligatorio';
         break;
-      case 'lastName':
-        if (!value) error = 'Los apellidos son obligatorios';
+      case 'firstSurname':  // 🆕
+        if (!value) error = 'El primer apellido es obligatorio';
+        break;
+      case 'secondSurname': // 🆕 - Opcional, sin validación
         break;
       case 'birthDate':
         if (!value) {
@@ -213,7 +216,7 @@ export default function MembershipPage() {
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Correo inválido';
 
     if (!formData.firstName) newErrors.firstName = 'El nombre es obligatorio';
-    if (!formData.lastName) newErrors.lastName = 'Los apellidos son obligatorios';
+    if (!formData.firstSurname) newErrors.firstSurname = 'El apellido es obligatorio';
     if (!formData.birthDate) {
       newErrors.birthDate = 'La fecha de nacimiento es obligatoria';
     } else {
@@ -358,7 +361,9 @@ export default function MembershipPage() {
 
       try {
         logger.log('💳 Iniciando proceso de pago...');
-
+        const lastName = formData.secondSurname?.trim()
+          ? `${formData.firstSurname} ${formData.secondSurname}`.trim()
+          : formData.firstSurname;
         const response = await fetch('/api/checkout', {
           method: 'POST',
           headers: {
@@ -370,7 +375,7 @@ export default function MembershipPage() {
             memberData: {
               email: formData.email,
               firstName: formData.firstName,
-              lastName: formData.lastName,
+              lastName: lastName,
               licenseType: formData.licenseType,
               ageCategory: ageCategory,
             }
@@ -647,6 +652,7 @@ export default function MembershipPage() {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Datos Personales */}
+         {/* Sección Datos Personales */}
           <section className="bg-zinc-900 rounded-xl p-6 md:p-8 border border-zinc-800">
             <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
               <span className="w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
@@ -665,8 +671,9 @@ export default function MembershipPage() {
                   value={formData.email}
                   onChange={handleChange}
                   onBlur={() => handleBlur('email')}
-                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${errors.email ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
-                    } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
+                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${
+                    errors.email ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
+                  } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
                   placeholder="tu@email.com"
                 />
                 {errors.email && (
@@ -688,8 +695,9 @@ export default function MembershipPage() {
                   value={formData.firstName}
                   onChange={handleChange}
                   onBlur={() => handleBlur('firstName')}
-                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${errors.firstName ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
-                    } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
+                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${
+                    errors.firstName ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
+                  } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
                   placeholder="Juan"
                 />
                 {errors.firstName && (
@@ -700,25 +708,70 @@ export default function MembershipPage() {
                 )}
               </div>
 
-              {/* Apellidos */}
+              {/* 🆕 Primer Apellido */}
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-2">
-                  Apellidos <span className="text-red-500">*</span>
+                  Primer Apellido <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  name="lastName"
-                  value={formData.lastName}
+                  name="firstSurname"
+                  value={formData.firstSurname}
                   onChange={handleChange}
-                  onBlur={() => handleBlur('lastName')}
-                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${errors.lastName ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
-                    } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
-                  placeholder="García López"
+                  onBlur={() => handleBlur('firstSurname')}
+                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${
+                    errors.firstSurname 
+                      ? 'border-red-500 focus:border-red-500' 
+                      : 'border-zinc-700 focus:border-orange-500'
+                  } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
+                  placeholder="García"
                 />
-                {errors.lastName && (
+                {errors.firstSurname && (
                   <p className="mt-2 text-sm text-red-400 flex items-center gap-1">
                     <AlertCircle className="w-4 h-4" />
-                    {errors.lastName}
+                    {errors.firstSurname}
+                  </p>
+                )}
+              </div>
+
+              {/* 🆕 Segundo Apellido (Opcional) - AHORA EN 1 COLUMNA */}
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  Segundo Apellido <span className="text-zinc-500 text-xs">(opcional)</span>
+                </label>
+                <input
+                  type="text"
+                  name="secondSurname"
+                  value={formData.secondSurname}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-zinc-800 border-2 border-zinc-700 focus:border-orange-500 rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all"
+                  placeholder="López"
+                />
+              </div>
+
+              {/* Sexo - AHORA AL LADO DE SEGUNDO APELLIDO */}
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  Sexo <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="sex"
+                  value={formData.sex}
+                  onChange={handleChange}
+                  onBlur={() => handleBlur('sex')}
+                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${
+                    errors.sex ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
+                  } rounded-lg text-white focus:outline-none transition-all`}
+                >
+                  <option value="">Selecciona...</option>
+                  <option value="M">Masculino</option>
+                  <option value="F">Femenino</option>
+                  <option value="O">Otro</option>
+                </select>
+                {errors.sex && (
+                  <p className="mt-2 text-sm text-red-400 flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4" />
+                    {errors.sex}
                   </p>
                 )}
               </div>
@@ -744,8 +797,9 @@ export default function MembershipPage() {
                     const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
                     return minDate.toISOString().split('T')[0];
                   })()}
-                  className={`${styles.dateInput} w-full px-4 py-3 bg-zinc-800 border-2 ${errors.birthDate ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
-                    } rounded-lg text-white focus:outline-none transition-all`}
+                  className={`${styles.dateInput} w-full px-4 py-3 bg-zinc-800 border-2 ${
+                    errors.birthDate ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
+                  } rounded-lg text-white focus:outline-none transition-all`}
                 />
                 {errors.birthDate && (
                   <p className="mt-2 text-sm text-red-400 flex items-center gap-1">
@@ -766,40 +820,15 @@ export default function MembershipPage() {
                   value={formData.dni}
                   onChange={handleChange}
                   onBlur={() => handleBlur('dni')}
-                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${errors.dni ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
-                    } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
+                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${
+                    errors.dni ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
+                  } rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-all`}
                   placeholder="12345678A"
                 />
                 {errors.dni && (
                   <p className="mt-2 text-sm text-red-400 flex items-center gap-1">
                     <AlertCircle className="w-4 h-4" />
                     {errors.dni}
-                  </p>
-                )}
-              </div>
-
-              {/* Sexo */}
-              <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-2">
-                  Sexo <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="sex"
-                  value={formData.sex}
-                  onChange={handleChange}
-                  onBlur={() => handleBlur('sex')}
-                  className={`w-full px-4 py-3 bg-zinc-800 border-2 ${errors.sex ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 focus:border-orange-500'
-                    } rounded-lg text-white focus:outline-none transition-all`}
-                >
-                  <option value="">Selecciona...</option>
-                  <option value="M">Masculino</option>
-                  <option value="F">Femenino</option>
-                  <option value="O">Otro</option>
-                </select>
-                {errors.sex && (
-                  <p className="mt-2 text-sm text-red-400 flex items-center gap-1">
-                    <AlertCircle className="w-4 h-4" />
-                    {errors.sex}
                   </p>
                 )}
               </div>
@@ -1157,7 +1186,8 @@ function getFieldLabel(field: string): string {
   const labels: Record<string, string> = {
     email: 'Email',
     firstName: 'Nombre',
-    lastName: 'Apellidos',
+    firstSurname: 'Primer apellido',    // 🆕
+    secondSurname: 'Segundo apellido',  // 🆕
     birthDate: 'Fecha de nacimiento',
     dni: 'DNI/NIE',
     licenseType: 'Modalidad de licencia',

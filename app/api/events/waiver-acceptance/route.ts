@@ -150,8 +150,32 @@ export async function POST(request: NextRequest) {
     // ========================================
     // 5) GUARDAR EN BD
     // ========================================
-    const acceptance = await prisma.waiverAcceptance.create({
-      data: {
+    const acceptance = await prisma.waiverAcceptance.upsert({
+      where: {
+        // 👇 Este nombre lo genera Prisma automáticamente del @@unique
+        event_id_participant_document_id_waiver_version: {
+          event_id: eventUuid,
+          participant_document_id: payload.participantDocumentId,
+          waiver_version: waiverVersion,
+        }
+      },
+      update: {
+        // 👇 Actualizar campos si ya existe (nueva aceptación)
+        participant_full_name: payload.participantFullName,
+        participant_birth_date: payload.participantBirthDateISO
+          ? new Date(payload.participantBirthDateISO)
+          : null,
+        waiver_text: waiverTextRaw,
+        waiver_text_canonical: waiverTextCanonical,
+        waiver_text_hash: waiverTextHash,
+        accepted_at: acceptedAt,           // 👈 Nueva fecha de aceptación
+        ip_address: clientIp,              // 👈 Nueva IP
+        user_agent: userAgent,             // 👈 Nuevo user agent
+        event_registration_id: eventRegistrationId,
+        member_id: memberId,
+      },
+      create: {
+        // 👇 Crear si NO existe (primera vez)
         event_id: eventUuid,
         participant_full_name: payload.participantFullName,
         participant_document_id: payload.participantDocumentId,
@@ -166,7 +190,7 @@ export async function POST(request: NextRequest) {
         ip_address: clientIp,
         user_agent: userAgent,
         event_registration_id: eventRegistrationId,
-        member_id: memberId                            // 👈 VINCULACIÓN
+        member_id: memberId,
       }
     });
 

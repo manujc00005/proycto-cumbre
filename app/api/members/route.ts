@@ -27,6 +27,8 @@ export async function POST(request: NextRequest) {
       dni: formData.dni,
       licenseType: formData.licenseType,
       hasConsents: !!consents,
+      firstSurname: formData.firstSurname,    // 🆕
+      secondSurname: formData.secondSurname,  // 🆕
       ip: ipAddress
     });
 
@@ -56,6 +58,11 @@ export async function POST(request: NextRequest) {
 
     if (!['M', 'F', 'O'].includes(formData.sex)) {
       errors.sex = 'Sexo inválido';
+    }
+
+     // 🆕 Validar primer apellido obligatorio
+    if (!formData.firstSurname || formData.firstSurname.trim() === '') {
+      errors.firstSurname = 'El apellido es obligatorio';
     }
 
     // ✅ Validar licenseType
@@ -122,6 +129,9 @@ export async function POST(request: NextRequest) {
     const licenseType = formData.licenseType as LicenseType;
     const fedmeStatus: FedmeStatus = licenseType === 'none' ? 'none' : 'pending';
     const membershipStatus: MembershipStatus = 'pending';
+    const lastName = formData.secondSurname 
+      ? `${formData.firstSurname} ${formData.secondSurname}`.trim()
+      : formData.firstSurname;
 
     logger.log('✅ Tipo de licencia:', licenseType);
 
@@ -131,7 +141,9 @@ export async function POST(request: NextRequest) {
       member_number: memberNumber,
       email: formData.email,
       first_name: formData.firstName,
-      last_name: formData.lastName,
+      first_surname: formData.firstSurname,           // 🆕
+      second_surname: formData.secondSurname || null, // 🆕
+      last_name: lastName,                             // Compatibilidad
       birth_date: new Date(formData.birthDate),
       dni: formData.dni.toUpperCase(),
       sex: formData.sex as Sex,
@@ -220,6 +232,8 @@ export async function POST(request: NextRequest) {
         member_number: member.member_number,
         email: member.email,
         first_name: member.first_name,
+        first_surname: member.first_surname,        // 🆕
+        second_surname: member.second_surname,      // 🆕
         last_name: member.last_name,
         license_type: member.license_type,
         membership_status: member.membership_status,

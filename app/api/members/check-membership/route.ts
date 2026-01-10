@@ -38,7 +38,9 @@ export async function GET(request: NextRequest) {
         id: true,
         member_number: true,
         first_name: true,
-        last_name: true,
+        first_surname: true,     // 🆕
+        second_surname: true,    // 🆕
+        last_name: true,         // Por compatibilidad
         email: true,
         dni: true,
         membership_status: true,
@@ -56,9 +58,13 @@ export async function GET(request: NextRequest) {
 
     // Verificar que la membresía esté activa
     const isActive = member.membership_status === MembershipStatus.active;
+    const fullName = member.second_surname
+      ? `${member.first_name} ${member.first_surname} ${member.second_surname}`
+      : `${member.first_name} ${member.first_surname}`;
 
     logger.log('✅ Miembro encontrado:', {
       memberNumber: member.member_number,
+      fullName,
       status: member.membership_status,
       isActive,
     });
@@ -66,7 +72,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       isMember: true,
       memberNumber: member.member_number,
-      name: `${member.first_name} ${member.last_name}`,
+      name: fullName,
+      firstName: member.first_name,
+      firstSurname: member.first_surname,    // 🆕
+      secondSurname: member.second_surname,  // 🆕
       email: member.email,
       dni: member.dni,
       membershipStatus: member.membership_status,

@@ -42,6 +42,8 @@ model Member {
   email                  String              @unique @db.VarChar(255)
   first_name             String              @db.VarChar(100)
   last_name              String              @db.VarChar(100)
+  first_surname          String?             @db.VarChar(100)
+  second_surname         String?             @db.VarChar(100)
   nickname               String?             @db.VarChar(50)
   birth_date             DateTime            @db.Date
   dni                    String?             @db.VarChar(20)
