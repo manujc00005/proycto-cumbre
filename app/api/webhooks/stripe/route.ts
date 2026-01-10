@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { MembershipStatus, PaymentStatus } from '@prisma/client';
+import { MembershipStatus, PaymentStatus, RegistrationStatus } from '@prisma/client';
 import { logger } from '@/lib/logger';
 import { getStripe } from '@/lib/stripe';
 import EmailService from '@/lib/mail/email-service';
@@ -257,6 +257,37 @@ async function processEventPayment(session: Stripe.Checkout.Session) {
   }
 
   await prisma.$transaction(async (tx) => {
+        // ========================================
+    // ✅ NUEVO: Verificar si ya existe registro confirmed
+    // ========================================
+    const existingConfirmed = await tx.eventRegistration.findFirst({
+      where: {
+        event_id: eventId,
+        participant_dni: participantDni,
+        status: RegistrationStatus.confirmed,
+      },
+      select: { id: true, participant_name: true }
+    });
+
+    if (existingConfirmed) {
+      logger.warn('⚠️ [EVENT] Ya existe un registro confirmed para este DNI');
+      logger.warn(`   Registro existente: ${existingConfirmed.id}`);
+      logger.warn(`   Sesión duplicada: ${session.id}`);
+      
+      // Marcar el payment como completed pero NO crear nuevo registro
+      await tx.payment.update({
+        where: { stripe_session_id: session.id },
+        data: {
+          status: PaymentStatus.completed,
+          stripe_payment_id: session.payment_intent as string || null,
+          event_registration_id: existingConfirmed.id, // ← Vincular al existente
+          updated_at: new Date(),
+        },
+      });
+      
+      logger.log('✅ [EVENT] Payment duplicado marcado como completed (vinculado a registro existente)');
+      return; // ← Salir sin crear nuevo registro ni incrementar contador
+    }
     // 1. Actualizar Payment
     const payment = await tx.payment.update({
       where: { stripe_session_id: session.id },
@@ -280,7 +311,7 @@ async function processEventPayment(session: Stripe.Checkout.Session) {
         participant_phone: participantPhone,
         participant_dni: participantDni,
         custom_data: customData,
-        status: 'confirmed',
+        status: RegistrationStatus.confirmed,
         
         privacy_accepted: session.metadata?.privacy_accepted === 'true',
         privacy_accepted_at: session.metadata?.privacy_accepted_at 
@@ -320,16 +351,28 @@ async function processEventPayment(session: Stripe.Checkout.Session) {
 
     // 4. Vincular WaiverAcceptance
     const waiverAcceptanceId = session.metadata?.waiver_acceptance_id;
+
     if (waiverAcceptanceId && waiverAcceptanceId !== '') {
-      await tx.waiverAcceptance.update({
+      // Verificar que existe antes de actualizar
+      const existingWaiver = await tx.waiverAcceptance.findUnique({
         where: { id: waiverAcceptanceId },
-        data: {
-          event_registration_id: registration.id,
-          member_id: session.metadata?.member_id || null,
-        },
+        select: { id: true }
       });
 
-      logger.log('✅ [EVENT] WaiverAcceptance vinculado');
+      if (existingWaiver) {
+        await tx.waiverAcceptance.update({
+          where: { id: waiverAcceptanceId },
+          data: {
+            event_registration_id: registration.id,
+            member_id: session.metadata?.member_id || null,
+            updated_at: new Date(),
+          },
+        });
+        logger.log('✅ [EVENT] WaiverAcceptance vinculado');
+      } else {
+        logger.warn(`⚠️ [EVENT] WaiverAcceptance no encontrado: ${waiverAcceptanceId}`);
+        logger.warn('   Continuando sin vincular waiver...');
+      }
     }
 
     // 5. Incrementar current_participants

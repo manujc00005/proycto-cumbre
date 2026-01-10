@@ -340,16 +340,55 @@ export async function POST(request: NextRequest) {
       where: {
         event_id: eventId,
         participant_dni: normalizedDni,
-        status: { in: [RegistrationStatus.pending, RegistrationStatus.confirmed] }
       },
-      select: { id: true, status: true }
+      select: { 
+        id: true, 
+        status: true,
+        participant_name: true,
+        participant_email: true,
+      },
+      orderBy: {
+        created_at: 'desc', // Obtener la más reciente
+      }
     });
 
     if (existingRegistration) {
-      return NextResponse.json(
-        { error: "Ya existe una inscripción para este evento con ese DNI" },
-        { status: 409 }
-      );
+      // ❌ Si está CONFIRMADA, bloquear
+      if (existingRegistration.status === RegistrationStatus.confirmed) {
+        logger.log(`⛔ Inscripción duplicada bloqueada: DNI ${normalizedDni} ya confirmado`);
+        return NextResponse.json(
+          { 
+            error: "Ya existe una inscripción confirmada para este evento con ese DNI",
+            details: {
+              registrationId: existingRegistration.id,
+              participantName: existingRegistration.participant_name,
+            }
+          },
+          { status: 409 }
+        );
+      }
+      
+      // ✅ Si está PENDING o CANCELLED, permitir reintento
+      if (existingRegistration.status === RegistrationStatus.pending) {
+        logger.log(`🔄 Reintento detectado: DNI ${normalizedDni} tiene inscripción pending`);
+        logger.log(`   Inscripción anterior: ${existingRegistration.id} (status: ${existingRegistration.status})`);
+        
+        // Opción 1: CANCELAR la anterior y crear nueva
+        await prisma.eventRegistration.update({
+          where: { id: existingRegistration.id },
+          data: { 
+            status: RegistrationStatus.cancelled,
+            updated_at: new Date(),
+          }
+        });
+        
+        logger.log(`   ✅ Inscripción anterior cancelada, permitiendo reintento`);
+        
+        // Continuar con el flujo normal...
+      } else if (existingRegistration.status === RegistrationStatus.cancelled) {
+        logger.log(`🔄 Reintento después de cancelación: DNI ${normalizedDni}`);
+        // Continuar con el flujo normal...
+      }
     }
 
     const existingMember = await prisma.member.findUnique({

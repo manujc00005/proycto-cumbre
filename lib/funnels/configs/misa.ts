@@ -43,6 +43,12 @@ export const MISA_FUNNEL: EventFunnelConfig = {
       label: 'Nombre completo',
       placeholder: 'Tu nombre',
       required: true,
+      validation: (value) => {
+        if (!value || value.trim().length < 6) {
+          return 'El nombre y apellidos debe tener al menos 6 caracteres';
+        }
+        return null;
+      }
     },
     {
       id: 'email',
